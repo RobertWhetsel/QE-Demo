@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages & Help</title>
+</head>
+<body class="content-page messages-page">
+    <div class="content-wrapper">
+        <header class="content-header">
+            <h1>Messages & Help</h1>
+        </header>
+
+        <main class="content-main">
+            <div class="messages-container">
+                <div class="messages-sidebar">
+                    <div class="messages-header">
+                        <h2>Messages</h2>
+                        <button id="newMessage" class="new-message-btn">New Message</button>
+                    </div>
+
+                    <div class="message-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="unread">Unread</button>
+                        <button class="filter-btn" data-filter="important">Important</button>
+                    </div>
+
+                    <div class="message-list" id="messageList">
+                        <!-- Messages will be dynamically populated -->
+                    </div>
+                </div>
+
+                <div class="message-content">
+                    <div class="no-message-selected">
+                        <p>Select a message to read</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Message Modal -->
+            <div id="newMessageModal" class="modal">
+                <div class="modal-content">
+                    <h2>New Message</h2>
+                    <form id="newMessageForm">
+                        <div class="form-group">
+                            <label for="recipient">To:</label>
+                            <input type="text" id="recipient" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject:</label>
+                            <input type="text" id="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageBody">Message:</label>
+                            <textarea id="messageBody" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="send-btn">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

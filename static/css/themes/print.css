@@ -1,0 +1,114 @@
+/* Print styles using BEM methodology */
+@media print {
+    /* Reset background colors and ensure dark text */
+    * {
+        background-color: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        border-color: #000 !important;
+    }
+
+    /* Hide non-essential elements */
+    .nav,
+    .sidebar,
+    .button,
+    .message,
+    .error-modal,
+    .nav__toggle,
+    .sidebar__close,
+    .message__close,
+    [class*="--no-print"] {
+        display: none !important;
+    }
+
+    /* Ensure proper layout for printing */
+    .l-container {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .l-dashboard__main {
+        margin: 0;
+        padding: 1cm;
+    }
+
+    /* Adjust typography for print */
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+        font-family: Georgia, "Times New Roman", Times, serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    h1 {
+        font-size: 24pt;
+    }
+
+    h2 {
+        font-size: 20pt;
+    }
+
+    h3 {
+        font-size: 16pt;
+    }
+
+    /* Handle links */
+    a {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 10pt;
+    }
+
+    /* Don't show URL for internal, hash or javascript links */
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }
+
+    /* Table adjustments */
+    table {
+        border-collapse: collapse !important;
+    }
+
+    th, td {
+        border: 1px solid #000 !important;
+        padding: 0.2cm !important;
+    }
+
+    /* Ensure proper page breaks */
+    img, table, figure {
+        page-break-inside: avoid;
+    }
+
+    p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Print-specific utilities */
+    .print-only {
+        display: block !important;
+    }
+
+    .page-break-before {
+        page-break-before: always;
+    }
+
+    .page-break-after {
+        page-break-after: always;
+    }
+
+    /* Ensure proper margins */
+    @page {
+        margin: 2cm;
+    }
+}

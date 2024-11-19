@@ -1,0 +1,126 @@
+/* Button Components using BEM methodology */
+.button {
+    display: inline-block;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    text-align: center;
+    transition: all var(--transition-speed);
+    color: var(--color-text-on-brand);
+}
+
+/* Button variants */
+.button--primary {
+    background-color: var(--color-brand-primary);
+}
+
+.button--primary:hover:not(:disabled) {
+    background-color: var(--color-brand-primary-hover);
+    transform: translateY(-1px);
+}
+
+.button--secondary {
+    background-color: var(--color-brand-secondary);
+}
+
+.button--secondary:hover:not(:disabled) {
+    background-color: var(--color-brand-secondary-hover);
+    transform: translateY(-1px);
+}
+
+.button--success {
+    background-color: var(--color-success);
+}
+
+.button--success:hover:not(:disabled) {
+    background-color: var(--color-success-hover);
+    transform: translateY(-1px);
+}
+
+.button--info {
+    background-color: var(--color-info);
+}
+
+.button--info:hover:not(:disabled) {
+    background-color: var(--color-info-hover);
+    transform: translateY(-1px);
+}
+
+/* Ghost button variant */
+.button--ghost {
+    background-color: transparent;
+    border: var(--border-width) solid var(--color-border-default);
+    color: var(--color-text-primary);
+}
+
+.button--ghost:hover:not(:disabled) {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-surface-secondary);
+    transform: translateY(-1px);
+}
+
+/* Button sizes */
+.button--small {
+    padding: calc(var(--spacing-xs)) calc(var(--spacing-sm));
+    font-size: 0.875em;
+}
+
+.button--large {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1.125em;
+}
+
+/* Button states */
+.button:disabled,
+.button--disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.button--full-width {
+    display: block;
+    width: 100%;
+}
+
+/* Button with icon */
+.button__icon {
+    display: inline-block;
+    margin-right: var(--spacing-xs);
+    vertical-align: middle;
+}
+
+.button__icon--right {
+    margin-right: 0;
+    margin-left: var(--spacing-xs);
+}
+
+/* Loading state */
+.button--loading {
+    position: relative;
+    color: transparent;
+}
+
+.button--loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1em;
+    height: 1em;
+    margin: -0.5em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-loading-spinner 0.75s linear infinite;
+}
+
+@keyframes button-loading-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}

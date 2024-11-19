@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Settings</title>
+</head>
+<body class="content-page settings-page">
+    <div class="content-wrapper">
+        <header class="content-header">
+            <h1>Settings</h1>
+            <div class="logo-container">
+                <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" class="logo">
+            </div>
+        </header>
+
+        <main class="content-main">
+            <div class="settings-container">
+                <div class="settings-sidebar">
+                    <nav class="settings-nav">
+                        <button class="nav-item active" data-section="appearance">Appearance</button>
+                        <button class="nav-item" data-section="notifications">Notifications</button>
+                        <button class="nav-item" data-section="privacy">Privacy</button>
+                        <button class="nav-item" data-section="accessibility">Accessibility</button>
+                        <button class="nav-item" data-section="advanced">Advanced</button>
+                    </nav>
+                </div>
+
+                <div class="settings-sections">
+                    <!-- Appearance Section -->
+                    <section id="appearance" class="settings-section active">
+                        <h2>Appearance</h2>
+                        <form id="appearanceForm">
+                            <div class="form-group">
+                                <label for="theme">Theme</label>
+                                <select id="theme" name="theme">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="system">System Default</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fontSize">Font Size</label>
+                                <select id="fontSize" name="fontSize">
+                                    <option value="small">Small</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Color Scheme</label>
+                                <div class="color-options">
+                                    <button type="button" class="color-option" data-color="blue"></button>
+                                    <button type="button" class="color-option" data-color="green"></button>
+                                    <button type="button" class="color-option" data-color="purple"></button>
+                                    <button type="button" class="color-option" data-color="orange"></button>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Notifications Section -->
+                    <section id="notifications" class="settings-section">
+                        <h2>Notifications</h2>
+                        <form id="notificationsForm">
+                            <div class="form-group">
+                                <label>Email Notifications</label>
+                                <div class="notification-options">
+                                    <label class="switch">
+                                        <input type="checkbox" name="emailSurveys">
+                                        <span class="slider"></span>
+                                        New Surveys
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="emailMessages">
+                                        <span class="slider"></span>
+                                        Messages
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="emailUpdates">
+                                        <span class="slider"></span>
+                                        System Updates
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Push Notifications</label>
+                                <div class="notification-options">
+                                    <label class="switch">
+                                        <input type="checkbox" name="pushSurveys">
+                                        <span class="slider"></span>
+                                        New Surveys
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="pushMessages">
+                                        <span class="slider"></span>
+                                        Messages
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="pushUpdates">
+                                        <span class="slider"></span>
+                                        System Updates
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Privacy Section -->
+                    <section id="privacy" class="settings-section">
+                        <h2>Privacy</h2>
+                        <form id="privacyForm">
+                            <div class="form-group">
+                                <label>Privacy Options</label>
+                                <div class="privacy-options">
+                                    <label class="switch">
+                                        <input type="checkbox" name="profileVisibility">
+                                        <span class="slider"></span>
+                                        Profile Visibility
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="activityTracking">
+                                        <span class="slider"></span>
+                                        Activity Tracking
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Accessibility Section -->
+                    <section id="accessibility" class="settings-section">
+                        <h2>Accessibility</h2>
+                        <form id="accessibilityForm">
+                            <div class="form-group">
+                                <label>Accessibility Options</label>
+                                <div class="accessibility-options">
+                                    <label class="switch">
+                                        <input type="checkbox" name="highContrast">
+                                        <span class="slider"></span>
+                                        High Contrast
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="screenReader">
+                                        <span class="slider"></span>
+                                        Screen Reader Support
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Advanced Section -->
+                    <section id="advanced" class="settings-section">
+                        <h2>Advanced</h2>
+                        <form id="advancedForm">
+                            <div class="form-group">
+                                <label>Advanced Options</label>
+                                <div class="advanced-options">
+                                    <label class="switch">
+                                        <input type="checkbox" name="developerMode">
+                                        <span class="slider"></span>
+                                        Developer Mode
+                                    </label>
+                                    <label class="switch">
+                                        <input type="checkbox" name="experimentalFeatures">
+                                        <span class="slider"></span>
+                                        Experimental Features
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

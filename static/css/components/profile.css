@@ -1,0 +1,130 @@
+/* Profile Card Component using BEM methodology */
+.profile-card {
+    background-color: var(--color-surface-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    width: 800px;
+    padding: var(--spacing-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 100vh;
+    overflow: auto;
+    border: var(--border-width) solid var(--color-border-default);
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--color-surface-secondary);
+    margin-bottom: var(--spacing-lg);
+    overflow: hidden;
+    position: relative;
+    border: var(--border-width) solid var(--color-border-default);
+}
+
+.profile-picture__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture__input {
+    display: none;
+}
+
+.profile-picture__upload {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: var(--spacing-sm);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--color-text-on-brand);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--transition-speed);
+    text-align: center;
+}
+
+.profile-picture:hover .profile-picture__upload {
+    opacity: 1;
+}
+
+.profile-details {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+}
+
+.profile-details__column {
+    width: 45%;
+}
+
+.profile-details__label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text-secondary);
+}
+
+.profile-details__input,
+.profile-details__select {
+    width: 100%;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border: var(--border-width) solid var(--color-border-default);
+    border-radius: var(--border-radius);
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    transition: all var(--transition-speed);
+}
+
+.profile-details__input:hover,
+.profile-details__select:hover {
+    border-color: var(--color-border-hover);
+}
+
+.profile-details__input:focus,
+.profile-details__select:focus {
+    border-color: var(--color-brand-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
+}
+
+.profile-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-lg);
+    gap: var(--spacing-md);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .profile-card {
+        width: 90%;
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-details {
+        flex-direction: column;
+    }
+
+    .profile-details__column {
+        width: 100%;
+    }
+
+    .profile-actions {
+        flex-direction: column;
+    }
+
+    .profile-actions .button {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+}

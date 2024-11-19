@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <div id="header-component"></div>
+    <link rel="stylesheet" href="/css/components/auth.css">
+</head>
+<body class="auth-page {{pageClass}}">
+    <main class="auth-container">
+        <div class="auth-box">
+            <h1>Quantum Eye</h1>
+            <h2>{{pageTitle}}</h2>
+            
+            {{content}}
+        </div>
+    </main>
+
+    <script type="module">
+        import ComponentLoader from '/js/components/componentLoader.js';
+        
+        // Load header component
+        ComponentLoader.insertComponent('#header-component', '/components/header.html', {
+            pageTitle: '{{pageTitle}}',
+            additionalStyles: '{{additionalStyles}}'
+        });
+
+        // Initialize any page-specific scripts
+        if (typeof initPage === 'function') {
+            initPage();
+        }
+    </script>
+    {{additionalScripts}}
+</body>
+</html>

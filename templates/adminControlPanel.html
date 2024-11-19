@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis Admin Control Panel - Quantum Eye</title>
+    <link rel="stylesheet" href="/static/css/core/variables.css">
+    <link rel="stylesheet" href="/static/css/core/base.css">
+    <link rel="stylesheet" href="/static/css/layouts/container.css">
+    <link rel="stylesheet" href="/static/css/components/navigation.css">
+    <link rel="stylesheet" href="/static/css/components/button.css">
+    <link rel="stylesheet" href="/static/css/components/message.css">
+    <link rel="stylesheet" href="/static/css/components/profile.css">
+    <link rel="stylesheet" href="/static/css/components/admin-control-panel.css">
+    <link rel="stylesheet" href="/static/css/themes/dark.css">
+    <link rel="stylesheet" href="/static/css/themes/print.css">
+    <style>
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: var(--color-background-alt);
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+        }
+
+        .sidebar--open {
+            width: 250px !important;
+        }
+
+        .sidebar__close {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            color: var(--color-text);
+        }
+
+        .sidebar__brand, .sidebar__link {
+            padding: 8px 16px;
+            color: var(--color-text);
+            text-decoration: none;
+            display: block;
+        }
+
+            .sidebar__link:hover {
+                background-color: var(--color-background-hover);
+            }
+
+        .nav__dropdown {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background-color: var(--color-background);
+            border: 1px solid var(--color-border);
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+            .nav__dropdown.open {
+                display: block;
+            }
+    </style>
+</head>
+<body class="page">
+    <nav class="nav">
+        <div class="nav__container">
+            <button id="hamburger" class="nav__toggle">&#9776;</button>
+            <span class="nav__brand">Quantum Eye</span>
+            <div class="nav__menu">
+                <span id="userName" class="nav__link user-name">User</span>
+                <div id="navMenu" class="nav__dropdown">
+                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
+        <div class="sidebar__brand">Quantum Eye</div>
+        <a href="/" class="sidebar__link">Admin Panel</a>
+        <a href="login.html" class="sidebar__link">Login Page</a>
+        <a href="other.html" class="sidebar__link">Other Page</a>
+    </div>
+
+    <div class="page__container">
+        <div class="content-area l-container">
+            <div class="admin-control-panel">
+                <h1 class="page-title">Genesis Admin Control Panel</h1>
+
+                <div class="section">
+                    <h2 class="section-title">Create New Admin User</h2>
+                    <p class="form-description">
+                        Use this form to create new Platform Admins or User Admins.
+                        Each admin will need to change their password upon first login.
+                    </p>
+
+                    <form id="admin-creation-form" class="user-form" method="post" onsubmit="return false;">
+                        <div class="form-group">
+                            <label for="username" class="required-field">Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="required-field">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="required-field">Initial Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role" class="required-field">Admin Type</label>
+                            <select id="role" name="role" required>
+                                <option value="">Select admin type</option>
+                                <option value="user">User Admin</option>
+                                <option value="platform">Platform Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" id="submitBtn" class="button button--primary">Create Admin User</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Existing Admin Users</h2>
+                    <div id="admin-list-container">
+                        <!-- Admin list will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/login.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminForm = document.getElementById('admin-creation-form');
+            const adminListContainer = document.getElementById('admin-list-container');
+            const userNameEl = document.getElementById('userName');
+            const navMenu = document.getElementById('navMenu');
+
+            // Display username
+            const userName = sessionStorage.getItem('username') || "User";
+            userNameEl.textContent = userName;
+
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                sessionStorage.clear();
+                window.location.href = '/login.html';
+            });
+
+            // Sidebar toggle
+            document.getElementById('hamburger').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('sidebar--open');
+            });
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('sidebar--open');
+            });
+
+            // Dropdown toggle
+            userNameEl.addEventListener('click', () => {
+                navMenu.classList.toggle('open');
+            });
+
+            // Load admins from server
+            async function loadAdmins() {
+                try {
+                    const response = await fetch("/load_admins");
+                    const admins = await response.json();
+                    adminListContainer.innerHTML = admins.map(admin => `
+                            <div class="admin-row">
+                                <p>Username: ${admin.username}</p>
+                                <p>Email: ${admin.email}</p>
+                                <p>Role: ${admin.role}</p>
+                                <p>Created: ${admin.created}</p>
+                            </div>
+                        `).join('');
+                } catch (error) {
+                    console.error("Error loading admins:", error);
+                    adminListContainer.innerHTML = "<p>Error loading admin list.</p>";
+                }
+            }
+
+            // Save new admin
+            async function saveAdmin(adminData) {
+                try {
+                    const response = await fetch("/save_admin", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(adminData),
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(result.message);
+                        adminForm.reset();
+                        loadAdmins();
+                    } else {
+                        alert(`Error saving admin: ${result.message}`);
+                    }
+                } catch (error) {
+                    console.error("Error saving admin:", error);
+                }
+            }
+
+            // Form submission
+            adminForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const newAdmin = {
+                    username: document.getElementById("username").value.trim(),
+                    email: document.getElementById("email").value.trim(),
+                    password: document.getElementById("password").value.trim(),
+                    role: document.getElementById("role").value,
+                    created: new Date().toISOString(),
+                };
+                saveAdmin(newAdmin);
+            });
+
+            // Load admins on page load
+            loadAdmins();
+        });
+    </script>
+</body>
+</html>

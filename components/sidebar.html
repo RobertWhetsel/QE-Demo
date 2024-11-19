@@ -1,0 +1,84 @@
+<div id="sidebar" class="sidebar" style="width: 0;">
+    <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
+    <div class="sidebar__brand">Quantum Eye</div>
+    <div id="menu-items">
+        <!-- Genesis Admin Menu -->
+        <template id="genesisAdmin-menu">
+            <a href="#" class="sidebar__link" data-content="adminControlPanel.html">Admin Control Panel</a>
+            <a href="#" class="sidebar__link" data-content="userProfile.html">My Profile</a>
+            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
+        </template>
+
+        <!-- Platform Admin Menu -->
+        <template id="platformAdmin-menu">
+            <a href="#" class="sidebar__link" data-content="adminDashboard.html">Dashboard</a>
+            <a href="#" class="sidebar__link" data-content="userProfile.html">My Profile</a>
+            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
+            <a href="#" class="sidebar__link" data-content="research.html">Research Management</a>
+        </template>
+
+        <!-- User Admin Menu -->
+        <template id="userAdmin-menu">
+            <a href="#" class="sidebar__link" data-content="adminDashboard.html">Dashboard</a>
+            <a href="#" class="sidebar__link" data-content="userProfile.html">My Profile</a>
+            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
+            <a href="#" class="sidebar__link" data-content="volunteerDashboard.html">Volunteer Management</a>
+        </template>
+
+        <!-- Volunteer Menu -->
+        <template id="volunteer-menu">
+            <a href="#" class="sidebar__link" data-content="volunteerDashboard.html">Dashboard</a>
+            <a href="#" class="sidebar__link" data-content="availableSurveys.html">Available Surveys</a>
+            <a href="#" class="sidebar__link" data-content="completedSurveys.html">Completed Surveys</a>
+            <a href="#" class="sidebar__link" data-content="messages.html">Messages & Help</a>
+        </template>
+
+        <!-- Research Menu -->
+        <template id="research-menu">
+            <a href="#" class="sidebar__link" data-content="researchDashboard.html">Dashboard</a>
+            <a href="#" class="sidebar__link" data-content="survey.html">Survey Management</a>
+            <a href="#" class="sidebar__link" data-content="messages.html">Messages</a>
+        </template>
+    </div>
+    
+    <!-- Common Menu Items -->
+    <div class="sidebar__footer">
+        <a href="#" class="sidebar__link logout-link">Logout</a>
+        <a href="#" class="sidebar__link exit-button">Exit</a>
+    </div>
+</div>
+
+<script type="module">
+import navigation from '../js/modules/navigation.js';
+
+// Initialize sidebar with all functionality
+navigation.initializeSidebar();
+
+// Add direct event listeners for critical functions
+const closeBtn = document.getElementById('close-sidebar');
+if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigation.closeNav();
+    });
+}
+
+const logoutLink = document.querySelector('.logout-link');
+if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigation.logout();
+    });
+}
+
+const exitButton = document.querySelector('.exit-button');
+if (exitButton) {
+    exitButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigation.exitApplication();
+    });
+}
+</script>

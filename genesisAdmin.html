@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Eye</title>
+    <link rel="stylesheet" href="/static/css/styles.css"> <!-- Correct path -->
+    <script>
+        // Check if this is first time setup
+        const isFirstTimeSetup = !localStorage.getItem('setupComplete');
+
+        // Redirect to appropriate page
+        window.onload = function () {
+            // Clear any existing session data on fresh load
+            if (isFirstTimeSetup) {
+                localStorage.clear();
+            }
+
+            // Always redirect to login page
+            window.location.href = '/login.html'; // Corrected path
+        };
+    </script>
+</head>
+<body class="page">
+    <noscript>
+        <p>Please enable JavaScript to use this application.</p>
+        <a href="/login.html">Proceed to Login</a> <!-- Corrected path -->
+    </noscript>
+</body>
+</html>

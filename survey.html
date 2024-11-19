@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveys - Quantum Eye</title>
+    <link rel="stylesheet" href="css/survey.css">
+    <style>
+        
+    </style>
+</head>
+<body class="page">
+    <div class="page__container">
+        <div id="nav-component"></div>
+        <div id="sidebar-component"></div>
+
+        <div class="content-area">
+            <div class="survey-container">
+                <header class="survey-header">
+                    <h1>Available Surveys</h1>
+                    <div class="survey-filters">
+                        <select id="surveyFilter" aria-label="Filter surveys">
+                            <option value="all">All Surveys</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <button id="refreshSurveys" class="btn" aria-label="Refresh surveys">
+                            ↻ Refresh
+                        </button>
+                    </div>
+                </header>
+
+                <main class="survey-list" id="surveyList">
+                    <!-- Surveys will be dynamically populated -->
+                </main>
+
+                <template id="surveyTemplate">
+                    <article class="survey-card">
+                        <div class="survey-status"></div>
+                        <div class="survey-content">
+                            <h2 class="survey-title"></h2>
+                            <p class="survey-description"></p>
+                            <div class="survey-meta">
+                                <span class="deadline"></span>
+                                <span class="estimated-time"></span>
+                            </div>
+                        </div>
+                        <div class="survey-actions">
+                            <button class="start-survey">Start Survey</button>
+                            <button class="view-results hidden">View Results</button>
+                        </div>
+                    </article>
+                </template>
+
+                <div id="noSurveys" class="no-surveys hidden">
+                    <p>No surveys available at this time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from './js/modules/componentLoader.js';
+
+        // Load components
+        async function initializeSurvey() {
+            await ComponentLoader.insertComponent('#nav-component', 'components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', 'components/sidebar.html');
+        }
+
+        // Initialize the survey page
+        document.addEventListener('DOMContentLoaded', initializeSurvey);
+    </script>
+    <script src="js/survey.js"></script>
+</body>
+</html>

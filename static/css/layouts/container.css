@@ -1,0 +1,114 @@
+/* Layout Components using BEM methodology */
+.l-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Container variations */
+.l-container--fluid {
+    max-width: none;
+}
+
+.l-container--narrow {
+    max-width: 800px;
+}
+
+.l-container--wide {
+    max-width: 1600px;
+}
+
+/* Content Area */
+.l-content {
+    padding: var(--spacing-lg) 0;
+}
+
+.l-content--fixed-header {
+    padding-top: calc(60px + var(--spacing-lg)); /* Account for fixed header */
+}
+
+/* Grid System */
+.l-grid {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* Common grid patterns */
+.l-grid--2-cols {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.l-grid--3-cols {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.l-grid--4-cols {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Auto-fit grid */
+.l-grid--auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Flex layouts */
+.l-flex {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.l-flex--wrap {
+    flex-wrap: wrap;
+}
+
+.l-flex--center {
+    align-items: center;
+    justify-content: center;
+}
+
+.l-flex--space-between {
+    justify-content: space-between;
+}
+
+/* Stack layout */
+.l-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.l-stack--sm {
+    gap: var(--spacing-sm);
+}
+
+.l-stack--lg {
+    gap: var(--spacing-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .l-grid--4-cols {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .l-grid--4-cols,
+    .l-grid--3-cols {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .l-grid--4-cols,
+    .l-grid--3-cols,
+    .l-grid--2-cols {
+        grid-template-columns: 1fr;
+    }
+
+    .l-container {
+        padding: 0 var(--spacing-sm);
+    }
+}

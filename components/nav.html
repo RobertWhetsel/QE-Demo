@@ -1,0 +1,110 @@
+<nav class="nav">
+    <div class="nav__container">
+        <button id="hamburger" class="nav__toggle">&#9776;</button>
+        <span class="nav__brand">Quantum Eye</span>
+        <div class="nav__menu">
+            <span class="nav__link user-name" id="userName"></span>
+        </div>
+    </div>
+    <div id="navMenu" class="nav__dropdown" hidden>
+        <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+        <button class="nav__dropdown-item" id="exitBtn">Exit</button>
+    </div>
+</nav>
+
+<style>
+    .nav__actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-left: var(--spacing-md);
+    }
+
+    .nav__button {
+        background: transparent;
+        color: var(--color-text-on-brand);
+        border: 1px solid var(--color-text-on-brand);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all var(--transition-speed);
+    }
+
+    .nav__button:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav__menu {
+        display: flex;
+        align-items: center;
+    }
+
+    .nav__dropdown {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        background: var(--color-background);
+        border: 1px solid var(--color-border);
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .nav__dropdown-item {
+        display: block;
+        width: 100%;
+        padding: var(--spacing-sm);
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        color: var(--color-text);
+    }
+
+    .nav__dropdown-item:hover {
+        background: var(--color-background-hover);
+    }
+</style>
+
+<script type="module">
+import navigation from '../js/modules/navigation.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const navMenu = document.getElementById('navMenu');
+    
+    // Setup hamburger menu
+    document.getElementById('hamburger').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = navMenu.hasAttribute('hidden');
+        if (isHidden) {
+            navMenu.removeAttribute('hidden');
+        } else {
+            navMenu.setAttribute('hidden', '');
+        }
+        navigation.toggleNav();
+    });
+    
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        navigation.logout();
+    });
+
+    // Setup exit button
+    document.getElementById('exitBtn').addEventListener('click', () => {
+        navigation.exitApplication();
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav__dropdown') && !e.target.closest('.nav__toggle')) {
+            navMenu.setAttribute('hidden', '');
+        }
+    });
+    
+    // Set username from session
+    const userName = sessionStorage.getItem('userName');
+    if (userName) {
+        document.getElementById('userName').textContent = userName;
+    }
+});
+</script>

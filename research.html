@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Data Center - Quantum Eye</title>
+    <link rel="stylesheet" href="css/research.css">
+</head>
+<body class="page">
+    <div class="page__container">
+        <div id="nav-component"></div>
+        <div id="sidebar-component"></div>
+
+        <div class="content-area">
+            <!-- Added error message container -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            
+            <div class="container">
+                <header class="header">
+                    <h1>Research Data Center</h1>
+                    <div class="controls">
+                        <button id="refreshData" class="btn">
+                            ↻ Refresh Data
+                        </button>
+                        <button id="exportToSpreadsheet" class="btn">
+                            ⤓ Export to Spreadsheet
+                        </button>
+                    </div>
+                </header>
+
+                <div class="data-filters">
+                    <div class="filter-group">
+                        <label for="dateRange">Date Range:</label>
+                        <select id="dateRange">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dataType">Data Type:</label>
+                        <select id="dataType">
+                            <option value="all">All Data</option>
+                            <option value="surveys">Surveys</option>
+                            <option value="responses">Responses</option>
+                            <option value="analytics">Analytics</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchData">Search:</label>
+                        <input type="text" id="searchData" placeholder="Search in data...">
+                    </div>
+                </div>
+
+                <div class="data-container">
+                    <div class="data-header">
+                        <div class="data-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Records:</span>
+                                <span id="totalRecords" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Last Updated:</span>
+                                <span id="lastUpdated" class="stat-value">Never</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-grid">
+                        <table id="researchData">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataBody">
+                                <!-- Data rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="data-pagination">
+                        <button id="prevPage" class="btn">Previous</button>
+                        <span id="pageInfo">Page 1 of 1</span>
+                        <button id="nextPage" class="btn">Next</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Preview Modal -->
+            <div id="dataPreviewModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Data Preview</h2>
+                        <button class="close-modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="dataPreview"></pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="sendToSpreadsheet" class="btn">Send to Spreadsheet</button>
+                        <button class="btn btn-secondary close-modal">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading overlay -->
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from './js/modules/componentLoader.js';
+
+        // Load components
+        async function initializeResearch() {
+            await ComponentLoader.insertComponent('#nav-component', 'components/nav.html', {
+                userName: localStorage.getItem('userName') || 'Researcher'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', 'components/sidebar.html');
+        }
+
+        // Initialize the research page
+        document.addEventListener('DOMContentLoaded', initializeResearch);
+    </script>
+    <script src="js/errorhandler.js"></script>
+    <script src="js/research.js"></script>
+</body>
+</html>

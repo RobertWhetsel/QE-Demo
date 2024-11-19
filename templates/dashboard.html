@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <div id="header-component"></div>
+    <link rel="stylesheet" href="/css/components/dashboard.css">
+</head>
+<body class="dashboard {{pageClass}}">
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="iframe-container">
+            <iframe id="content-frame" src="{{defaultContent}}" sandbox="allow-scripts allow-same-origin"></iframe>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '/js/components/componentLoader.js';
+        
+        // Load components
+        async function initializeDashboard() {
+            await ComponentLoader.insertComponent('#header-component', '/components/header.html', {
+                pageTitle: '{{pageTitle}}',
+                additionalStyles: '{{additionalStyles}}'
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '/components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '/components/sidebar.html');
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+
+        // Handle sidebar navigation
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('sidebar-link') && e.target.dataset.content) {
+                e.preventDefault();
+                const contentFrame = document.getElementById('content-frame');
+                if (contentFrame) {
+                    contentFrame.src = e.target.dataset.content;
+                }
+            }
+        });
+
+        // Initialize any page-specific scripts
+        if (typeof initPage === 'function') {
+            initPage();
+        }
+    </script>
+    {{additionalScripts}}
+</body>
+</html>
