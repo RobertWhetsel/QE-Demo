@@ -1,6 +1,6 @@
 # Quantum Eye
 
-Quantum Eye is a comprehensive research and survey management platform designed to facilitate data collection, analysis, and research administration. The platform provides robust tools for creating surveys, managing research data, and analyzing responses with different levels of administrative access.
+Quantum Eye is a comprehensive research and survey management platform built on [US9069626B2](https://patentimages.storage.googleapis.com/78/dc/6b/02571988bca951/US9069626.pdf) that is designed to facilitate data collection, analysis, and research administration. The platform provides robust tools for creating surveys, managing research data, and analyzing responses with different levels of administrative access.
 
 ## Features
 
