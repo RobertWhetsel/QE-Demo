@@ -167,11 +167,11 @@
                 navMenu.classList.toggle('open');
             });
 
-            // Load admins from server
-            async function loadAdmins() {
+            // Load admins from sessionStorage
+            function loadAdmins() {
                 try {
-                    const response = await fetch("/load_admins");
-                    const admins = await response.json();
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
+                    const admins = appData.users;
                     adminListContainer.innerHTML = admins.map(admin => `
                             <div class="admin-row">
                                 <p>Username: ${admin.username}</p>
@@ -186,25 +186,27 @@
                 }
             }
 
-            // Save new admin
-            async function saveAdmin(adminData) {
+            // Save new admin to sessionStorage
+            function saveAdmin(adminData) {
                 try {
-                    const response = await fetch("/save_admin", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(adminData),
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        alert(result.message);
-                        adminForm.reset();
-                        loadAdmins();
-                    } else {
-                        alert(`Error saving admin: ${result.message}`);
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+                    
+                    // Check for duplicate username
+                    if (appData.users.some(user => user.username === adminData.username)) {
+                        alert('Username already exists');
+                        return;
                     }
+
+                    // Add new admin
+                    appData.users.push(adminData);
+                    sessionStorage.setItem('appData', JSON.stringify(appData));
+                    
+                    alert('Admin created successfully');
+                    adminForm.reset();
+                    loadAdmins();
                 } catch (error) {
                     console.error("Error saving admin:", error);
+                    alert('Failed to create admin account');
                 }
             }
 
@@ -216,7 +218,7 @@
                     email: document.getElementById("email").value.trim(),
                     password: document.getElementById("password").value.trim(),
                     role: document.getElementById("role").value,
-                    created: new Date().toISOString(),
+                    created: new Date().toISOString()
                 };
                 saveAdmin(newAdmin);
             });

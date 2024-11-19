@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Eye - Initial Setup</title>
+    <link rel="stylesheet" href="static/css/login.css">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .form-field {
+            margin-bottom: 1rem;
+        }
+        .form-field label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .form-field input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h1>Quantum Eye</h1>
+            <h2>System Initialization</h2>
+            
+            <div id="setup-intro" class="login-form">
+                <div class="form-group">
+                    <p>Welcome to Quantum Eye! To begin using the system, you'll need to create a Genesis Admin account.</p>
+                    <p>The Genesis Admin is the primary administrator who will:</p>
+                    <ul>
+                        <li>Configure system settings</li>
+                        <li>Manage user accounts</li>
+                        <li>Set up workspaces and teams</li>
+                        <li>Oversee all system operations</li>
+                    </ul>
+                </div>
+
+                <div class="form-actions">
+                    <button id="startSetup" class="primary-button">Begin Setup</button>
+                </div>
+            </div>
+
+            <div id="setup-form" class="login-form hidden">
+                <h3>Create Genesis Admin Account</h3>
+                <div class="form-field">
+                    <label for="adminName">Full Name</label>
+                    <input type="text" id="adminName" required>
+                    <div id="nameError" class="error-message"></div>
+                </div>
+                <div class="form-field">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" required>
+                    <div id="usernameError" class="error-message"></div>
+                </div>
+                <div class="form-field">
+                    <label for="adminEmail">Email Address</label>
+                    <input type="email" id="adminEmail" required>
+                    <div id="emailError" class="error-message"></div>
+                </div>
+                <div class="form-field">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" required>
+                    <div id="passwordError" class="error-message"></div>
+                </div>
+                <div class="form-field">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                    <div id="confirmError" class="error-message"></div>
+                </div>
+                <div class="form-actions">
+                    <button id="createAdmin" class="primary-button">Create Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if setup is already complete
+        fetch('/load_admins')
+            .then(response => response.json())
+            .then(admins => {
+                if (admins && admins.length > 0) {
+                    window.location.href = 'main/login.html';
+                }
+            })
+            .catch(error => console.error('Error checking admin status:', error));
+
+        document.getElementById('startSetup').addEventListener('click', function() {
+            document.getElementById('setup-intro').classList.add('hidden');
+            document.getElementById('setup-form').classList.remove('hidden');
+        });
+
+        document.getElementById('createAdmin').addEventListener('click', function() {
+            // Reset error messages
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(el => el.textContent = '');
+
+            // Get form values
+            const name = document.getElementById('adminName').value.trim();
+            const username = document.getElementById('adminUsername').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+
+            // Validate inputs
+            let isValid = true;
+
+            if (!name) {
+                document.getElementById('nameError').textContent = 'Name is required';
+                isValid = false;
+            }
+
+            if (!username) {
+                document.getElementById('usernameError').textContent = 'Username is required';
+                isValid = false;
+            }
+
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                isValid = false;
+            } else if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+
+            if (!password) {
+                document.getElementById('passwordError').textContent = 'Password is required';
+                isValid = false;
+            } else if (password.length < 8) {
+                document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
+                isValid = false;
+            }
+
+            if (password !== confirmPass) {
+                document.getElementById('confirmError').textContent = 'Passwords do not match';
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Create admin data
+                const adminData = {
+                    username: username,
+                    email: email,
+                    password: password,
+                    role: 'genesis',
+                    created: new Date().toISOString()
+                };
+
+                // Save admin using server endpoint
+                fetch('/save_admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(adminData)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Set session data
+                        sessionStorage.setItem('isAuthenticated', 'true');
+                        sessionStorage.setItem('userRole', 'genesis');
+                        sessionStorage.setItem('username', username);
+                        
+                        // Redirect to login
+                        window.location.href = 'main/login.html';
+                    } else {
+                        throw new Error(result.message || 'Failed to save admin data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creating admin:', error);
+                    alert('Failed to create admin account. Please try again.');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

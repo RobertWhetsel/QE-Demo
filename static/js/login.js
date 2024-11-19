@@ -23,7 +23,7 @@ class Auth {
         }
 
         try {
-            // Check for Genesis Admin login
+            // Check for Genesis Admin login (fallback)
             if (username === 'genesis' && password === 'admin123') {
                 sessionStorage.setItem('isAuthenticated', 'true');
                 sessionStorage.setItem('userRole', 'genesis');
@@ -32,12 +32,11 @@ class Auth {
                 return;
             }
 
-            // Fetch users from the admins.json file
-            const response = await fetch('/load_admins');
-            const admins = await response.json();
-
-            // Check if user exists in admins.json
-            const admin = admins.find(
+            // Get users from sessionStorage
+            const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+            
+            // Check if user exists
+            const admin = appData.users.find(
                 (user) => user.username === username && user.password === password
             );
 
@@ -45,7 +44,21 @@ class Auth {
                 sessionStorage.setItem('isAuthenticated', 'true');
                 sessionStorage.setItem('userRole', admin.role);
                 sessionStorage.setItem('username', admin.username);
-                window.location.href = 'adminControlPanel.html';
+
+                // Redirect based on role
+                switch (admin.role) {
+                    case 'genesis':
+                        window.location.href = 'adminControlPanel.html';
+                        break;
+                    case 'user':
+                        window.location.href = 'userAdmin.html';
+                        break;
+                    case 'platform':
+                        window.location.href = 'platformAdmin.html';
+                        break;
+                    default:
+                        window.location.href = 'dashboard.html';
+                }
             } else {
                 this.showError('Invalid username or password');
             }
