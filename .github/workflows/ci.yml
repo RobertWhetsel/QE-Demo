@@ -11,4 +11,4 @@ jobs:
     - name: Run ESLint
       run: |
         npm install -g eslint
-        eslint . --ext .js
+        eslint . -c .js
