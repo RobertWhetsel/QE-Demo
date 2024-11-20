@@ -40,15 +40,15 @@ class Auth {
                 switch (admin.role) {
                     case 'genesis':
                         // Genesis Admin can only create other admins
-                        window.location.href = '/main/adminControlPanel.html';
+                        window.location.href = '/src/views/pages/genesisAdmin.html';
                         break;
                     case 'platform':
                         // Platform Admin can only create teams
-                        window.location.href = '/main/adminDashboard.html';
+                        window.location.href = '/src/views/pages/adminDashboard.html';
                         break;
                     case 'user':
                         // User Admin can only create users
-                        window.location.href = '/main/adminDashboard.html';
+                        window.location.href = '/src/views/pages/adminDashboard.html';
                         break;
                     default:
                         this.showError('Invalid user role');

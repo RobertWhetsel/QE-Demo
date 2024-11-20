@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- [Previous head content remains the same until the table] -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genesis Admin Control Panel - Quantum Eye</title>
-    <link rel="stylesheet" href="/static/css/core/variables.css">
-    <link rel="stylesheet" href="/static/css/core/base.css">
-    <link rel="stylesheet" href="/static/css/layouts/container.css">
-    <link rel="stylesheet" href="/static/css/components/navigation.css">
-    <link rel="stylesheet" href="/static/css/components/button.css">
-    <link rel="stylesheet" href="/static/css/components/message.css">
-    <link rel="stylesheet" href="/static/css/components/profile.css">
-    <link rel="stylesheet" href="/static/css/components/admin-control-panel.css">
-    <link rel="stylesheet" href="/static/css/themes/dark.css">
-    <link rel="stylesheet" href="/static/css/themes/print.css">
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+    <link rel="stylesheet" href="/src/views/styles/components/profile.css">
+    <link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/print.css">
     <style>
         .sidebar {
             height: 100%;
@@ -65,9 +66,29 @@
             .nav__dropdown.open {
                 display: block;
             }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .button--small {
+            margin: 0;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .button--danger {
+            background-color: var(--color-error);
+        }
+
+        .button--danger:hover {
+            background-color: var(--color-error-hover);
+        }
     </style>
 </head>
 <body class="page">
+    <!-- [Previous nav and sidebar content remains the same] -->
     <nav class="nav">
         <div class="nav__container">
             <button id="hamburger" class="nav__toggle">&#9776;</button>
@@ -117,8 +138,8 @@
                             <label for="role" class="required-field">Admin Type</label>
                             <select id="role" name="role" required>
                                 <option value="">Select admin type</option>
-                                <option value="user">User Admin</option>
-                                <option value="platform">Platform Admin</option>
+                                <option value="Platform Admin">Platform Admin</option>
+                                <option value="User Admin">User Admin</option>
                             </select>
                         </div>
                         <button type="submit" id="submitBtn" class="button button--primary">Create Admin User</button>
@@ -128,7 +149,21 @@
                 <div class="section">
                     <h2 class="section-title">Existing Admin Users</h2>
                     <div id="admin-list-container">
-                        <!-- Admin list will be populated here -->
+                        <table class="admin-list">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-list-body">
+                                <!-- Admin list will be populated here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -136,15 +171,17 @@
     </div>
 
     <script>
+        // [Previous JavaScript functions remain the same until loadAdmins]
+        
         // Check if user is Genesis Admin
         const userRole = sessionStorage.getItem('userRole');
-        if (userRole !== 'genesis') {
+        if (userRole !== 'Genesis Admin') {
             window.location.href = 'login.html';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const adminForm = document.getElementById('admin-creation-form');
-            const adminListContainer = document.getElementById('admin-list-container');
+            const adminListBody = document.getElementById('admin-list-body');
             const userNameEl = document.getElementById('userName');
             const navMenu = document.getElementById('navMenu');
 
@@ -171,22 +208,97 @@
                 navMenu.classList.toggle('open');
             });
 
+            // Format date to local string
+            function formatDate(dateString) {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            // Handle user disable
+            function handleDisableUser(username) {
+                try {
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+                    const userIndex = appData.users.findIndex(user => user.username === username);
+                    
+                    if (userIndex !== -1) {
+                        // Toggle user status
+                        appData.users[userIndex].status = appData.users[userIndex].status === 'disabled' ? 'active' : 'disabled';
+                        sessionStorage.setItem('appData', JSON.stringify(appData));
+                        loadAdmins();
+                    }
+                } catch (error) {
+                    console.error("Error disabling user:", error);
+                    alert('Failed to disable user');
+                }
+            }
+
+            // Handle user delete
+            function handleDeleteUser(username) {
+                if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+                    try {
+                        const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+                        appData.users = appData.users.filter(user => user.username !== username);
+                        sessionStorage.setItem('appData', JSON.stringify(appData));
+                        loadAdmins();
+                    } catch (error) {
+                        console.error("Error deleting user:", error);
+                        alert('Failed to delete user');
+                    }
+                }
+            }
+
             // Load admins from sessionStorage
             function loadAdmins() {
                 try {
                     const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
                     const admins = appData.users;
-                    adminListContainer.innerHTML = admins.map(admin => `
-                            <div class="admin-row">
-                                <p>Username: ${admin.username}</p>
-                                <p>Email: ${admin.email}</p>
-                                <p>Role: ${admin.role}</p>
-                                <p>Created: ${admin.created}</p>
-                            </div>
-                        `).join('');
+                    
+                    if (admins.length === 0) {
+                        adminListBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="no-admins-message">No admin users found</td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    adminListBody.innerHTML = admins.map(admin => `
+                        <tr>
+                            <td>${admin.username}</td>
+                            <td>${admin.email}</td>
+                            <td>${admin.role}</td>
+                            <td>${formatDate(admin.created)}</td>
+                            <td>
+                                <div class="status-indicator ${admin.status === 'disabled' ? 'status-indicator--inactive' : 'status-indicator--active'}" 
+                                     title="${admin.status === 'disabled' ? 'Disabled' : 'Active'}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button onclick="handleDisableUser('${admin.username}')" 
+                                            class="button button--primary button--small">
+                                        ${admin.status === 'disabled' ? 'Enable' : 'Disable'}
+                                    </button>
+                                    <button onclick="handleDeleteUser('${admin.username}')" 
+                                            class="button button--danger button--small">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
                 } catch (error) {
                     console.error("Error loading admins:", error);
-                    adminListContainer.innerHTML = "<p>Error loading admin list.</p>";
+                    adminListBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="no-admins-message">Error loading admin list</td>
+                        </tr>
+                    `;
                 }
             }
 
@@ -201,7 +313,8 @@
                         return;
                     }
 
-                    // Add new admin
+                    // Add new admin with active status
+                    adminData.status = 'active';
                     appData.users.push(adminData);
                     sessionStorage.setItem('appData', JSON.stringify(appData));
                     
@@ -226,6 +339,10 @@
                 };
                 saveAdmin(newAdmin);
             });
+
+            // Make functions available globally
+            window.handleDisableUser = handleDisableUser;
+            window.handleDeleteUser = handleDeleteUser;
 
             // Load admins on page load
             loadAdmins();

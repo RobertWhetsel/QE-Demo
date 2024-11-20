@@ -44,8 +44,8 @@ export class Auth {
                 // Redirect based on role with strict role-based access
                 switch (user.role) {
                     case 'Genesis Admin':
-                        // Genesis Admin can only create other admins
-                        this.navigation.navigateTo('/genesisAdmin');
+                        // Genesis Admin manages other admins through the admin control panel
+                        this.navigation.navigateTo('/adminControlPanel');
                         break;
                     case 'Platform Admin':
                         // Platform Admin can only create teams
