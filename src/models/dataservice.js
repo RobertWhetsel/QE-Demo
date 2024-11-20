@@ -45,9 +45,23 @@ export class DataService {
                 return;
             }
 
-            // If no stored data, try CSV
+            // Try JSON first
             try {
-                const response = await fetch('/src/models/data/data.csv');
+                const response = await fetch('/src/models/data/users.json');
+                if (response.ok) {
+                    const jsonData = await response.json();
+                    this.log('Loading data from JSON');
+                    this.data = jsonData;
+                    this.saveToStorage(this.data);
+                    return;
+                }
+            } catch (error) {
+                this.error('JSON read failed:', error);
+            }
+
+            // If JSON fails, try CSV
+            try {
+                const response = await fetch('/src/models/data/users.csv');
                 if (!response.ok) {
                     throw new Error('CSV file not found');
                 }
@@ -56,14 +70,14 @@ export class DataService {
                 this.data = this.parseCSV(csvText);
             } catch (error) {
                 this.error('CSV read failed:', error);
-                this.data = [];
+                this.data = { users: [], pendingUsers: [] };
             }
             
             // Store in storage with expiration
             this.saveToStorage(this.data);
         } catch (error) {
             this.error('Error initializing data:', error);
-            this.data = [];
+            this.data = { users: [], pendingUsers: [] };
             this.saveToStorage(this.data);
         }
     }
@@ -102,21 +116,21 @@ export class DataService {
     // Parse CSV to array of objects
     parseCSV(csv) {
         if (!csv || csv.trim() === '') {
-            return [];
+            return { users: [], pendingUsers: [] };
         }
 
         const lines = csv.split('\n').filter(line => line.trim() !== '');
         if (lines.length === 0) {
-            return [];
+            return { users: [], pendingUsers: [] };
         }
 
         try {
             const headers = lines[0].split(',').map(h => h.trim());
             if (lines.length === 1) {
-                return [];
+                return { users: [], pendingUsers: [] };
             }
             
-            return lines.slice(1)
+            const users = lines.slice(1)
                 .filter(line => line.trim() !== '')
                 .map(line => {
                     const values = line.split(',').map(v => v.trim());
@@ -126,22 +140,24 @@ export class DataService {
                     });
                     return obj;
                 });
+
+            return { users, pendingUsers: [] };
         } catch (error) {
             this.error('Error parsing CSV:', error);
-            return [];
+            return { users: [], pendingUsers: [] };
         }
     }
 
     // Convert data to CSV
     toCSV() {
-        if (!this.data || this.data.length === 0) {
-            return 'id,name,email,password,type,created';
+        if (!this.data?.users || this.data.users.length === 0) {
+            return 'username,email,password,role,created';
         }
         
-        const headers = ['id', 'name', 'email', 'password', 'type', 'created'];
+        const headers = ['username', 'email', 'password', 'role', 'created'];
         const csvLines = [
             headers.join(','),
-            ...this.data.map(row => 
+            ...this.data.users.map(row => 
                 headers.map(field => {
                     const value = row[field] || '';
                     // Escape commas and quotes in values
@@ -156,7 +172,7 @@ export class DataService {
     // Get all data
     getData() {
         this.log('Getting data:', this.data);
-        return this.data || [];
+        return this.data || { users: [], pendingUsers: [] };
     }
 
     // Save data
@@ -168,19 +184,39 @@ export class DataService {
             // Save to storage
             this.saveToStorage(this.data);
 
-            // Try to save to CSV
-            const csvContent = this.toCSV();
-            const response = await fetch('/src/models/data/data.csv', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/csv',
-                },
-                body: csvContent
-            });
-            
-            if (!response.ok) {
-                this.error('Failed to save to CSV:', response.statusText);
-                return false;
+            // Save to JSON
+            try {
+                const response = await fetch('/src/models/data/users.json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.data)
+                });
+                
+                if (!response.ok) {
+                    this.error('Failed to save to JSON:', response.statusText);
+                }
+            } catch (error) {
+                this.error('Error saving to JSON:', error);
+            }
+
+            // Save to CSV
+            try {
+                const csvContent = this.toCSV();
+                const response = await fetch('/src/models/data/users.csv', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/csv',
+                    },
+                    body: csvContent
+                });
+                
+                if (!response.ok) {
+                    this.error('Failed to save to CSV:', response.statusText);
+                }
+            } catch (error) {
+                this.error('Error saving to CSV:', error);
             }
 
             return true;
@@ -190,49 +226,40 @@ export class DataService {
         }
     }
 
-    // Add new record
-    async addRecord(record) {
-        if (!record) {
-            throw new Error('Invalid record data');
+    // Add new user
+    async addUser(user) {
+        if (!user) {
+            throw new Error('Invalid user data');
         }
         
-        this.log('Adding record:', record);
-        this.data = this.data || [];
-        this.data.push(record);
+        this.log('Adding user:', user);
+        this.data = this.data || { users: [], pendingUsers: [] };
+        this.data.users.push(user);
         
-        // Save to both storage and CSV
-        const saved = await this.saveData(this.data);
-        if (!saved) {
-            this.error('Failed to save record to CSV, but saved to storage');
-            this.saveToStorage(this.data);
-        }
-        
-        return true;
+        return this.saveData(this.data);
     }
 
-    // Update record
-    async updateRecord(id, updates) {
-        const index = this.data.findIndex(record => record.id === id);
+    // Update user
+    async updateUser(username, updates) {
+        const index = this.data.users.findIndex(user => user.username === username);
         if (index === -1) {
-            throw new Error('Record not found');
+            throw new Error('User not found');
         }
         
-        this.data[index] = { ...this.data[index], ...updates };
+        this.data.users[index] = { ...this.data.users[index], ...updates };
         return this.saveData(this.data);
     }
 
-    // Delete record
-    async deleteRecord(id) {
-        this.data = this.data.filter(record => record.id !== id);
+    // Delete user
+    async deleteUser(username) {
+        this.data.users = this.data.users.filter(user => user.username !== username);
         return this.saveData(this.data);
     }
 
-    // Search records
-    searchRecords(criteria) {
-        return this.data.filter(record => 
-            Object.entries(criteria).every(([key, value]) => 
-                record[key] === value
-            )
+    // Find user
+    findUser(username, password) {
+        return this.data?.users?.find(
+            user => user.username === username && user.password === password
         );
     }
 }

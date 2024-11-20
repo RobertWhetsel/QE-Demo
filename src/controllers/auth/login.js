@@ -1,5 +1,3 @@
-import { DataService } from '../../models/dataservice.js';
-import { ErrorHandler } from '../../utils/error/errorhandler.js';
 import { NavigationService } from '../../services/navigation/navigation.js';
 
 export class Auth {
@@ -28,38 +26,41 @@ export class Auth {
         }
 
         try {
-            // Get users from sessionStorage
+            // Get users from sessionStorage (loaded by index.html)
             const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+            console.log('Login attempt with:', { username, appData }); // Debug log
             
             // Check if user exists
-            const admin = appData.users.find(
+            const user = appData.users.find(
                 (user) => user.username === username && user.password === password
             );
 
-            if (admin) {
+            if (user) {
+                console.log('User found:', user); // Debug log
                 sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('userRole', admin.role);
-                sessionStorage.setItem('username', admin.username);
+                sessionStorage.setItem('userRole', user.role);
+                sessionStorage.setItem('username', user.username);
 
                 // Redirect based on role with strict role-based access
-                switch (admin.role) {
-                    case 'genesis':
+                switch (user.role) {
+                    case 'Genesis Admin':
                         // Genesis Admin can only create other admins
-                        this.navigation.navigateTo('/src/views/pages/adminControlPanel.html');
+                        this.navigation.navigateTo('/genesisAdmin');
                         break;
-                    case 'platform':
+                    case 'Platform Admin':
                         // Platform Admin can only create teams
-                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
+                        this.navigation.navigateTo('/adminDashboard');
                         break;
-                    case 'user':
+                    case 'User Admin':
                         // User Admin can only create users
-                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
+                        this.navigation.navigateTo('/adminDashboard');
                         break;
                     default:
                         this.showError('Invalid user role');
                         sessionStorage.clear();
                 }
             } else {
+                console.log('User not found'); // Debug log
                 this.showError('Invalid username or password');
             }
         } catch (error) {

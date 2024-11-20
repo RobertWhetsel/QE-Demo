@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quantum Eye</title>
-    <link rel="stylesheet" href="/static/css/styles.css" onerror="this.onerror=null;this.href='/static/css/core/base.css';">
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
     <style>
         .auth-container {
             display: flex;
@@ -139,13 +139,19 @@
 
                 <div class="form-actions">
                     <button type="submit" class="primary-button">Login</button>
-                    <a href="/main/forgot-password.html" class="forgot-password">Forgot Password?</a>
+                    <a href="/src/views/pages/forgot-password.html" class="forgot-password">Forgot Password?</a>
                 </div>
             </form>
         </div>
     </main>
 
-    <script src="/static/js/dataservice.js" onerror="console.error('Failed to load dataservice.js')"></script>
-    <script src="/static/js/login.js" onerror="console.error('Failed to load login.js')"></script>
+    <script type="module">
+        import { Auth } from '/src/controllers/auth/login.js';
+        
+        // Initialize Auth when document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new Auth();
+        });
+    </script>
 </body>
 </html>

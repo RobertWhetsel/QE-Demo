@@ -28,7 +28,8 @@ const config = {
     },
     cache: {
       maxAge: 3600, // 1 hour
-      enabled: true
+      enabled: true,
+      enableLocalStorage: false
     }
   },
   production: {
@@ -60,11 +61,11 @@ const config = {
     },
     cache: {
       maxAge: 3600,
-      enabled: true
+      enabled: true,
+      enableLocalStorage: true
     }
   }
 };
 
-// Export the configuration based on environment
-const env = process.env.NODE_ENV || 'development';
-export default config[env];
+// For browser environment, always use development config
+export default config.development;
