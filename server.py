@@ -3,41 +3,54 @@ import json
 import os
 import csv
 import atexit
+import sys
+from config.server import config
 
-app = Flask(__name__)
+# Get environment from environment variable or default to development
+env = os.getenv('FLASK_ENV', 'development')
+app_config = config[env]
 
-# Define paths
-csv_file_path = "admins.csv"
-TEMPLATES_DIR = os.path.join(os.getcwd(), "templates")
-STATIC_DIR = os.path.join(os.getcwd(), "static")
+app = Flask(__name__, 
+           static_folder='static',
+           template_folder='src/views/pages')
+
+# Apply configuration
+app.config.from_object(app_config)
+
+# Define paths from configuration
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "src", "models", "data")
+csv_file_path = os.path.join(DATA_DIR, "users.csv")
 
 # Ensure the CSV file exists
 if not os.path.exists(csv_file_path):
+    os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
     with open(csv_file_path, "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
         # Write header row to CSV file
         writer.writerow(["username", "email", "password", "role", "created"])
 
-# Cleanup function to clear the CSV file cache
 def clear_csv_cache():
-    print("Clearing admins.csv cache...")
+    """Cleanup function to clear the CSV file cache"""
+    print("Clearing users.csv cache...")
     with open(csv_file_path, "w", newline="", encoding="utf-8") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerow(["username", "email", "password", "role", "created"])  # Write empty header row
+        writer.writerow(["username", "email", "password", "role", "created"])
 
 # Register the cleanup function to run at exit
 atexit.register(clear_csv_cache)
 
 @app.route("/")
 def index():
-    return render_template("adminControlPanel.html")
+    return send_from_directory('.', 'index.html')
 
-@app.route("/<page_name>")
-def serve_page(page_name):
-    try:
-        return render_template(page_name)
-    except Exception as e:
-        return f"Error loading page: {e}", 404
+@app.route("/src/<path:path>")
+def serve_src(path):
+    return send_from_directory('src', path)
+
+@app.route("/static/<path:path>")
+def serve_static(path):
+    return send_from_directory('static', path)
 
 @app.route("/save_admin", methods=["POST"])
 def save_admin():
@@ -64,9 +77,9 @@ def save_admin():
         new_admin = {
             "username": username,
             "email": email,
-            "password": password,
+            "password": password,  # In production, this should be hashed
             "role": role,
-            "created": request.json.get("created", "")  # Optional timestamp
+            "created": request.json.get("created", "")
         }
 
         # Append the new admin to the CSV file
@@ -76,13 +89,13 @@ def save_admin():
 
         return jsonify({"success": True, "message": "Admin saved successfully"})
     except Exception as e:
+        app.logger.error(f"Error saving admin: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route("/load_admins", methods=["GET"])
 def load_admins():
     try:
         admins = []
-        # Read and return the list of admins from the CSV file
         with open(csv_file_path, "r", newline="", encoding="utf-8") as csv_file:
             reader = csv.DictReader(csv_file)
             for row in reader:
@@ -90,12 +103,10 @@ def load_admins():
 
         return jsonify(admins)
     except Exception as e:
+        app.logger.error(f"Error loading admins: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
 
-@app.route("/static/<path:path>")
-def static_files(path):
-    # Serve static files (CSS, JS, etc.)
-    return send_from_directory(STATIC_DIR, path)
-
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    port = int(os.getenv('PORT', app_config.PORT if hasattr(app_config, 'PORT') else 8080))
+    debug = app_config.DEBUG if hasattr(app_config, 'DEBUG') else True
+    app.run(debug=debug, port=port)

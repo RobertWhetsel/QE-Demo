@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Eye - Welcome</title>
-    <script>
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    <script type="module">
+        import { DataService } from '/src/models/dataservice.js';
+        
         // Check if a Genesis Admin exists
         const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
         const hasGenesisAdmin = appData.users.some(user => user.role === 'genesis');
         
         // If no Genesis Admin exists, redirect to Genesis Admin creation
         if (!hasGenesisAdmin) {
-            window.location.href = "main/genesisAdmin.html";
+            window.location.href = "/src/views/pages/genesisAdmin.html";
         } else {
             // Otherwise redirect to login
-            window.location.href = "main/login.html";
+            window.location.href = "/src/views/pages/login.html";
         }
     </script>
 </head>
 <body>
-    <p>Redirecting... If you are not redirected automatically, <a href="main/login.html">click here</a>.</p>
+    <p>Redirecting... If you are not redirected automatically, <a href="/src/views/pages/login.html">click here</a>.</p>
 </body>
 </html>

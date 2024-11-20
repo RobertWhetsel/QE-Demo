@@ -1,115 +1,169 @@
-# Quantum Eye
+# QE-Demo Configuration System
 
-Quantum Eye is a comprehensive research and survey management platform built on [US9069626B2](https://patentimages.storage.googleapis.com/78/dc/6b/02571988bca951/US9069626.pdf) that is designed to facilitate data collection, analysis, and research administration. The platform provides robust tools for creating surveys, managing research data, and analyzing responses with different levels of administrative access.
+This demo webapp uses a structured configuration system to manage different settings across environments. All configuration files are stored in the `config/` directory.
 
-## Features
+## Configuration Files
 
-### Authentication & Authorization
-- Multi-level user authentication system
-- Role-based access control (User Admin, Platform Admin)
-- Secure login and session management
-- Password recovery functionality
+### 1. Environment Configuration (`config/env.json`)
+Contains environment-specific application settings:
+- Server port and environment
+- Logging configuration
+- CSV file paths
+- Session settings
+- Storage keys
 
-### Survey Management
-- Create and customize surveys with multiple question types:
-  - Text responses
-  - Multiple choice
-  - True/False questions
-- Target surveys to specific groups:
-  - Workspaces
-  - Teams
-  - Individual users
-  - All users
-- Set due dates and track completion status
-- Survey response collection and storage
-
-### Research Center
-- Centralized research data management
-- Real-time data filtering and search
-- Export capabilities to spreadsheet format
-- Pagination and sorting features
-- Data visualization and analytics
-- Comprehensive data preview functionality
-
-### Administrative Features
-- Admin Control Panel for system management
-- User management and role assignment
-- Workspace and team administration
-- Data export and reporting tools
-- System monitoring and statistics
-
-### Data Management
-- Secure data storage and retrieval
-- CSV data import/export functionality
-- Data filtering and search capabilities
-- Real-time updates and synchronization
-
-## Technical Architecture
-
-### Frontend
-- Pure HTML5, CSS3, and JavaScript implementation
-- Modular JavaScript architecture with class-based components
-- Responsive design for cross-device compatibility
-- Real-time data updates and state management
-
-### Security
-- Session-based authentication
-- Role-based access control
-- Secure password handling
-- Protected API endpoints
-
-### Data Handling
-- Client-side data processing
-- Session storage for temporary data
-- CSV data format support
-- Real-time data synchronization
-
-## Getting Started
-
-1. Clone the repository
-2. Open `index.html` in a modern web browser
-3. First-time setup will redirect to create a Genesis Admin account
-4. Use the Genesis Admin account to set up additional users and configure the system
-
-## Project Structure
-
-```
-quantum-eye/
-├── assets/           # Static assets
-├── components/       # Reusable HTML components
-├── css/             # Stylesheets
-├── js/              # JavaScript modules
-│   ├── modules/     # Core modules
-│   └── *.js         # Feature-specific scripts
-├── templates/       # HTML templates
-└── *.html           # Main HTML pages
+```json
+{
+  "development": {
+    "PORT": 8080,
+    "ENABLE_LOGGING": true,
+    "CSV_PATH": "src/models/data/users.csv",
+    "STORAGE": {
+      "TYPE": "session",
+      "KEYS": {
+        "USER_DATA": "appData",
+        "AUTH": "isAuthenticated"
+      }
+    }
+  }
+}
 ```
 
-## Core Components
+### 2. Server Configuration (`config/server.py`)
+Python-specific server configuration:
+- Debug settings
+- Session management
+- CSV file handling
+- Security configurations
+- Testing configurations
 
-- **StateManager**: Handles application state and data flow
-- **DataService**: Manages data operations and persistence
-- **ResearchCenter**: Core research data management functionality
-- **SurveyManager**: Survey creation and management
-- **AdminControlPanel**: Administrative functions and system management
+```python
+class DevelopmentConfig(Config):
+    DEBUG = True
+    CSV_FILE_PATH = "src/models/data/users.csv"
+    CSV_HEADERS = ["username", "email", "password", "role", "created"]
+```
 
-## Browser Support
+### 3. Client Configuration (`config/client.js`)
+Frontend-specific settings:
+- Feature flags
+- Session storage configuration
+- CSV data structure
+- UI configurations
+- Cache settings
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+```javascript
+const config = {
+  development: {
+    storage: {
+      type: 'session',
+      keys: {
+        userData: 'appData',
+        auth: 'isAuthenticated'
+      }
+    },
+    csv: {
+      path: 'src/models/data/users.csv',
+      headers: ['username', 'email', 'password', 'role', 'created']
+    }
+  }
+}
+```
 
-## Development
+## Storage Architecture
 
-The project uses a modular architecture with separate concerns for:
-- User Interface Components
-- Data Management
-- State Management
-- Authentication
-- Research Tools
-- Survey Management
+This demo webapp uses a simple but effective storage approach:
 
-## License
+1. **Session Storage**
+   - Primary storage mechanism for temporary data
+   - Handles user authentication state
+   - Stores current user information
+   - Clears on browser/tab close
 
-[MIT](https://github.com/RobertWhetsel/QE-Demo/blob/dev/LICENSE)
+2. **CSV File Storage**
+   - Persistent storage for user data
+   - Located at `src/models/data/users.csv`
+   - Simple, readable format for demo purposes
+   - Structured with consistent headers
+
+## Usage
+
+### Python Server
+```python
+from config.server import config
+
+# Get environment-specific config
+env = os.getenv('FLASK_ENV', 'development')
+app_config = config[env]
+
+# Apply configuration
+app.config.from_object(app_config)
+
+# Access CSV path
+csv_path = app_config.CSV_FILE_PATH
+```
+
+### JavaScript Client
+```javascript
+import config from '../config/client.js';
+
+// Use storage configuration
+const storageType = config.storage.type;
+const storage = storageType === 'session' ? sessionStorage : localStorage;
+
+// Access CSV configuration
+const csvHeaders = config.csv.headers;
+```
+
+## Environment Variables
+
+The following environment variables can be used to override configuration settings:
+
+- `FLASK_ENV`: Set the environment ('development', 'production', 'testing')
+- `PORT`: Override the server port
+- `SECRET_KEY`: Override session secret key
+- `CSV_FILE_PATH`: Override the CSV file location
+
+## Best Practices
+
+1. Keep session storage data temporary and non-sensitive
+2. Regularly clear old session data
+3. Validate CSV data structure before reading/writing
+4. Use appropriate error handling for storage operations
+5. Keep CSV headers consistent across environments
+6. Document storage key names and purposes
+7. Clear session storage on logout
+8. Handle storage quota limitations
+9. Implement proper data validation
+10. Use consistent date formats
+
+## Security Considerations
+
+1. Don't store sensitive data in session storage
+2. Clear session data appropriately
+3. Validate all data before storage
+4. Use secure defaults
+5. Implement proper access controls
+6. Monitor storage usage
+7. Handle storage errors gracefully
+8. Protect CSV file access
+9. Validate CSV data integrity
+10. Implement proper session management
+
+## Adding New Configuration
+
+When adding new configuration options:
+
+1. Add the option to the appropriate configuration file
+2. Update storage keys if needed
+3. Document the new option in this README
+4. Test in all environments
+5. Update related components
+
+## Development Setup
+
+1. Ensure proper CSV file permissions
+2. Set up development environment variables
+3. Initialize session storage structure
+4. Test storage operations
+5. Verify CSV file access
