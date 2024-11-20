@@ -12,8 +12,33 @@
     <div id="sidebar-component"></div>
     
     <div class="content-area">
-        <div class="iframe-container">
-            <iframe id="content-frame" src="dashboard.html" sandbox="allow-scripts allow-same-origin"></iframe>
+        <div class="dashboard-container">
+            <!-- Role-specific content will be loaded here -->
+            <div id="role-specific-content">
+                <script>
+                    // Load role-specific content
+                    const userRole = sessionStorage.getItem('userRole');
+                    let defaultContent = '';
+                    
+                    switch(userRole) {
+                        case 'platform':
+                            defaultContent = 'research.html'; // Platform Admin sees research management
+                            break;
+                        case 'user':
+                            defaultContent = 'volunteerDashboard.html'; // User Admin sees volunteer management
+                            break;
+                        default:
+                            defaultContent = 'dashboard.html'; // Default dashboard view
+                    }
+                    
+                    // Create iframe for content
+                    const iframe = document.createElement('iframe');
+                    iframe.src = defaultContent;
+                    iframe.id = 'content-frame';
+                    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+                    document.getElementById('role-specific-content').appendChild(iframe);
+                </script>
+            </div>
         </div>
     </div>
 
@@ -28,7 +53,7 @@
             });
 
             await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
-                userName: localStorage.getItem('userName') || 'User'
+                userName: sessionStorage.getItem('username') || 'User'
             });
 
             await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');

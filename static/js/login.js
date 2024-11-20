@@ -36,23 +36,23 @@ class Auth {
                 sessionStorage.setItem('userRole', admin.role);
                 sessionStorage.setItem('username', admin.username);
 
-                // Redirect based on role
+                // Redirect based on role with strict role-based access
                 switch (admin.role) {
                     case 'genesis':
-                        // Genesis Admin goes to admin control panel to create other admins
+                        // Genesis Admin can only create other admins
                         window.location.href = 'adminControlPanel.html';
                         break;
-                    case 'user':
-                        // User Admin goes to user dashboard
-                        window.location.href = '../adminDashboard.html';
-                        break;
                     case 'platform':
-                        // Platform Admin goes to research dashboard
-                        window.location.href = '../researchDashboard.html';
+                        // Platform Admin can only create teams
+                        window.location.href = 'adminDashboard.html';
+                        break;
+                    case 'user':
+                        // User Admin can only create users
+                        window.location.href = 'adminDashboard.html';
                         break;
                     default:
-                        // Regular users go to volunteer dashboard
-                        window.location.href = '../volunteerDashboard.html';
+                        this.showError('Invalid user role');
+                        sessionStorage.clear();
                 }
             } else {
                 this.showError('Invalid username or password');

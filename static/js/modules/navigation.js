@@ -153,16 +153,16 @@ const navigation = {
             return;
         }
 
-        // Map role to template ID
+        // Map role to template ID using the same role names as login.js
         let templateId;
         switch(userRole) {
             case 'genesis':
                 templateId = 'genesisAdmin-menu';
                 break;
-            case 'platformAdmin':
+            case 'platform':
                 templateId = 'platformAdmin-menu';
                 break;
-            case 'userAdmin':
+            case 'user':
                 templateId = 'userAdmin-menu';
                 break;
             default:
@@ -192,6 +192,8 @@ const navigation = {
                     }
                 }
             });
+        } else {
+            console.error('Menu template or container not found for role:', userRole);
         }
 
         // Ensure sidebar starts closed
@@ -206,5 +208,5 @@ const navigation = {
     }
 };
 
-// Expose to window
-window.navigation = navigation;
+// Export as module
+export default navigation;

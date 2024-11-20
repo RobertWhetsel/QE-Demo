@@ -1,1 +1,24 @@
-genesisAdmin.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Eye - Welcome</title>
+    <script>
+        // Check if a Genesis Admin exists
+        const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+        const hasGenesisAdmin = appData.users.some(user => user.role === 'genesis');
+        
+        // If no Genesis Admin exists, redirect to Genesis Admin creation
+        if (!hasGenesisAdmin) {
+            window.location.href = "main/genesisAdmin.html";
+        } else {
+            // Otherwise redirect to login
+            window.location.href = "main/login.html";
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting... If you are not redirected automatically, <a href="main/login.html">click here</a>.</p>
+</body>
+</html>
