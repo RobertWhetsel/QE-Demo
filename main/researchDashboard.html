@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Dashboard - Quantum Eye</title>
+    <link rel="stylesheet" href="../static/css/research.css">
+</head>
+<body>
+    <div id="header-component"></div>
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="dashboard-container">
+            <div class="dashboard-stats">
+                <!-- Stats will be populated here -->
+            </div>
+            <div class="dashboard-charts">
+                <!-- Charts will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '../static/js/modules/componentLoader.js';
+        
+        // Load components
+        async function initializePage() {
+            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
+                pageTitle: 'Research Dashboard',
+                additionalStyles: ''
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+    <script src="../static/js/researchdashboard.js"></script>
+    <script src="../static/js/chart.js"></script>
+</body>
+</html>

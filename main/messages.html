@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Quantum Eye</title>
+    <link rel="stylesheet" href="../static/css/components/message.css">
+</head>
+<body>
+    <div id="header-component"></div>
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="message-list" id="message-list">
+            <!-- Messages will be populated here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '../static/js/modules/componentLoader.js';
+        
+        // Load components
+        async function initializePage() {
+            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
+                pageTitle: 'Messages',
+                additionalStyles: ''
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+    <script src="../static/js/messages.js"></script>
+</body>
+</html>

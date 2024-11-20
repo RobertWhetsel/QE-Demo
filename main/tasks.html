@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks - Quantum Eye</title>
+    <link rel="stylesheet" href="../static/css/core/base.css">
+</head>
+<body>
+    <div id="header-component"></div>
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h1>Tasks</h1>
+                <button id="add-task" class="button button--primary">Add Task</button>
+            </div>
+            <div class="tasks-list" id="tasks-list">
+                <!-- Tasks will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '../static/js/modules/componentLoader.js';
+        
+        // Load components
+        async function initializePage() {
+            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
+                pageTitle: 'Tasks',
+                additionalStyles: ''
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+    <script src="../static/js/tabManagement.js"></script>
+</body>
+</html>

@@ -23,15 +23,6 @@ class Auth {
         }
 
         try {
-            // Check for Genesis Admin login (fallback)
-            if (username === 'genesis' && password === 'admin123') {
-                sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('userRole', 'genesis');
-                sessionStorage.setItem('username', 'genesis');
-                window.location.href = 'adminControlPanel.html';
-                return;
-            }
-
             // Get users from sessionStorage
             const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
             
@@ -48,16 +39,20 @@ class Auth {
                 // Redirect based on role
                 switch (admin.role) {
                     case 'genesis':
+                        // Genesis Admin goes to admin control panel to create other admins
                         window.location.href = 'adminControlPanel.html';
                         break;
                     case 'user':
-                        window.location.href = 'userAdmin.html';
+                        // User Admin goes to user dashboard
+                        window.location.href = '../adminDashboard.html';
                         break;
                     case 'platform':
-                        window.location.href = 'platformAdmin.html';
+                        // Platform Admin goes to research dashboard
+                        window.location.href = '../researchDashboard.html';
                         break;
                     default:
-                        window.location.href = 'dashboard.html';
+                        // Regular users go to volunteer dashboard
+                        window.location.href = '../volunteerDashboard.html';
                 }
             } else {
                 this.showError('Invalid username or password');

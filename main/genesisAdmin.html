@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Eye - Initial Setup</title>
-    <link rel="stylesheet" href="static/css/login.css">
+    <link rel="stylesheet" href="../static/css/login.css">
     <style>
         .hidden {
             display: none;
@@ -88,14 +88,10 @@
 
     <script>
         // Check if setup is already complete
-        fetch('/load_admins')
-            .then(response => response.json())
-            .then(admins => {
-                if (admins && admins.length > 0) {
-                    window.location.href = 'main/login.html';
-                }
-            })
-            .catch(error => console.error('Error checking admin status:', error));
+        const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+        if (appData.users.length > 0) {
+            window.location.href = 'login.html';
+        }
 
         document.getElementById('startSetup').addEventListener('click', function() {
             document.getElementById('setup-intro').classList.add('hidden');
@@ -149,41 +145,35 @@
             }
 
             if (isValid) {
-                // Create admin data
-                const adminData = {
-                    username: username,
-                    email: email,
-                    password: password,
-                    role: 'genesis',
-                    created: new Date().toISOString()
-                };
+                try {
+                    // Create admin data
+                    const adminData = {
+                        name: name,
+                        username: username,
+                        email: email,
+                        password: password,
+                        role: 'genesis',
+                        created: new Date().toISOString()
+                    };
 
-                // Save admin using server endpoint
-                fetch('/save_admin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(adminData)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        // Set session data
-                        sessionStorage.setItem('isAuthenticated', 'true');
-                        sessionStorage.setItem('userRole', 'genesis');
-                        sessionStorage.setItem('username', username);
-                        
-                        // Redirect to login
-                        window.location.href = 'main/login.html';
-                    } else {
-                        throw new Error(result.message || 'Failed to save admin data');
-                    }
-                })
-                .catch(error => {
+                    // Initialize app data
+                    const appData = {
+                        users: [adminData],
+                        pendingUsers: []
+                    };
+
+                    // Save to sessionStorage
+                    sessionStorage.setItem('appData', JSON.stringify(appData));
+                    sessionStorage.setItem('isAuthenticated', 'true');
+                    sessionStorage.setItem('userRole', 'genesis');
+                    sessionStorage.setItem('username', username);
+
+                    // Redirect to admin control panel
+                    window.location.href = 'adminControlPanel.html';
+                } catch (error) {
                     console.error('Error creating admin:', error);
                     alert('Failed to create admin account. Please try again.');
-                });
+                }
             }
         });
     </script>

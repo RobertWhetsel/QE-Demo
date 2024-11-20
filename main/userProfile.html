@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Quantum Eye</title>
+    <link rel="stylesheet" href="../static/css/userProfile.css">
+</head>
+<body>
+    <div id="header-component"></div>
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h1>User Profile</h1>
+            </div>
+            <div class="profile-content">
+                <div class="profile-section">
+                    <h2>Personal Information</h2>
+                    <form id="personal-info-form">
+                        <!-- Personal info form will be populated here -->
+                    </form>
+                </div>
+                <div class="profile-section">
+                    <h2>Account Settings</h2>
+                    <form id="account-settings-form">
+                        <!-- Account settings form will be populated here -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '../static/js/modules/componentLoader.js';
+        
+        // Load components
+        async function initializePage() {
+            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
+                pageTitle: 'User Profile',
+                additionalStyles: ''
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+    <script src="../static/js/userprofile.js"></script>
+</body>
+</html>

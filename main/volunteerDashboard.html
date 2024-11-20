@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Dashboard - Quantum Eye</title>
+    <link rel="stylesheet" href="../static/css/core/base.css">
+</head>
+<body>
+    <div id="header-component"></div>
+    <div id="nav-component"></div>
+    <div id="sidebar-component"></div>
+    
+    <div class="content-area">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>Volunteer Dashboard</h1>
+            </div>
+            <div class="dashboard-content">
+                <div class="dashboard-section">
+                    <h2>Active Tasks</h2>
+                    <div id="active-tasks">
+                        <!-- Active tasks will be populated here -->
+                    </div>
+                </div>
+                <div class="dashboard-section">
+                    <h2>Available Surveys</h2>
+                    <div id="available-surveys">
+                        <!-- Available surveys will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ComponentLoader from '../static/js/modules/componentLoader.js';
+        
+        // Load components
+        async function initializePage() {
+            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
+                pageTitle: 'Volunteer Dashboard',
+                additionalStyles: ''
+            });
+
+            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
+                userName: localStorage.getItem('userName') || 'User'
+            });
+
+            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+    <script src="../static/js/volunteerdashboard.js"></script>
+</body>
+</html>
