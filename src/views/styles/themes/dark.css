@@ -1,65 +1,106 @@
 /* Dark Theme */
-.theme--dark {
-    /* Convert theme--dark class to use data-theme attribute */
+:root[data-theme="dark"] {
+    /* Base colors */
+    --color-surface-primary: #1c1c1c;
+    --color-surface-secondary: #2d2d2d;
+    --color-surface-tertiary: #333333;
+    
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cccccc;
+    --color-text-tertiary: #999999;
+    
+    --color-border-default: rgba(255, 255, 255, 0.1);
+    --color-border-hover: rgba(255, 255, 255, 0.2);
+    
+    /* Brand Colors - Adjusted for dark theme */
+    --color-brand-primary: #4d9fff;
+    --color-brand-primary-hover: #3d8fff;
+    --color-brand-secondary: #8c959d;
+    --color-brand-secondary-hover: #778088;
+    
+    /* Feedback Colors - Adjusted for dark theme */
+    --color-success: #3cbd5c;
+    --color-success-hover: #2ea548;
+    --color-error: #e4545f;
+    --color-error-hover: #d63d4a;
+    --color-warning: #ffd11a;
+    --color-warning-hover: #e6bc18;
+    --color-info: #29b9cc;
+    --color-info-hover: #1fa3b8;
+    
+    /* Elevation - Adjusted for dark theme */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.25);
+
+    /* System */
     color-scheme: dark;
 }
 
-/* Apply dark theme via data attribute */
-.theme--dark,
-[data-theme="dark"] {
-    /* Base colors are handled by CSS custom properties in variables.css */
+/* Ensure all elements inherit theme colors */
+[data-theme="dark"] *:not([class*="theme-preview"]) {
     background-color: var(--color-surface-primary);
     color: var(--color-text-primary);
+    border-color: var(--color-border-default);
 }
 
-/* Scrollbar customization for dark theme */
-.theme--dark ::-webkit-scrollbar,
+/* Form elements */
+[data-theme="dark"] input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background-color: var(--color-surface-secondary) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+/* Buttons */
+[data-theme="dark"] .button {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+[data-theme="dark"] .button:hover {
+    background-color: var(--color-brand-primary-hover);
+}
+
+/* Navigation */
+[data-theme="dark"] .nav {
+    background-color: var(--color-surface-secondary);
+    border-color: var(--color-border-default);
+}
+
+[data-theme="dark"] .sidebar {
+    background-color: var(--color-surface-secondary);
+    border-color: var(--color-border-default);
+}
+
+/* Sections */
+[data-theme="dark"] .section {
+    background-color: var(--color-surface-secondary);
+    border-color: var(--color-border-default);
+}
+
+/* Selection */
+[data-theme="dark"] ::selection {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+/* Scrollbar */
 [data-theme="dark"] ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.theme--dark ::-webkit-scrollbar-track,
 [data-theme="dark"] ::-webkit-scrollbar-track {
     background: var(--color-surface-secondary);
 }
 
-.theme--dark ::-webkit-scrollbar-thumb,
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
     background: var(--color-brand-secondary);
     border-radius: var(--border-radius);
 }
 
-.theme--dark ::-webkit-scrollbar-thumb:hover,
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     background: var(--color-brand-secondary-hover);
-}
-
-/* Form elements - Adding specific dark theme enhancements */
-.theme--dark input:not([type="submit"]):not([type="button"]):not([type="reset"]),
-.theme--dark textarea,
-.theme--dark select,
-[data-theme="dark"] input:not([type="submit"]):not([type="button"]):not([type="reset"]),
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-    background-color: var(--color-surface-secondary);
-    color: var(--color-text-primary);
-    border-color: var(--color-border-default);
-}
-
-.theme--dark input:focus:not([type="submit"]):not([type="button"]):not([type="reset"]),
-.theme--dark textarea:focus,
-.theme--dark select:focus,
-[data-theme="dark"] input:focus:not([type="submit"]):not([type="button"]):not([type="reset"]),
-[data-theme="dark"] textarea:focus,
-[data-theme="dark"] select:focus {
-    border-color: var(--color-brand-primary);
-    box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
-}
-
-/* Selection color for dark theme */
-.theme--dark ::selection,
-[data-theme="dark"] ::selection {
-    background-color: var(--color-brand-primary);
-    color: var(--color-text-on-brand);
 }

@@ -1,71 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- [Previous head content remains the same until the table] -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genesis Admin Control Panel - Quantum Eye</title>
+
+    <!-- Theme initialization - Must be first -->
+    <script type="module">
+        import ThemeManager from '/src/services/state/thememanager.js';
+        // Apply theme immediately before any content loads
+        ThemeManager.initialize();
+    </script>
+
+    <!-- Core styles -->
     <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Base styles -->
     <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
     <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
     <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
     <link rel="stylesheet" href="/src/views/styles/components/button.css">
     <link rel="stylesheet" href="/src/views/styles/components/message.css">
     <link rel="stylesheet" href="/src/views/styles/components/profile.css">
     <link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/print.css">
+
     <style>
-        .sidebar {
-            height: 100%;
-            width: 0;
-            position: fixed;
-            z-index: 1;
-            top: 0;
-            left: 0;
-            background-color: var(--color-background-alt);
-            overflow-x: hidden;
-            transition: 0.3s;
-            padding-top: 60px;
+        /* Ensure smooth theme transitions */
+        :root {
+            transition: background-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease;
         }
 
-        .sidebar--open {
-            width: 250px !important;
+        /* Ensure theme colors are inherited */
+        html, body {
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
         }
-
-        .sidebar__close {
-            position: absolute;
-            top: 0;
-            right: 25px;
-            font-size: 36px;
-            color: var(--color-text);
-        }
-
-        .sidebar__brand, .sidebar__link {
-            padding: 8px 16px;
-            color: var(--color-text);
-            text-decoration: none;
-            display: block;
-        }
-
-            .sidebar__link:hover {
-                background-color: var(--color-background-hover);
-            }
-
-        .nav__dropdown {
-            position: absolute;
-            top: 50px;
-            right: 10px;
-            background-color: var(--color-background);
-            border: 1px solid var(--color-border);
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
-        }
-
-            .nav__dropdown.open {
-                display: block;
-            }
 
         .action-buttons {
             display: flex;
@@ -88,14 +67,15 @@
     </style>
 </head>
 <body class="page">
-    <!-- [Previous nav and sidebar content remains the same] -->
     <nav class="nav">
         <div class="nav__container">
-            <button id="hamburger" class="nav__toggle">&#9776;</button>
-            <span class="nav__brand">Quantum Eye</span>
+            <div class="nav__left">
+                <button id="hamburger" class="nav__toggle">&#9776;</button>
+                <span class="nav__brand">Quantum Eye</span>
+            </div>
             <div class="nav__menu">
                 <span id="userName" class="nav__link user-name">User</span>
-                <div id="navMenu" class="nav__dropdown">
+                <div id="navMenu" class="nav__dropdown" hidden>
                     <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
                 </div>
             </div>
@@ -105,8 +85,15 @@
     <div id="sidebar" class="sidebar">
         <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
         <div class="sidebar__brand">Quantum Eye</div>
-        <a href="adminControlPanel.html" class="sidebar__link">Admin Panel</a>
-        <a href="login.html" class="sidebar__link">Login Page</a>
+        <div id="menu-items">
+            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link">Genesis Admin Control Panel</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+        </div>
+        <div class="sidebar__footer">
+            <a href="#" class="sidebar__link logout-link">Logout</a>
+            <a href="#" class="sidebar__link exit-button">Exit</a>
+        </div>
     </div>
 
     <div class="page__container">
@@ -170,43 +157,95 @@
         </div>
     </div>
 
-    <script>
-        // [Previous JavaScript functions remain the same until loadAdmins]
-        
+    <script type="module">
+        import navigation from '/src/services/navigation/navigation.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+
         // Check if user is Genesis Admin
         const userRole = sessionStorage.getItem('userRole');
+        const username = sessionStorage.getItem('username');
+        
         if (userRole !== 'Genesis Admin') {
-            window.location.href = 'login.html';
+            window.location.href = '/src/views/pages/login.html';
+            throw new Error('Unauthorized access');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const adminForm = document.getElementById('admin-creation-form');
-            const adminListBody = document.getElementById('admin-list-body');
+            // Initialize theme
+            ThemeManager.initialize();
+
+            // Initialize navigation components
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutLink = document.querySelector('.logout-link');
+            const exitButton = document.querySelector('.exit-button');
             const userNameEl = document.getElementById('userName');
             const navMenu = document.getElementById('navMenu');
 
-            // Display username
-            const userName = sessionStorage.getItem('username') || "User";
-            userNameEl.textContent = userName;
+            // Setup hamburger menu
+            if (hamburger && sidebar) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar--open');
+                });
+            }
 
-            // Logout functionality
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                sessionStorage.clear();
-                window.location.href = 'login.html';
+            // Setup close button
+            if (closeBtn && sidebar) {
+                closeBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('sidebar--open');
+                });
+            }
+
+            // Setup logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => navigation.logout());
+            }
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.logout();
+                });
+            }
+
+            // Setup exit functionality
+            if (exitButton) {
+                exitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.exitApplication();
+                });
+            }
+
+            // Setup username display and dropdown
+            if (userNameEl) {
+                userNameEl.textContent = username || "User";
+
+                userNameEl.addEventListener('click', () => {
+                    navMenu.toggleAttribute('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav__menu')) {
+                        navMenu.setAttribute('hidden', '');
+                    }
+                });
+            }
+
+            // Setup navigation links
+            const links = document.querySelectorAll('.sidebar__link[href]');
+            links.forEach(link => {
+                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.navigateTo(link.getAttribute('href'));
+                    });
+                }
             });
 
-            // Sidebar toggle
-            document.getElementById('hamburger').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('sidebar--open');
-            });
-            document.getElementById('close-sidebar').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.remove('sidebar--open');
-            });
-
-            // Dropdown toggle
-            userNameEl.addEventListener('click', () => {
-                navMenu.classList.toggle('open');
-            });
+            const adminForm = document.getElementById('admin-creation-form');
+            const adminListBody = document.getElementById('admin-list-body');
 
             // Format date to local string
             function formatDate(dateString) {
@@ -346,6 +385,16 @@
 
             // Load admins on page load
             loadAdmins();
+
+            // Listen for theme changes
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'theme_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.theme && data.username === username) {
+                        ThemeManager.applyTheme(data.theme);
+                    }
+                }
+            });
         });
     </script>
 </body>

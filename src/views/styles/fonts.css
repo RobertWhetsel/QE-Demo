@@ -1,0 +1,49 @@
+/* System Fonts */
+:root[data-font="arial"] {
+    --font-family-custom: Arial, sans-serif;
+}
+
+:root[data-font="helvetica"] {
+    --font-family-custom: Helvetica, sans-serif;
+}
+
+:root[data-font="times-new-roman"] {
+    --font-family-custom: "Times New Roman", serif;
+}
+
+:root[data-font="georgia"] {
+    --font-family-custom: Georgia, serif;
+}
+
+:root[data-font="verdana"] {
+    --font-family-custom: Verdana, sans-serif;
+}
+
+:root[data-font="tahoma"] {
+    --font-family-custom: Tahoma, sans-serif;
+}
+
+:root[data-font="trebuchet-ms"] {
+    --font-family-custom: "Trebuchet MS", sans-serif;
+}
+
+:root[data-font="geneva"] {
+    --font-family-custom: Geneva, sans-serif;
+}
+
+:root[data-font="courier-new"] {
+    --font-family-custom: "Courier New", monospace;
+}
+
+:root[data-font="monaco"] {
+    --font-family-custom: Monaco, monospace;
+}
+
+:root[data-font="system-ui"] {
+    --font-family-custom: system-ui, sans-serif;
+}
+
+/* Apply custom font to all elements */
+* {
+    font-family: var(--font-family-custom);
+}

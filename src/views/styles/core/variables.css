@@ -3,37 +3,10 @@
     --color-white: #ffffff;
     --color-black: #000000;
     
-    /* Semantic Color Tokens - Light Theme (default) */
-    --color-surface-primary: var(--color-white);
-    --color-surface-secondary: #f8f9fa;
-    --color-surface-tertiary: #e9ecef;
-    
-    --color-text-primary: #212529;
-    --color-text-secondary: #495057;
-    --color-text-tertiary: #6c757d;
-    --color-text-on-brand: var(--color-white);
-    
-    --color-border-default: rgba(0, 0, 0, 0.1);
-    --color-border-hover: rgba(0, 0, 0, 0.2);
-    
-    /* Brand Colors */
-    --color-brand-primary: #007bff;
-    --color-brand-primary-hover: #0056b3;
-    --color-brand-secondary: #6c757d;
-    --color-brand-secondary-hover: #545b62;
-    
-    /* Feedback Colors */
-    --color-success: #28a745;
-    --color-success-hover: #218838;
-    --color-error: #dc3545;
-    --color-error-hover: #c82333;
-    --color-warning: #ffc107;
-    --color-warning-hover: #e0a800;
-    --color-info: #17a2b8;
-    --color-info-hover: #138496;
-    
     /* Typography */
     --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    /* Default to base font if custom font is not set */
+    --font-family-custom: var(--font-family-base);
     --font-size-base: 16px;
     --line-height-base: 1.6;
     
@@ -51,11 +24,6 @@
     /* Transitions */
     --transition-speed: 0.2s;
     
-    /* Elevation */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    
     /* Z-index */
     --z-index-dropdown: 1000;
     --z-index-sticky: 1020;
@@ -63,39 +31,53 @@
     --z-index-modal: 1040;
     --z-index-popover: 1050;
     --z-index-tooltip: 1060;
+
+    /* Light Theme Default Variables */
+    --color-surface-primary: var(--color-white);
+    --color-surface-secondary: #f8f9fa;
+    --color-surface-tertiary: #e9ecef;
+    
+    --color-text-primary: #212529;
+    --color-text-secondary: #495057;
+    --color-text-tertiary: #6c757d;
+    --color-text-on-brand: var(--color-white);
+    
+    --color-border-default: rgba(0, 0, 0, 0.1);
+    --color-border-hover: rgba(0, 0, 0, 0.2);
+    
+    --color-brand-primary: #007bff;
+    --color-brand-primary-hover: #0056b3;
+    --color-brand-secondary: #6c757d;
+    --color-brand-secondary-hover: #545b62;
+    
+    --color-success: #28a745;
+    --color-success-hover: #218838;
+    --color-error: #dc3545;
+    --color-error-hover: #c82333;
+    --color-warning: #ffc107;
+    --color-warning-hover: #e0a800;
+    --color-info: #17a2b8;
+    --color-info-hover: #138496;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Dark theme color tokens */
-[data-theme="dark"] {
-    --color-surface-primary: #1c1c1c;
-    --color-surface-secondary: #2d2d2d;
-    --color-surface-tertiary: #333333;
-    
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #cccccc;
-    --color-text-tertiary: #999999;
-    
-    --color-border-default: rgba(255, 255, 255, 0.1);
-    --color-border-hover: rgba(255, 255, 255, 0.2);
-    
-    /* Brand Colors - Adjusted for dark theme */
-    --color-brand-primary: #4d9fff;
-    --color-brand-primary-hover: #3d8fff;
-    --color-brand-secondary: #8c959d;
-    --color-brand-secondary-hover: #778088;
-    
-    /* Feedback Colors - Adjusted for dark theme */
-    --color-success: #3cbd5c;
-    --color-success-hover: #2ea548;
-    --color-error: #e4545f;
-    --color-error-hover: #d63d4a;
-    --color-warning: #ffd11a;
-    --color-warning-hover: #e6bc18;
-    --color-info: #29b9cc;
-    --color-info-hover: #1fa3b8;
-    
-    /* Elevation - Adjusted for dark theme */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.25);
+/* Apply theme styles and font to all elements */
+* {
+    font-family: var(--font-family-custom);
+}
+
+/* Apply theme styles to body and all children */
+body {
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-custom);
+    transition: font-family var(--transition-speed) ease;
+}
+
+/* Ensure inputs and buttons use the custom font */
+input, button, select, textarea {
+    font-family: var(--font-family-custom);
 }

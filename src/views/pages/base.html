@@ -1,7 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <div id="header-component"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{pageTitle}} - Quantum Eye</title>
+
+    <!-- Theme and Font initialization - Must be first -->
+    <script type="module">
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
+        
+        // Apply theme and font immediately before any content loads
+        ThemeManager.initialize();
+        FontManager.initialize();
+    </script>
+
+    <!-- Core variables -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles - Must be after variables -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+
+    <!-- Additional styles -->
+    <script>
+        // Add page-specific styles
+        const additionalStyles = `{{additionalStyles}}`;
+        if (additionalStyles) {
+            const style = document.createElement('style');
+            style.textContent = additionalStyles;
+            document.head.appendChild(style);
+        }
+    </script>
+
+    <style>
+        /* Ensure smooth theme and font transitions */
+        :root {
+            transition: background-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease,
+                        font-family var(--transition-speed) ease;
+        }
+
+        /* Ensure theme colors and fonts are inherited */
+        html, body {
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            font-family: var(--font-family-custom);
+        }
+
+        /* Ensure all elements inherit the font */
+        * {
+            font-family: inherit;
+        }
+    </style>
 </head>
 <body class="{{pageClass}}">
     <div id="main-content">
@@ -9,18 +75,34 @@
     </div>
 
     <script type="module">
-        import ComponentLoader from '/js/components/componentLoader.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
         
-        // Load header component
-        ComponentLoader.insertComponent('#header-component', '/components/header.html', {
-            pageTitle: '{{pageTitle}}',
-            additionalStyles: '{{additionalStyles}}'
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listen for theme changes from other tabs/windows
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'theme_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.theme) {
+                        ThemeManager.applyTheme(data.theme);
+                    }
+                }
+                // Listen for font changes
+                else if (event.key === 'font_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.fontFamily) {
+                        FontManager.applyFont(data.fontFamily);
+                        // Force reload to ensure font is applied
+                        window.location.reload();
+                    }
+                }
+            });
 
-        // Initialize any page-specific scripts
-        if (typeof initPage === 'function') {
-            initPage();
-        }
+            // Initialize any page-specific scripts
+            if (typeof initPage === 'function') {
+                initPage();
+            }
+        });
     </script>
     {{additionalScripts}}
 </body>

@@ -1,10 +1,53 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{pageTitle}} - Quantum Eye</title>
-<link rel="stylesheet" href="/css/styles.css">
+
+<!-- Theme initialization - Must be first -->
+<script type="module">
+    import ThemeManager from '/src/services/state/thememanager.js';
+    // Apply theme immediately before any content loads
+    ThemeManager.initialize();
+</script>
+
+<!-- Core variables -->
+<link rel="stylesheet" href="/src/views/styles/core/variables.css">
+
+<!-- Theme styles - Must be after variables -->
+<link rel="stylesheet" href="/src/views/styles/themes/light.css">
+<link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+
+<!-- Base styles -->
+<link rel="stylesheet" href="/src/views/styles/core/base.css">
+
+<!-- Layout styles -->
+<link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+
+<!-- Component styles -->
+<link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+<link rel="stylesheet" href="/src/views/styles/components/button.css">
+<link rel="stylesheet" href="/src/views/styles/components/message.css">
+
+<style>
+    /* Ensure smooth theme transitions */
+    :root {
+        transition: background-color var(--transition-speed) ease,
+                    color var(--transition-speed) ease;
+    }
+
+    /* Ensure theme colors are inherited */
+    html, body {
+        background-color: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        min-height: 100vh;
+    }
+</style>
+
 <script>
     // Add page-specific styles
-    const style = document.createElement('style');
-    style.textContent = `{{additionalStyles}}`;
-    document.head.appendChild(style);
+    const additionalStyles = `{{additionalStyles}}`;
+    if (additionalStyles) {
+        const style = document.createElement('style');
+        style.textContent = additionalStyles;
+        document.head.appendChild(style);
+    }
 </script>

@@ -37,23 +37,34 @@ export class Auth {
 
             if (user) {
                 console.log('User found:', user); // Debug log
+                
+                // Set session data consistently
                 sessionStorage.setItem('isAuthenticated', 'true');
                 sessionStorage.setItem('userRole', user.role);
-                sessionStorage.setItem('username', user.username);
+                sessionStorage.setItem('username', user.username); // Use consistent key
+                sessionStorage.setItem('userName', user.username); // Keep for backward compatibility
+
+                // Load user preferences including theme
+                const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${user.username}`) || '{}');
+                if (userPreferences.theme) {
+                    // Apply theme immediately if user has a preference
+                    const ThemeManager = (await import('/src/services/state/thememanager.js')).default;
+                    ThemeManager.applyTheme(userPreferences.theme);
+                }
 
                 // Redirect based on role with strict role-based access
                 switch (user.role) {
                     case 'Genesis Admin':
                         // Genesis Admin manages other admins through the admin control panel
-                        this.navigation.navigateTo('/adminControlPanel');
+                        this.navigation.navigateTo('/src/views/pages/adminControlPanel.html');
                         break;
                     case 'Platform Admin':
                         // Platform Admin can only create teams
-                        this.navigation.navigateTo('/adminDashboard');
+                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
                         break;
                     case 'User Admin':
                         // User Admin can only create users
-                        this.navigation.navigateTo('/adminDashboard');
+                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
                         break;
                     default:
                         this.showError('Invalid user role');

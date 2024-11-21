@@ -1,114 +1,66 @@
-/* Print styles using BEM methodology */
 @media print {
-    /* Reset background colors and ensure dark text */
+    /* Reset background colors and shadows */
     * {
-        background-color: transparent !important;
-        color: #000 !important;
+        background: transparent !important;
         box-shadow: none !important;
-        text-shadow: none !important;
-        border-color: #000 !important;
+        color: #000 !important;
     }
 
-    /* Hide non-essential elements */
-    .nav,
+    /* Typography */
+    body {
+        font-family: var(--font-family-custom);
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+
+    /* Hide unnecessary elements */
+    nav,
     .sidebar,
+    .nav,
+    .footer,
     .button,
-    .message,
-    .error-modal,
-    .nav__toggle,
-    .sidebar__close,
-    .message__close,
-    [class*="--no-print"] {
+    .no-print {
         display: none !important;
     }
 
-    /* Ensure proper layout for printing */
-    .l-container {
-        max-width: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .l-dashboard__main {
-        margin: 0;
-        padding: 1cm;
-    }
-
-    /* Adjust typography for print */
-    body {
-        font-size: 12pt;
-        line-height: 1.4;
-        font-family: Georgia, "Times New Roman", Times, serif;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        page-break-after: avoid;
-        page-break-inside: avoid;
-    }
-
-    h1 {
-        font-size: 24pt;
-    }
-
-    h2 {
-        font-size: 20pt;
-    }
-
-    h3 {
-        font-size: 16pt;
-    }
-
-    /* Handle links */
+    /* Ensure links are readable */
     a {
         text-decoration: underline;
     }
 
+    /* Show link URLs */
     a[href]:after {
         content: " (" attr(href) ")";
-        font-size: 10pt;
     }
 
-    /* Don't show URL for internal, hash or javascript links */
-    a[href^="#"]:after,
-    a[href^="javascript:"]:after {
+    /* Don't show URLs for internal links */
+    a[href^="#"]:after {
         content: "";
     }
 
-    /* Table adjustments */
-    table {
-        border-collapse: collapse !important;
-    }
-
-    th, td {
-        border: 1px solid #000 !important;
-        padding: 0.2cm !important;
-    }
-
-    /* Ensure proper page breaks */
-    img, table, figure {
+    /* Page breaks */
+    h1, h2, h3 {
+        page-break-after: avoid;
         page-break-inside: avoid;
     }
 
-    p, h2, h3 {
-        orphans: 3;
-        widows: 3;
+    img {
+        page-break-inside: avoid;
+        max-width: 100% !important;
     }
 
-    /* Print-specific utilities */
-    .print-only {
-        display: block !important;
+    table {
+        page-break-inside: avoid;
     }
 
-    .page-break-before {
-        page-break-before: always;
+    /* Ensure white background for pages */
+    body {
+        background-color: #fff;
     }
 
-    .page-break-after {
-        page-break-after: always;
-    }
-
-    /* Ensure proper margins */
-    @page {
-        margin: 2cm;
+    /* Print in black and white */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 }

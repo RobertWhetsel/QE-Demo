@@ -1,0 +1,34 @@
+/* Light Theme */
+:root[data-theme="light"] {
+    --color-surface-primary: #ffffff;
+    --color-surface-secondary: #f8f9fa;
+    --color-surface-tertiary: #e9ecef;
+    
+    --color-text-primary: #212529;
+    --color-text-secondary: #495057;
+    --color-text-tertiary: #6c757d;
+    --color-text-on-brand: #ffffff;
+    
+    --color-border-default: rgba(0, 0, 0, 0.1);
+    --color-border-hover: rgba(0, 0, 0, 0.2);
+    
+    --color-brand-primary: #007bff;
+    --color-brand-primary-hover: #0056b3;
+    --color-brand-secondary: #6c757d;
+    --color-brand-secondary-hover: #545b62;
+    
+    --color-success: #28a745;
+    --color-success-hover: #218838;
+    --color-error: #dc3545;
+    --color-error-hover: #c82333;
+    --color-warning: #ffc107;
+    --color-warning-hover: #e0a800;
+    --color-info: #17a2b8;
+    --color-info-hover: #138496;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    color-scheme: light;
+}

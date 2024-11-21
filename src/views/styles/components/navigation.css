@@ -1,144 +1,179 @@
-/* Navigation Components using BEM methodology */
+/* Navigation Bar */
 .nav {
-    position: relative;
-    width: 100%;
-    background-color: var(--color-surface-secondary);
-    border-bottom: var(--border-width) solid var(--color-border-default);
-    z-index: var(--z-index-sticky);
-}
-
-.nav--fixed {
     position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--color-background-dark);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 1000;
 }
 
 .nav__container {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md);
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 0.5rem 1rem;
+    height: 3.5rem;
 }
 
-/* Navigation Menu */
-.nav__menu {
-    position: relative;
+.nav__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 .nav__toggle {
     background: none;
     border: none;
+    color: var(--color-text);
     font-size: 1.5rem;
     cursor: pointer;
-    padding: var(--spacing-sm);
-    color: var(--color-text-primary);
+    padding: 0.25rem;
 }
 
 .nav__toggle:hover {
-    color: var(--color-brand-primary);
+    color: var(--color-primary);
 }
 
-.nav__submenu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: var(--color-surface-primary);
-    border: var(--border-width) solid var(--color-border-default);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    z-index: var(--z-index-dropdown);
-    min-width: 200px;
-    display: none;
+.nav__brand {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
 }
 
-.nav__submenu--visible {
-    display: block;
+.nav__menu {
+    position: relative;
 }
 
 .nav__link {
-    display: block;
-    padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--color-text-primary);
+    color: var(--color-text);
     text-decoration: none;
-    transition: all var(--transition-speed);
+    padding: 0.5rem;
+    cursor: pointer;
 }
 
 .nav__link:hover {
-    background-color: var(--color-surface-tertiary);
-    color: var(--color-brand-primary);
+    color: var(--color-primary);
 }
 
-/* Sidebar Navigation */
+.nav__dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--color-background-dark);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    min-width: 150px;
+    z-index: 1000;
+}
+
+.nav__dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    color: var(--color-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.nav__dropdown-item:hover {
+    background-color: var(--color-background-light);
+    color: var(--color-primary);
+}
+
+/* Sidebar */
 .sidebar {
-    height: 100%;
-    width: 0;
     position: fixed;
-    z-index: var(--z-index-fixed);
-    top: 0;
+    top: 3.5rem;
     left: 0;
-    background-color: var(--color-surface-secondary);
-    overflow-x: hidden;
-    transition: width var(--transition-speed);
-    padding-top: 60px;
-    box-shadow: var(--shadow-lg);
+    bottom: 0;
+    width: 300px; /* Increased from default width */
+    background-color: var(--color-background-dark);
+    border-right: 1px solid var(--color-border);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar--open {
-    width: 250px;
-}
-
-.sidebar__link {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    text-decoration: none;
-    font-size: 1.25rem;
-    color: var(--color-text-primary);
-    display: block;
-    transition: all var(--transition-speed);
-    white-space: nowrap;
-}
-
-.sidebar__link:hover {
-    background-color: var(--color-surface-tertiary);
-    color: var(--color-brand-primary);
+    transform: translateX(0);
 }
 
 .sidebar__close {
     position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-md);
-    font-size: 2.25rem;
-    color: var(--color-text-primary);
+    top: 0.5rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    color: var(--color-text);
+    text-decoration: none;
     cursor: pointer;
-    transition: color var(--transition-speed);
 }
 
 .sidebar__close:hover {
-    color: var(--color-brand-primary);
+    color: var(--color-primary);
 }
 
 .sidebar__brand {
-    color: var(--color-text-primary);
-    font-size: 1.5rem;
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    border-bottom: var(--border-width) solid var(--color-border-default);
+    padding: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .nav__submenu {
-        position: static;
-        width: 100%;
-        box-shadow: none;
-        border: none;
-        border-top: var(--border-width) solid var(--color-border-default);
+#menu-items {
+    flex: 1;
+    padding: 1rem 0;
+}
+
+.sidebar__link {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.sidebar__link:hover {
+    background-color: var(--color-background-light);
+    color: var(--color-primary);
+}
+
+.sidebar__footer {
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    .page__container {
+        margin-left: 0;
+        transition: margin-left 0.3s ease-in-out;
     }
 
-    .sidebar {
-        width: 0;
+    .sidebar--open + .page__container {
+        margin-left: 300px; /* Match sidebar width */
     }
+}
 
-    .sidebar--open {
-        width: 100%;
-    }
+/* Status indicators */
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator--active {
+    background-color: var(--color-success);
+}
+
+.status-indicator--inactive {
+    background-color: var(--color-error);
 }

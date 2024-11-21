@@ -4,44 +4,437 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Quantum Eye</title>
-    <link rel="stylesheet" href="../static/css/core/base.css">
-</head>
-<body>
-    <div id="header-component"></div>
-    <div id="nav-component"></div>
-    <div id="sidebar-component"></div>
+    <!-- Core styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
     
-    <div class="content-area">
-        <div class="settings-container">
-            <div class="settings-section">
-                <h2>General Settings</h2>
-                <form id="settings-form">
-                    <!-- Settings form will be populated here -->
-                </form>
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+    <link rel="stylesheet" href="/src/views/styles/components/profile.css">
+    <link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
+    
+    <style>
+        /* Settings specific styles */
+        .settings-container {
+            padding: 2rem;
+        }
+        
+        .settings-form {
+            max-width: 600px;
+            margin: 2rem 0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group select,
+        .form-group input[type="checkbox"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            background-color: var(--color-surface-secondary);
+            color: var(--color-text-primary);
+        }
+        
+        .form-group select,
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .notification-methods {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .notification-method {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-fields {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .notification-fields.show {
+            display: block;
+        }
+        
+        .section {
+            background-color: var(--color-surface-secondary);
+            border: 1px solid var(--color-border-default);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+        }
+
+        /* Theme preview styles */
+        .theme-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--color-border-default);
+        }
+
+        .theme-preview.light {
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        .theme-preview.dark {
+            background-color: #1c1c1c;
+            color: #ffffff;
+        }
+
+        /* Ensure smooth theme transitions */
+        :root {
+            transition: background-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease;
+        }
+
+        /* Ensure theme colors are inherited */
+        html, body {
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="page">
+    <nav class="nav">
+        <div class="nav__container">
+            <div class="nav__left">
+                <button id="hamburger" class="nav__toggle">&#9776;</button>
+                <span class="nav__brand">Quantum Eye</span>
+            </div>
+            <div class="nav__menu">
+                <span id="userName" class="nav__link user-name">User</span>
+                <div id="navMenu" class="nav__dropdown" hidden>
+                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
+        <div class="sidebar__brand">Quantum Eye</div>
+        <div id="menu-items">
+            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+        </div>
+        <div class="sidebar__footer">
+            <a href="#" class="sidebar__link logout-link">Logout</a>
+            <a href="#" class="sidebar__link exit-button">Exit</a>
+        </div>
+    </div>
+
+    <div class="page__container">
+        <div class="content-area l-container">
+            <div class="settings-container">
+                <h1 class="page-title">Settings</h1>
+                
+                <div class="section">
+                    <h2 class="section-title">Appearance</h2>
+                    <form id="settings-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="theme">Theme</label>
+                            <select id="theme" name="theme">
+                                <option value="light">Light Theme</option>
+                                <option value="dark">Dark Theme</option>
+                            </select>
+                            <div id="theme-preview" class="theme-preview">
+                                Theme Preview
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="font-family">System Font</label>
+                            <select id="font-family" name="font-family">
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Tahoma">Tahoma</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Geneva">Geneva</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Monaco">Monaco</option>
+                                <option value="system-ui">System Default</option>
+                            </select>
+                            <div id="font-preview" class="theme-preview">
+                                The quick brown fox jumps over the lazy dog
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Notifications</label>
+                            <div class="notification-methods">
+                                <div class="notification-method">
+                                    <input type="checkbox" id="notifications" name="notifications">
+                                    <label for="notifications">Enable Notifications</label>
+                                </div>
+                            </div>
+                            <div id="notification-fields" class="notification-fields">
+                                <div class="form-group">
+                                    <label for="notification-email">Email Address</label>
+                                    <input type="email" id="notification-email" name="notification-email" placeholder="Enter your email">
+                                    <div class="notification-method">
+                                        <input type="checkbox" id="email-notifications" name="email-notifications">
+                                        <label for="email-notifications">Receive Email Notifications</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notification-phone">Phone Number</label>
+                                    <input type="tel" id="notification-phone" name="notification-phone" placeholder="Enter your phone number">
+                                    <div class="notification-method">
+                                        <input type="checkbox" id="sms-notifications" name="sms-notifications">
+                                        <label for="sms-notifications">Receive Text Message Notifications</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="button button--primary">Save Settings</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import ComponentLoader from '../static/js/modules/componentLoader.js';
-        
-        // Load components
-        async function initializePage() {
-            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
-                pageTitle: 'Settings',
-                additionalStyles: ''
-            });
+        import navigation from '/src/services/navigation/navigation.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
 
-            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
-                userName: localStorage.getItem('userName') || 'User'
-            });
-
-            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        // Check if user is logged in
+        if (!navigation.isAuthenticated()) {
+            window.location.href = '/src/views/pages/login.html';
+            throw new Error('User not logged in');
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', initializePage);
+        // Initialize theme and font immediately
+        ThemeManager.initialize();
+        FontManager.initialize();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutLink = document.querySelector('.logout-link');
+            const exitButton = document.querySelector('.exit-button');
+            const userNameEl = document.getElementById('userName');
+            const navMenu = document.getElementById('navMenu');
+            const themeSelect = document.getElementById('theme');
+            const themePreview = document.getElementById('theme-preview');
+            const fontSelect = document.getElementById('font-family');
+            const fontPreview = document.getElementById('font-preview');
+            const notificationsCheckbox = document.getElementById('notifications');
+            const notificationFields = document.getElementById('notification-fields');
+
+            // Handle notifications toggle
+            notificationsCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    notificationFields.classList.add('show');
+                } else {
+                    notificationFields.classList.remove('show');
+                }
+            });
+
+            // Load saved font preference
+            const currentFont = FontManager.getFont();
+            if (currentFont) {
+                fontSelect.value = currentFont;
+            }
+
+            // Load notification preferences
+            const username = sessionStorage.getItem('username');
+            const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+            if (userPreferences.notifications) {
+                notificationsCheckbox.checked = true;
+                notificationFields.classList.add('show');
+                document.getElementById('notification-email').value = userPreferences.notificationEmail || '';
+                document.getElementById('notification-phone').value = userPreferences.notificationPhone || '';
+                document.getElementById('email-notifications').checked = userPreferences.emailNotifications || false;
+                document.getElementById('sms-notifications').checked = userPreferences.smsNotifications || false;
+            }
+
+            // Handle font changes
+            fontSelect.addEventListener('change', (e) => {
+                const newFont = e.target.value;
+                FontManager.setFont(newFont);
+            });
+
+            // Setup hamburger menu
+            if (hamburger && sidebar) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar--open');
+                });
+            }
+
+            // Setup close button
+            if (closeBtn && sidebar) {
+                closeBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('sidebar--open');
+                });
+            }
+
+            // Setup logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => navigation.logout());
+            }
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.logout();
+                });
+            }
+
+            // Setup exit functionality
+            if (exitButton) {
+                exitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.exitApplication();
+                });
+            }
+
+            // Setup username display and dropdown
+            if (userNameEl) {
+                const userName = sessionStorage.getItem('username') || "User";
+                userNameEl.textContent = userName;
+
+                userNameEl.addEventListener('click', () => {
+                    navMenu.toggleAttribute('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav__menu')) {
+                        navMenu.setAttribute('hidden', '');
+                    }
+                });
+            }
+
+            // Setup navigation links
+            const links = document.querySelectorAll('.sidebar__link[href]');
+            links.forEach(link => {
+                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.navigateTo(link.getAttribute('href'));
+                    });
+                }
+            });
+
+            // Show/hide admin-only elements
+            const userRole = sessionStorage.getItem('userRole');
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+            });
+
+            // Load user preferences
+            const currentTheme = ThemeManager.getTheme();
+            themeSelect.value = currentTheme;
+            updateThemePreview(currentTheme);
+
+            // Handle theme changes
+            themeSelect.addEventListener('change', (e) => {
+                const newTheme = e.target.value;
+                ThemeManager.setTheme(newTheme);
+                updateThemePreview(newTheme);
+                
+                // Force reload all pages to ensure theme is applied
+                window.location.reload();
+            });
+
+            // Update theme preview
+            function updateThemePreview(theme) {
+                themePreview.className = `theme-preview ${theme}`;
+            }
+
+            // Handle settings form submission
+            document.getElementById('settings-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Save all user preferences
+                const username = sessionStorage.getItem('username');
+                const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+                userPreferences.notifications = document.getElementById('notifications').checked;
+                userPreferences.fontFamily = document.getElementById('font-family').value;
+                
+                // Save notification preferences
+                if (userPreferences.notifications) {
+                    userPreferences.notificationEmail = document.getElementById('notification-email').value;
+                    userPreferences.notificationPhone = document.getElementById('notification-phone').value;
+                    userPreferences.emailNotifications = document.getElementById('email-notifications').checked;
+                    userPreferences.smsNotifications = document.getElementById('sms-notifications').checked;
+                }
+
+                // Save preferences to localStorage
+                localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+
+                // Apply font change through FontManager
+                FontManager.setFont(userPreferences.fontFamily);
+                
+                alert('Settings saved successfully');
+            });
+
+            // Listen for theme changes from other windows/tabs
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'theme_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.theme && data.username === username) {
+                        ThemeManager.applyTheme(data.theme);
+                        themeSelect.value = data.theme;
+                        updateThemePreview(data.theme);
+                        // Force reload to ensure theme is applied
+                        window.location.reload();
+                    }
+                }
+                // Listen for font changes
+                else if (event.key === 'font_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.fontFamily && data.username === username) {
+                        FontManager.applyFont(data.fontFamily);
+                        fontSelect.value = data.fontFamily;
+                    }
+                }
+            });
+        });
     </script>
-    <script src="../static/js/settingsmanager.js"></script>
 </body>
 </html>

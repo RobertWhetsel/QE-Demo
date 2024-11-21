@@ -140,14 +140,17 @@
     margin: 0 auto;
 }
 
-.status-indicator--active {
-    background-color: var(--color-success);
-    box-shadow: 0 0 6px var(--color-success);
+/* Override theme inheritance for status indicators */
+[data-theme="light"] .status-indicator--active,
+[data-theme="dark"] .status-indicator--active {
+    background-color: var(--color-success) !important;
+    box-shadow: 0 0 6px var(--color-success) !important;
 }
 
-.status-indicator--inactive {
-    background-color: var(--color-error);
-    box-shadow: 0 0 6px var(--color-error);
+[data-theme="light"] .status-indicator--inactive,
+[data-theme="dark"] .status-indicator--inactive {
+    background-color: var(--color-error) !important;
+    box-shadow: 0 0 6px var(--color-error) !important;
 }
 
 /* Center status indicator in table cell */
@@ -177,12 +180,28 @@
     white-space: nowrap;
 }
 
-.button--danger {
-    background-color: var(--color-error);
+/* Override theme inheritance for action buttons */
+[data-theme="light"] .button--danger,
+[data-theme="dark"] .button--danger {
+    background-color: var(--color-error) !important;
+    color: var(--color-text-on-brand) !important;
 }
 
-.button--danger:hover:not(:disabled) {
-    background-color: var(--color-error-hover);
+[data-theme="light"] .button--danger:hover:not(:disabled),
+[data-theme="dark"] .button--danger:hover:not(:disabled) {
+    background-color: var(--color-error-hover) !important;
+    transform: translateY(-1px);
+}
+
+[data-theme="light"] .button--disable,
+[data-theme="dark"] .button--disable {
+    background-color: var(--color-brand-primary) !important;
+    color: var(--color-text-on-brand) !important;
+}
+
+[data-theme="light"] .button--disable:hover:not(:disabled),
+[data-theme="dark"] .button--disable:hover:not(:disabled) {
+    background-color: var(--color-brand-primary-hover) !important;
     transform: translateY(-1px);
 }
 
