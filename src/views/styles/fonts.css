@@ -1,4 +1,10 @@
 /* System Fonts */
+:root {
+    /* Default font */
+    --font-family-custom: Arial, sans-serif;
+}
+
+/* Font definitions */
 :root[data-font="arial"] {
     --font-family-custom: Arial, sans-serif;
 }
@@ -43,7 +49,31 @@
     --font-family-custom: system-ui, sans-serif;
 }
 
-/* Apply custom font to all elements */
-* {
+/* Ensure smooth font transitions */
+:root {
+    transition: font-family var(--transition-speed) ease;
+}
+
+/* Set default font inheritance */
+html {
     font-family: var(--font-family-custom);
+}
+
+/* Force all elements to inherit font */
+* {
+    font-family: inherit;
+}
+
+/* Force problematic elements to inherit */
+pre,
+code,
+kbd,
+samp,
+tt,
+input,
+button,
+select,
+textarea,
+option {
+    font-family: inherit !important;
 }

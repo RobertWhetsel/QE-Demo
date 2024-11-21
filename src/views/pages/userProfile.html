@@ -4,29 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Quantum Eye</title>
-    <link rel="stylesheet" href="../static/css/userProfile.css">
-</head>
-<body>
-    <div id="header-component"></div>
-    <div id="nav-component"></div>
-    <div id="sidebar-component"></div>
     
-    <div class="content-area">
-        <div class="profile-container">
-            <div class="profile-header">
-                <h1>User Profile</h1>
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
+    
+    <!-- Core styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+    <link rel="stylesheet" href="/src/views/styles/components/profile.css">
+    
+    <style>
+        .profile-container {
+            padding: 2rem;
+        }
+        
+        .profile-section {
+            background-color: var(--color-surface-secondary);
+            border: 1px solid var(--color-border-default);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-section h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            background-color: var(--color-surface-secondary);
+            color: var(--color-text-primary);
+        }
+    </style>
+</head>
+<body class="page">
+    <!-- Include navigation -->
+    <nav class="nav">
+        <div class="nav__container">
+            <div class="nav__left">
+                <button id="hamburger" class="nav__toggle">&#9776;</button>
             </div>
-            <div class="profile-content">
+            <div class="nav__menu">
+                <span id="userName" class="nav__link user-name">User</span>
+                <div id="navMenu" class="nav__dropdown" hidden>
+                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Include sidebar -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
+        <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
+        <div id="menu-items">
+            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+        </div>
+        <div class="sidebar__footer">
+            <a href="#" class="sidebar__link logout-link">Logout</a>
+            <a href="#" class="sidebar__link exit-button">Exit</a>
+        </div>
+    </div>
+
+    <div class="page__container">
+        <div class="content-area l-container">
+            <div class="profile-container">
+                <h1 class="page-title">User Profile</h1>
+                
                 <div class="profile-section">
                     <h2>Personal Information</h2>
                     <form id="personal-info-form">
-                        <!-- Personal info form will be populated here -->
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        <button type="submit" class="button button--primary">Save Personal Information</button>
                     </form>
                 </div>
+                
                 <div class="profile-section">
                     <h2>Account Settings</h2>
                     <form id="account-settings-form">
-                        <!-- Account settings form will be populated here -->
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" name="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="button button--primary">Update Password</button>
                     </form>
                 </div>
             </div>
@@ -34,25 +153,173 @@
     </div>
 
     <script type="module">
-        import ComponentLoader from '../static/js/modules/componentLoader.js';
-        
-        // Load components
-        async function initializePage() {
-            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
-                pageTitle: 'User Profile',
-                additionalStyles: ''
-            });
+        import { NavigationService } from '/src/services/navigation/navigation.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
 
-            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
-                userName: localStorage.getItem('userName') || 'User'
-            });
+        const navigation = new NavigationService();
 
-            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
+        // Check if user is logged in
+        if (!navigation.isAuthenticated()) {
+            window.location.href = '/src/views/pages/login.html';
+            throw new Error('User not logged in');
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', initializePage);
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutLink = document.querySelector('.logout-link');
+            const exitButton = document.querySelector('.exit-button');
+            const userNameEl = document.getElementById('userName');
+            const navMenu = document.getElementById('navMenu');
+
+            // Load user data
+            const loadUserData = () => {
+                try {
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
+                    const username = sessionStorage.getItem('username');
+                    const userData = appData.users.find(user => user.username === username);
+                    
+                    if (userData) {
+                        // Populate form fields
+                        document.getElementById('username').value = userData.username || '';
+                        document.getElementById('fullName').value = userData.fullName || '';
+                        document.getElementById('email').value = userData.email || '';
+                        document.getElementById('phone').value = userData.phoneNumber || '';
+                        
+                        // Update username in nav
+                        userNameEl.textContent = userData.username || "User";
+                    }
+                } catch (error) {
+                    console.error('Error loading user data:', error);
+                }
+            };
+
+            // Load user data immediately
+            loadUserData();
+
+            // Setup hamburger menu
+            if (hamburger && sidebar) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar--open');
+                });
+            }
+
+            // Setup close button
+            if (closeBtn && sidebar) {
+                closeBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('sidebar--open');
+                });
+            }
+
+            // Setup logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => navigation.logout());
+            }
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.logout();
+                });
+            }
+
+            // Setup exit functionality
+            if (exitButton) {
+                exitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.exitApplication();
+                });
+            }
+
+            // Setup username display and dropdown
+            if (userNameEl) {
+                userNameEl.addEventListener('click', () => {
+                    navMenu.toggleAttribute('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav__menu')) {
+                        navMenu.setAttribute('hidden', '');
+                    }
+                });
+            }
+
+            // Setup navigation links
+            const links = document.querySelectorAll('.sidebar__link[href]');
+            links.forEach(link => {
+                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.navigateTo(link.getAttribute('href'));
+                    });
+                }
+            });
+
+            // Show/hide admin-only elements
+            const userRole = sessionStorage.getItem('userRole');
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+            });
+
+            // Handle form submissions
+            document.getElementById('personal-info-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
+                    const username = sessionStorage.getItem('username');
+                    const userIndex = appData.users.findIndex(user => user.username === username);
+                    
+                    if (userIndex !== -1) {
+                        appData.users[userIndex] = {
+                            ...appData.users[userIndex],
+                            fullName: document.getElementById('fullName').value,
+                            email: document.getElementById('email').value,
+                            phoneNumber: document.getElementById('phone').value
+                        };
+                        
+                        sessionStorage.setItem('appData', JSON.stringify(appData));
+                        alert('Personal information updated successfully');
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('Failed to update personal information');
+                }
+            });
+
+            document.getElementById('account-settings-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (newPassword !== confirmPassword) {
+                    alert('New passwords do not match');
+                    return;
+                }
+
+                try {
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
+                    const username = sessionStorage.getItem('username');
+                    const userIndex = appData.users.findIndex(user => user.username === username);
+                    
+                    if (userIndex !== -1 && appData.users[userIndex].password === currentPassword) {
+                        appData.users[userIndex].password = newPassword;
+                        sessionStorage.setItem('appData', JSON.stringify(appData));
+                        alert('Password updated successfully');
+                        document.getElementById('account-settings-form').reset();
+                    } else {
+                        alert('Current password is incorrect');
+                    }
+                } catch (error) {
+                    console.error('Error updating password:', error);
+                    alert('Failed to update password');
+                }
+            });
+        });
     </script>
-    <script src="../static/js/userprofile.js"></script>
 </body>
 </html>

@@ -1,55 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <div id="header-component"></div>
-    <link rel="stylesheet" href="/css/components/dashboard.css">
-</head>
-<body class="dashboard {{pageClass}}">
-    <div id="nav-component"></div>
-    <div id="sidebar-component"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Quantum Eye</title>
     
-    <div class="content-area">
-        <div class="iframe-container">
-            <iframe id="content-frame" src="{{defaultContent}}" sandbox="allow-scripts allow-same-origin"></iframe>
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
+    
+    <!-- Core styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+    
+    <style>
+        .iframe-container {
+            width: 100%;
+            height: calc(100vh - var(--nav-height));
+            overflow: hidden;
+        }
+
+        #content-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: var(--color-surface-primary);
+        }
+
+        .dashboard-content {
+            padding: 2rem;
+        }
+
+        .section {
+            background-color: var(--color-surface-secondary);
+            border: 1px solid var(--color-border-default);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="page">
+    <!-- Include navigation -->
+    <nav class="nav">
+        <div class="nav__container">
+            <div class="nav__left">
+                <button id="hamburger" class="nav__toggle">&#9776;</button>
+            </div>
+            <div class="nav__menu">
+                <span id="userName" class="nav__link user-name">User</span>
+                <div id="navMenu" class="nav__dropdown" hidden>
+                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Include sidebar -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
+        <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
+        <div id="menu-items">
+            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+        </div>
+        <div class="sidebar__footer">
+            <a href="#" class="sidebar__link logout-link">Logout</a>
+            <a href="#" class="sidebar__link exit-button">Exit</a>
+        </div>
+    </div>
+
+    <div class="page__container">
+        <div class="content-area l-container">
+            <div class="dashboard-content">
+                <h1 class="page-title">Dashboard</h1>
+                
+                <div class="section">
+                    <div class="iframe-container">
+                        <iframe id="content-frame" src="/src/views/pages/adminDashboard.html" sandbox="allow-scripts allow-same-origin"></iframe>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script type="module">
-        import ComponentLoader from '/js/components/componentLoader.js';
-        
-        // Load components
-        async function initializeDashboard() {
-            await ComponentLoader.insertComponent('#header-component', '/components/header.html', {
-                pageTitle: '{{pageTitle}}',
-                additionalStyles: '{{additionalStyles}}'
-            });
+        import navigation from '/src/services/navigation/navigation.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
 
-            await ComponentLoader.insertComponent('#nav-component', '/components/nav.html', {
-                userName: localStorage.getItem('userName') || 'User'
-            });
-
-            await ComponentLoader.insertComponent('#sidebar-component', '/components/sidebar.html');
+        // Check if user is logged in
+        if (!navigation.isAuthenticated()) {
+            window.location.href = '/src/views/pages/login.html';
+            throw new Error('User not logged in');
         }
 
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const closeBtn = document.getElementById('close-sidebar');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutLink = document.querySelector('.logout-link');
+            const exitButton = document.querySelector('.exit-button');
+            const userNameEl = document.getElementById('userName');
+            const navMenu = document.getElementById('navMenu');
 
-        // Handle sidebar navigation
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('sidebar-link') && e.target.dataset.content) {
-                e.preventDefault();
-                const contentFrame = document.getElementById('content-frame');
-                if (contentFrame) {
-                    contentFrame.src = e.target.dataset.content;
-                }
+            // Setup hamburger menu
+            if (hamburger && sidebar) {
+                hamburger.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar--open');
+                });
             }
-        });
 
-        // Initialize any page-specific scripts
-        if (typeof initPage === 'function') {
-            initPage();
-        }
+            // Setup close button
+            if (closeBtn && sidebar) {
+                closeBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('sidebar--open');
+                });
+            }
+
+            // Setup logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => navigation.logout());
+            }
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.logout();
+                });
+            }
+
+            // Setup exit functionality
+            if (exitButton) {
+                exitButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.exitApplication();
+                });
+            }
+
+            // Setup username display and dropdown
+            if (userNameEl) {
+                const userName = sessionStorage.getItem('username') || "User";
+                userNameEl.textContent = userName;
+
+                userNameEl.addEventListener('click', () => {
+                    navMenu.toggleAttribute('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav__menu')) {
+                        navMenu.setAttribute('hidden', '');
+                    }
+                });
+            }
+
+            // Setup navigation links
+            const links = document.querySelectorAll('.sidebar__link[href]');
+            links.forEach(link => {
+                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.navigateTo(link.getAttribute('href'));
+                    });
+                }
+            });
+
+            // Show/hide admin-only elements
+            const userRole = sessionStorage.getItem('userRole');
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+            });
+
+            // Handle sidebar navigation for iframe content
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('sidebar-link') && e.target.dataset.content) {
+                    e.preventDefault();
+                    const contentFrame = document.getElementById('content-frame');
+                    if (contentFrame) {
+                        contentFrame.src = e.target.dataset.content;
+                    }
+                }
+            });
+        });
     </script>
-    {{additionalScripts}}
 </body>
 </html>

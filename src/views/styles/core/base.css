@@ -1,12 +1,38 @@
+/* Root level styles */
+:root {
+    /* Ensure smooth transitions */
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                font-family var(--transition-speed) ease;
+}
+
 /* Base styles using BEM methodology */
+html {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-custom);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    background-color: inherit;
+    color: inherit;
+}
+
 .page {
     margin: 0;
     padding: 0;
-    font-family: var(--font-family-custom);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-    background-color: var(--color-surface-primary);
-    color: var(--color-text-primary);
+    font-family: inherit;
+    background-color: inherit;
+    color: inherit;
 }
 
 .page__container {
@@ -14,11 +40,11 @@
     overflow-x: hidden;
 }
 
-/* Reset defaults */
+/* Reset defaults with font inheritance */
 h1, h2, h3, h4, h5, h6, p {
     margin: 0;
     padding: 0;
-    font-family: var(--font-family-custom);
+    font-family: inherit;
 }
 
 /* Links */
@@ -26,7 +52,7 @@ h1, h2, h3, h4, h5, h6, p {
     color: var(--color-brand-primary);
     text-decoration: none;
     transition: color var(--transition-speed);
-    font-family: var(--font-family-custom);
+    font-family: inherit;
 }
 
 .link:hover {
@@ -38,6 +64,7 @@ h1, h2, h3, h4, h5, h6, p {
     list-style: none;
     margin: 0;
     padding: 0;
+    font-family: inherit;
 }
 
 /* Images */
@@ -79,17 +106,38 @@ h1, h2, h3, h4, h5, h6, p {
     color: var(--color-text-on-brand);
 }
 
-/* Ensure all elements use the custom font */
+/* Global font inheritance */
 * {
-    font-family: var(--font-family-custom);
+    font-family: inherit;
 }
 
-/* Ensure inputs and buttons use the custom font */
-input, button, select, textarea {
-    font-family: var(--font-family-custom);
+/* Form elements font inheritance */
+input,
+button,
+select,
+textarea,
+option {
+    font-family: inherit;
+    color: inherit;
 }
 
 /* Ensure font changes are smooth */
-:root, body, * {
+* {
     transition: font-family var(--transition-speed) ease;
+}
+
+/* Force font inheritance for problematic elements */
+pre,
+code,
+kbd,
+samp,
+tt {
+    font-family: inherit;
+}
+
+/* Ensure iframes and embedded content inherit fonts */
+iframe,
+embed,
+object {
+    font-family: inherit;
 }

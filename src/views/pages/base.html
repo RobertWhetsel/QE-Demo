@@ -5,28 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{pageTitle}} - Quantum Eye</title>
 
-    <!-- Theme and Font initialization - Must be first -->
-    <script type="module">
-        import ThemeManager from '/src/services/state/thememanager.js';
-        import FontManager from '/src/services/state/fontmanager.js';
-        
-        // Get user preferences and apply them immediately
-        const username = sessionStorage.getItem('username');
-        if (username) {
-            const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-            
-            // Apply theme and font from preferences
-            ThemeManager.applyTheme(userPreferences.theme || 'light');
-            FontManager.applyFont(userPreferences.fontFamily || 'Arial');
-        }
-    </script>
-
     <!-- Core variables -->
     <link rel="stylesheet" href="/src/views/styles/core/variables.css">
     
     <!-- Theme styles - Must be after variables -->
     <link rel="stylesheet" href="/src/views/styles/themes/light.css">
     <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles - Must be before base styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
     
     <!-- Base styles -->
     <link rel="stylesheet" href="/src/views/styles/core/base.css">
@@ -39,6 +26,9 @@
     <link rel="stylesheet" href="/src/views/styles/components/button.css">
     <link rel="stylesheet" href="/src/views/styles/components/message.css">
 
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
+
     <!-- Additional styles -->
     <script>
         // Add page-specific styles
@@ -49,28 +39,6 @@
             document.head.appendChild(style);
         }
     </script>
-
-    <style>
-        /* Ensure smooth theme and font transitions */
-        :root {
-            transition: background-color var(--transition-speed) ease,
-                        color var(--transition-speed) ease,
-                        font-family var(--transition-speed) ease;
-        }
-
-        /* Ensure theme colors and fonts are inherited */
-        html, body {
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            min-height: 100vh;
-            font-family: var(--font-family-custom);
-        }
-
-        /* Ensure all elements inherit the font */
-        * {
-            font-family: inherit;
-        }
-    </style>
 </head>
 <body class="{{pageClass}}">
     <div id="main-content">
@@ -78,33 +46,10 @@
     </div>
 
     <script type="module">
-        import ThemeManager from '/src/services/state/thememanager.js';
-        import FontManager from '/src/services/state/fontmanager.js';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const username = sessionStorage.getItem('username');
-            if (!username) return;
-
-            // Listen for preference changes from other tabs/windows
-            window.addEventListener('storage', (event) => {
-                if (event.key === `user_preferences_${username}`) {
-                    const preferences = JSON.parse(event.newValue || '{}');
-                    
-                    // Apply theme and font changes
-                    if (preferences.theme) {
-                        ThemeManager.applyTheme(preferences.theme);
-                    }
-                    if (preferences.fontFamily) {
-                        FontManager.applyFont(preferences.fontFamily);
-                    }
-                }
-            });
-
-            // Initialize any page-specific scripts
-            if (typeof initPage === 'function') {
-                initPage();
-            }
-        });
+        // Initialize any page-specific scripts
+        if (typeof initPage === 'function') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        }
     </script>
     {{additionalScripts}}
 </body>

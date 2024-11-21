@@ -4,13 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quantum Eye</title>
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Load common head content -->
+    <script type="module">
+        import { loadCommonHead } from '/src/utils/loadCommonHead.js';
+        loadCommonHead();
+    </script>
+    
     <style>
         .auth-container {
             display: flex;
             justify-content: center;
             align-items: center;
             background: var(--color-surface-secondary, #f8f9fa);
+            min-height: 100vh;
         }
 
         .auth-box {
@@ -22,18 +29,18 @@
             max-width: 400px;
         }
 
-            .auth-box h1 {
-                text-align: center;
-                margin-bottom: 1rem;
-                color: #007bff;
-            }
+        .auth-box h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--color-brand-primary, #007bff);
+        }
 
-            .auth-box h2 {
-                text-align: center;
-                margin-bottom: 2rem;
-                color: #495057;
-                font-size: 1.25rem;
-            }
+        .auth-box h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--color-text-primary, #495057);
+            font-size: 1.25rem;
+        }
 
         .login-form {
             display: grid;
@@ -45,17 +52,19 @@
             gap: 0.5rem;
         }
 
-            .form-group label {
-                color: #495057;
-            }
+        .form-group label {
+            color: var(--color-text-primary, #495057);
+        }
 
-            .form-group input,
-            .form-group select {
-                padding: 0.5rem;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                border-radius: 4px;
-                font-size: 1rem;
-            }
+        .form-group input,
+        .form-group select {
+            padding: 0.5rem;
+            border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+        }
 
         .form-actions {
             display: grid;
@@ -64,8 +73,8 @@
         }
 
         .primary-button {
-            background: #007bff;
-            color: #ffffff;
+            background: var(--color-brand-primary, #007bff);
+            color: var(--color-text-on-brand, #ffffff);
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 4px;
@@ -74,25 +83,25 @@
             transition: background-color 0.2s;
         }
 
-            .primary-button:hover {
-                background: #0056b3;
-            }
+        .primary-button:hover {
+            background: var(--color-brand-primary-hover, #0056b3);
+        }
 
         .forgot-password {
             text-align: center;
-            color: #007bff;
+            color: var(--color-brand-primary, #007bff);
             text-decoration: none;
             font-size: 0.875rem;
         }
 
-            .forgot-password:hover {
-                color: #0056b3;
-                text-decoration: underline;
-            }
+        .forgot-password:hover {
+            color: var(--color-brand-primary-hover, #0056b3);
+            text-decoration: underline;
+        }
 
         .error-message {
-            background: #dc3545;
-            color: #ffffff;
+            background: var(--color-error, #dc3545);
+            color: var(--color-text-on-error, #ffffff);
             padding: 0.5rem 1rem;
             border-radius: 4px;
             margin-bottom: 1rem;
@@ -105,7 +114,6 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);

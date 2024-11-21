@@ -136,17 +136,43 @@ export class NavigationService {
     }
 
     /**
-     * Clears the session cache
+     * Clears the session data except for appData
      */
-    clearSessionCache() {
+    clearSessionData() {
+        // Preserve appData
+        const appData = sessionStorage.getItem('appData');
+        
+        // Clear session storage
         sessionStorage.clear();
+        
+        // Restore appData
+        if (appData) {
+            sessionStorage.setItem('appData', appData);
+        }
+    }
+
+    /**
+     * Clears all session data including appData
+     */
+    clearAllData() {
+        // Clear all session storage
+        sessionStorage.clear();
+        
+        // Clear browser cache
+        if (window.caches) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+            });
+        }
     }
 
     /**
      * Logout user
      */
     logout() {
-        this.clearSessionCache();
+        this.clearSessionData(); // Preserves appData
         this.navigateTo('/login');
     }
 
@@ -154,7 +180,7 @@ export class NavigationService {
      * Exit application
      */
     exitApplication() {
-        this.clearSessionCache();
+        this.clearAllData(); // Clears everything including appData
         window.close();
         // Fallback if window.close() is blocked
         this.navigateTo('/login');
