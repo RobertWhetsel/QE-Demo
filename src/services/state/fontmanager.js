@@ -23,25 +23,16 @@ export default class FontManager {
         
         // Apply font
         this.applyFont(fontFamily);
-
-        // Force reload all pages to ensure font is applied
-        window.location.reload();
     }
     
     static applyFont(fontFamily) {
         console.log('Applying font:', fontFamily); // Debug log
         
-        // Remove any existing font
-        document.documentElement.removeAttribute('data-font');
-        
-        // Force a reflow
-        void document.documentElement.offsetHeight;
-        
-        // Apply new font
-        document.documentElement.setAttribute('data-font', fontFamily.toLowerCase().replace(/[^a-z0-9]/g, '-'));
-        
-        // Update CSS variable
+        // Set CSS variable
         document.documentElement.style.setProperty('--font-family-custom', fontFamily);
+        
+        // Force reflow
+        void document.documentElement.offsetHeight;
         
         // Dispatch event for other components
         const event = new CustomEvent('fontchange', { 
@@ -60,22 +51,19 @@ export default class FontManager {
         const username = sessionStorage.getItem('username');
         if (!username) return;
 
+        // Load and apply font from preferences
         const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-        
-        // Apply font from preferences
         const font = userPreferences.fontFamily || 'Arial';
         console.log('Initial font:', font); // Debug log
         this.applyFont(font);
 
-        // Listen for changes from other tabs/windows
+        // Listen for preference changes
         window.addEventListener('storage', (event) => {
             if (event.key === `user_preferences_${username}`) {
                 const preferences = JSON.parse(event.newValue || '{}');
                 console.log('Preferences change detected:', preferences); // Debug log
                 if (preferences.fontFamily) {
                     this.applyFont(preferences.fontFamily);
-                    // Force reload to ensure font is applied
-                    window.location.reload();
                 }
             }
         });

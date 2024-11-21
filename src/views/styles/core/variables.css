@@ -74,10 +74,16 @@ body {
     background-color: var(--color-surface-primary);
     color: var(--color-text-primary);
     font-family: var(--font-family-custom);
-    transition: font-family var(--transition-speed) ease;
 }
 
 /* Ensure inputs and buttons use the custom font */
 input, button, select, textarea {
     font-family: var(--font-family-custom);
+}
+
+/* Ensure smooth transitions */
+:root, body, * {
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                font-family var(--transition-speed) ease;
 }

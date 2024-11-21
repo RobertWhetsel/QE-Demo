@@ -67,11 +67,11 @@
     </style>
 </head>
 <body class="page">
+    <!-- Include navigation -->
     <nav class="nav">
         <div class="nav__container">
             <div class="nav__left">
                 <button id="hamburger" class="nav__toggle">&#9776;</button>
-                <span class="nav__brand">Quantum Eye</span>
             </div>
             <div class="nav__menu">
                 <span id="userName" class="nav__link user-name">User</span>
@@ -82,9 +82,10 @@
         </div>
     </nav>
 
+    <!-- Include sidebar -->
     <div id="sidebar" class="sidebar">
         <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
-        <div class="sidebar__brand">Quantum Eye</div>
+        <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
         <div id="menu-items">
             <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link">Genesis Admin Control Panel</a>
             <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
@@ -163,7 +164,7 @@
 
         // Check if user is Genesis Admin
         const userRole = sessionStorage.getItem('userRole');
-        const username = sessionStorage.getItem('username');
+        const username = sessionStorage.getItem('username') || 'User';
         
         if (userRole !== 'Genesis Admin') {
             window.location.href = '/src/views/pages/login.html';
@@ -219,8 +220,8 @@
 
             // Setup username display and dropdown
             if (userNameEl) {
-                userNameEl.textContent = username || "User";
-
+                userNameEl.textContent = username;
+                
                 userNameEl.addEventListener('click', () => {
                     navMenu.toggleAttribute('hidden');
                 });

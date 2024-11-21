@@ -10,9 +10,15 @@
         import ThemeManager from '/src/services/state/thememanager.js';
         import FontManager from '/src/services/state/fontmanager.js';
         
-        // Apply theme and font immediately before any content loads
-        ThemeManager.initialize();
-        FontManager.initialize();
+        // Get user preferences and apply them immediately
+        const username = sessionStorage.getItem('username');
+        if (username) {
+            const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+            
+            // Apply theme and font from preferences
+            ThemeManager.applyTheme(userPreferences.theme || 'light');
+            FontManager.applyFont(userPreferences.fontFamily || 'Arial');
+        }
     </script>
 
     <!-- Core variables -->
@@ -21,9 +27,6 @@
     <!-- Theme styles - Must be after variables -->
     <link rel="stylesheet" href="/src/views/styles/themes/light.css">
     <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
     
     <!-- Base styles -->
     <link rel="stylesheet" href="/src/views/styles/core/base.css">
@@ -79,21 +82,20 @@
         import FontManager from '/src/services/state/fontmanager.js';
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Listen for theme changes from other tabs/windows
+            const username = sessionStorage.getItem('username');
+            if (!username) return;
+
+            // Listen for preference changes from other tabs/windows
             window.addEventListener('storage', (event) => {
-                if (event.key === 'theme_change') {
-                    const data = JSON.parse(event.newValue || '{}');
-                    if (data.theme) {
-                        ThemeManager.applyTheme(data.theme);
+                if (event.key === `user_preferences_${username}`) {
+                    const preferences = JSON.parse(event.newValue || '{}');
+                    
+                    // Apply theme and font changes
+                    if (preferences.theme) {
+                        ThemeManager.applyTheme(preferences.theme);
                     }
-                }
-                // Listen for font changes
-                else if (event.key === 'font_change') {
-                    const data = JSON.parse(event.newValue || '{}');
-                    if (data.fontFamily) {
-                        FontManager.applyFont(data.fontFamily);
-                        // Force reload to ensure font is applied
-                        window.location.reload();
+                    if (preferences.fontFamily) {
+                        FontManager.applyFont(preferences.fontFamily);
                     }
                 }
             });

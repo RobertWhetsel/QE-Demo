@@ -265,24 +265,11 @@
             const notificationsCheckbox = document.getElementById('notifications');
             const notificationFields = document.getElementById('notification-fields');
 
-            // Handle notifications toggle
-            notificationsCheckbox.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    notificationFields.classList.add('show');
-                } else {
-                    notificationFields.classList.remove('show');
-                }
-            });
-
-            // Load saved font preference
-            const currentFont = FontManager.getFont();
-            if (currentFont) {
-                fontSelect.value = currentFont;
-            }
-
-            // Load notification preferences
+            // Load user preferences
             const username = sessionStorage.getItem('username');
             const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+
+            // Load notification preferences
             if (userPreferences.notifications) {
                 notificationsCheckbox.checked = true;
                 notificationFields.classList.add('show');
@@ -292,11 +279,43 @@
                 document.getElementById('sms-notifications').checked = userPreferences.smsNotifications || false;
             }
 
+            // Load theme preference
+            const currentTheme = ThemeManager.getTheme();
+            themeSelect.value = currentTheme;
+            updateThemePreview(currentTheme);
+
+            // Load font preference
+            const currentFont = FontManager.getFont();
+            if (currentFont) {
+                fontSelect.value = currentFont;
+            }
+
+            // Handle notifications toggle
+            notificationsCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    notificationFields.classList.add('show');
+                } else {
+                    notificationFields.classList.remove('show');
+                }
+            });
+
             // Handle font changes
             fontSelect.addEventListener('change', (e) => {
                 const newFont = e.target.value;
                 FontManager.setFont(newFont);
             });
+
+            // Handle theme changes
+            themeSelect.addEventListener('change', (e) => {
+                const newTheme = e.target.value;
+                ThemeManager.setTheme(newTheme);
+                updateThemePreview(newTheme);
+            });
+
+            // Update theme preview
+            function updateThemePreview(theme) {
+                themePreview.className = `theme-preview ${theme}`;
+            }
 
             // Setup hamburger menu
             if (hamburger && sidebar) {
@@ -366,37 +385,20 @@
                 el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
             });
 
-            // Load user preferences
-            const currentTheme = ThemeManager.getTheme();
-            themeSelect.value = currentTheme;
-            updateThemePreview(currentTheme);
-
-            // Handle theme changes
-            themeSelect.addEventListener('change', (e) => {
-                const newTheme = e.target.value;
-                ThemeManager.setTheme(newTheme);
-                updateThemePreview(newTheme);
-                
-                // Force reload all pages to ensure theme is applied
-                window.location.reload();
-            });
-
-            // Update theme preview
-            function updateThemePreview(theme) {
-                themePreview.className = `theme-preview ${theme}`;
-            }
-
             // Handle settings form submission
             document.getElementById('settings-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 
-                // Save all user preferences
+                // Get username and existing preferences
                 const username = sessionStorage.getItem('username');
                 const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+                
+                // Update all preferences while preserving existing ones
                 userPreferences.notifications = document.getElementById('notifications').checked;
                 userPreferences.fontFamily = document.getElementById('font-family').value;
+                userPreferences.theme = document.getElementById('theme').value;
                 
-                // Save notification preferences
+                // Save notification preferences if enabled
                 if (userPreferences.notifications) {
                     userPreferences.notificationEmail = document.getElementById('notification-email').value;
                     userPreferences.notificationPhone = document.getElementById('notification-phone').value;
@@ -404,33 +406,28 @@
                     userPreferences.smsNotifications = document.getElementById('sms-notifications').checked;
                 }
 
-                // Save preferences to localStorage
+                // Save all preferences to localStorage
                 localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
 
-                // Apply font change through FontManager
+                // Apply theme and font changes
+                ThemeManager.setTheme(userPreferences.theme);
                 FontManager.setFont(userPreferences.fontFamily);
                 
                 alert('Settings saved successfully');
             });
 
-            // Listen for theme changes from other windows/tabs
+            // Listen for theme and font changes from other windows/tabs
             window.addEventListener('storage', (event) => {
-                if (event.key === 'theme_change') {
-                    const data = JSON.parse(event.newValue || '{}');
-                    if (data.theme && data.username === username) {
-                        ThemeManager.applyTheme(data.theme);
-                        themeSelect.value = data.theme;
-                        updateThemePreview(data.theme);
-                        // Force reload to ensure theme is applied
-                        window.location.reload();
+                if (event.key === `user_preferences_${username}`) {
+                    const preferences = JSON.parse(event.newValue || '{}');
+                    if (preferences.theme) {
+                        ThemeManager.applyTheme(preferences.theme);
+                        themeSelect.value = preferences.theme;
+                        updateThemePreview(preferences.theme);
                     }
-                }
-                // Listen for font changes
-                else if (event.key === 'font_change') {
-                    const data = JSON.parse(event.newValue || '{}');
-                    if (data.fontFamily && data.username === username) {
-                        FontManager.applyFont(data.fontFamily);
-                        fontSelect.value = data.fontFamily;
+                    if (preferences.fontFamily) {
+                        FontManager.applyFont(preferences.fontFamily);
+                        fontSelect.value = preferences.fontFamily;
                     }
                 }
             });

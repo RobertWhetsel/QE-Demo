@@ -41,16 +41,25 @@ export class Auth {
                 // Set session data consistently
                 sessionStorage.setItem('isAuthenticated', 'true');
                 sessionStorage.setItem('userRole', user.role);
-                sessionStorage.setItem('username', user.username); // Use consistent key
-                sessionStorage.setItem('userName', user.username); // Keep for backward compatibility
+                sessionStorage.setItem('username', user.username);
 
-                // Load user preferences including theme
+                // Initialize user preferences if they don't exist
                 const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${user.username}`) || '{}');
-                if (userPreferences.theme) {
-                    // Apply theme immediately if user has a preference
-                    const ThemeManager = (await import('/src/services/state/thememanager.js')).default;
-                    ThemeManager.applyTheme(userPreferences.theme);
+                if (Object.keys(userPreferences).length === 0) {
+                    userPreferences.theme = 'light';
+                    userPreferences.fontFamily = 'Arial';
+                    userPreferences.notifications = false;
+                    localStorage.setItem(`user_preferences_${user.username}`, JSON.stringify(userPreferences));
                 }
+
+                // Load and apply user preferences
+                const [ThemeManager, FontManager] = await Promise.all([
+                    import('/src/services/state/thememanager.js'),
+                    import('/src/services/state/fontmanager.js')
+                ]);
+
+                ThemeManager.default.applyTheme(userPreferences.theme || 'light');
+                FontManager.default.applyFont(userPreferences.fontFamily || 'Arial');
 
                 // Redirect based on role with strict role-based access
                 switch (user.role) {

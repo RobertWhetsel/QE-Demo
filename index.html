@@ -4,42 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Eye - Welcome</title>
+
+    <!-- Core variables -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles - Must be after variables -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Base styles -->
     <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+
     <style>
-        .welcome-container {
+        body {
+            background-color: var(--color-surface-secondary);
+            margin: 0;
+            padding: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            padding: 2rem;
+        }
+
+        .welcome-container {
+            background-color: var(--color-surface-primary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: var(--spacing-lg);
+            width: 100%;
+            max-width: 500px;
             text-align: center;
+            margin: var(--spacing-sm);
+        }
+
+        .logo {
+            max-width: 200px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        h2 {
+            color: var(--color-text-primary);
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-sm);
         }
 
         .instructions {
-            max-width: 600px;
-            margin: 2rem 0;
+            margin: var(--spacing-md) 0;
+            text-align: left;
+        }
+
+        .instructions p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .instructions ol {
+            color: var(--color-text-primary);
+            padding-left: var(--spacing-lg);
+            margin: 0;
+        }
+
+        .instructions li {
+            margin-bottom: var(--spacing-xs);
+            line-height: 1.4;
         }
 
         .begin-button {
-            background: #007bff;
-            color: #ffffff;
-            padding: 1rem 2rem;
+            background-color: var(--color-brand-primary);
+            color: var(--color-text-on-brand);
+            padding: var(--spacing-md) var(--spacing-xl);
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 1.1rem;
-            transition: background-color 0.2s;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            width: 100%;
+            max-width: 200px;
+            margin-top: var(--spacing-md);
         }
 
         .begin-button:hover {
-            background: #0056b3;
+            background-color: var(--color-brand-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .begin-button:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
         }
     </style>
 </head>
 <body>
     <div class="welcome-container">
-        <h1>Welcome to Quantum Eye</h1>
+        <img src="assets/qeLogoBW.png" alt="Quantum Eye Logo" class="logo">
         <div class="instructions">
             <h2>Login Instructions</h2>
             <p>Welcome to the Quantum Eye system. Please follow these steps:</p>
