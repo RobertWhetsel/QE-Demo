@@ -2,17 +2,22 @@ import navigation from '../../services/navigation/navigation.js';
 import { User } from '../../models/user.js';
 import ThemeManager from '../../services/state/thememanager.js';
 import FontManager from '../../services/state/fontmanager.js';
+import Logger from '../../utils/logging/logger.js';
 
 export class Auth {
     constructor() {
         this.form = document.getElementById('login-form');
+        Logger.info('Initializing Auth controller');
         this.init();
     }
 
     init() {
         // Add event listener to the login form
         if (this.form) {
+            Logger.debug('Setting up login form event listener');
             this.form.addEventListener('submit', (e) => this.handleLogin(e));
+        } else {
+            Logger.warn('Login form not found during initialization');
         }
     }
 
@@ -23,30 +28,35 @@ export class Auth {
         const password = document.getElementById('password').value.trim();
 
         if (!username || !password) {
+            Logger.warn('Login validation failed: missing credentials');
             this.showError('Please enter both username and password');
             return;
         }
 
         try {
-            // Get users from sessionStorage (loaded by init.js)
-            const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
-            console.log('Login attempt with:', { username }); // Debug log
+            Logger.info('Login attempt initiated', { username });
             
-            // Check if user exists
-            const userData = appData.users.find(
-                (user) => user.username === username && user.password === password
-            );
+            // Clear any existing storage before login attempt
+            Logger.debug('Clearing storage before login attempt');
+            await User.clearAllStorage();
+            
+            // Attempt login through User model
+            const user = await User.login(username, password);
 
-            if (userData) {
-                console.log('User found:', userData); // Debug log
+            if (user) {
+                Logger.info('Login successful', { 
+                    username: user.username, 
+                    role: user.role 
+                });
                 
-                // Set session data through User model
-                sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('userRole', userData.role);
-                sessionStorage.setItem('username', userData.username);
-
-                // Create user instance
-                const user = new User(userData);
+                // Verify storage consistency
+                const isConsistent = await User.verifyStorageConsistency();
+                if (!isConsistent) {
+                    Logger.error('Storage consistency check failed after login');
+                    await User.clearAllStorage();
+                    this.showError('Login failed due to storage inconsistency');
+                    return;
+                }
 
                 // Initialize user preferences if they don't exist
                 const userPreferences = User.getUserPreferences() || {
@@ -55,37 +65,50 @@ export class Auth {
                     notifications: false
                 };
                 User.updateUserPreferences(userPreferences);
+                Logger.debug('User preferences updated', userPreferences);
 
                 // Apply user preferences
                 ThemeManager.applyTheme(userPreferences.theme || 'light');
                 FontManager.applyFont(userPreferences.fontFamily || 'Arial');
+                Logger.debug('Applied user preferences');
 
                 // Redirect based on role with strict role-based access
-                switch (userData.role) {
+                switch (user.role) {
                     case 'Genesis Admin':
-                        // Genesis Admin manages other admins through the admin control panel
+                        Logger.info('Redirecting Genesis Admin to admin control panel');
                         navigation.navigateTo('/src/views/pages/adminControlPanel.html');
                         break;
                     case 'Platform Admin':
                     case 'User Admin':
-                        // Both Platform Admin and User Admin go to platform admin dashboard
+                        Logger.info('Redirecting Admin to platform admin dashboard');
                         navigation.navigateTo('/src/views/pages/platformAdmin.html');
                         break;
                     default:
+                        Logger.error('Invalid user role detected', { role: user.role });
                         this.showError('Invalid user role');
-                        sessionStorage.clear();
+                        await User.clearAllStorage();
+                        await User.logout();
                 }
             } else {
-                console.log('User not found'); // Debug log
+                Logger.warn('Login failed: Invalid credentials', { username });
+                await User.clearAllStorage();
                 this.showError('Invalid username or password');
             }
         } catch (error) {
-            console.error('Error during login:', error);
+            Logger.error('Error during login', error, {
+                username,
+                errorDetails: {
+                    message: error.message,
+                    stack: error.stack
+                }
+            });
+            await User.clearAllStorage();
             this.showError('An error occurred. Please try again later.');
         }
     }
 
     showError(message) {
+        Logger.warn('Displaying error message', { message });
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;
@@ -100,6 +123,7 @@ export class Auth {
         setTimeout(() => {
             if (errorDiv.parentNode) {
                 errorDiv.remove();
+                Logger.debug('Error message removed from display');
             }
         }, 3000);
     }

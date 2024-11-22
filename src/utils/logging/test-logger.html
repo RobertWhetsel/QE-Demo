@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #logDisplay {
+            white-space: pre;
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 1rem 0;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .button-group {
+            margin: 1rem 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button.clear {
+            background-color: #dc3545;
+        }
+        button.download {
+            background-color: #0d6efd;
+        }
+        .timestamp {
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .warn {
+            color: #ffc107;
+        }
+        .info {
+            color: #0d6efd;
+        }
+        .debug {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>System Logs</h1>
+        <div class="button-group">
+            <button onclick="refreshLogs()">Refresh Logs</button>
+            <button class="download" onclick="downloadLogs()">Download Logs</button>
+            <button class="clear" onclick="clearLogs()">Clear Logs</button>
+        </div>
+        <div id="logDisplay">No logs available</div>
+    </div>
+
+    <script type="module">
+        import Logger from './logger.js';
+
+        window.refreshLogs = function() {
+            const logContent = Logger.getLogs();
+            const logDisplay = document.getElementById('logDisplay');
+            
+            if (!logContent) {
+                logDisplay.textContent = 'No logs available';
+                return;
+            }
+
+            // Format the logs with color coding
+            const formattedLogs = logContent.split('\n').map(line => {
+                if (line.includes('[ERROR]')) {
+                    return `<span class="error">${line}</span>`;
+                } else if (line.includes('[WARN]')) {
+                    return `<span class="warn">${line}</span>`;
+                } else if (line.includes('[INFO]')) {
+                    return `<span class="info">${line}</span>`;
+                } else if (line.includes('[DEBUG]')) {
+                    return `<span class="debug">${line}</span>`;
+                }
+                return line;
+            }).join('\n');
+
+            logDisplay.innerHTML = formattedLogs;
+            logDisplay.scrollTop = logDisplay.scrollHeight;
+        };
+
+        window.downloadLogs = function() {
+            Logger.downloadLogs();
+        };
+
+        window.clearLogs = function() {
+            if (confirm('Are you sure you want to clear all logs?')) {
+                Logger.clearLogs();
+                refreshLogs();
+            }
+        };
+
+        // Initial load of logs
+        refreshLogs();
+
+        // Refresh logs every 5 seconds
+        setInterval(refreshLogs, 5000);
+    </script>
+</body>
+</html>

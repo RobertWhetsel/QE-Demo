@@ -1,32 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Volunteer Dashboard - Quantum Eye</title>
-    <link rel="stylesheet" href="../static/css/core/base.css">
-</head>
-<body>
-    <div id="header-component"></div>
-    <div id="nav-component"></div>
-    <div id="sidebar-component"></div>
     
-    <div class="content-area">
-        <div class="dashboard-container">
-            <div class="dashboard-header">
-                <h1>Volunteer Dashboard</h1>
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
+    
+    <!-- Core styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    
+    <!-- Theme styles -->
+    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
+    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
+    
+    <!-- Font styles -->
+    <link rel="stylesheet" href="/src/views/styles/fonts.css">
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
+    
+    <!-- Component styles -->
+    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
+    <link rel="stylesheet" href="/src/views/styles/components/button.css">
+    <link rel="stylesheet" href="/src/views/styles/components/message.css">
+    
+    <style>
+        :root {
+            --nav-height: 60px;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-family-custom);
+        }
+
+        .page {
+            padding-top: var(--nav-height);
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            transition: background-color var(--transition-speed);
+        }
+
+        .page__container {
+            padding-left: var(--sidebar-width);
+            transition: padding-left var(--transition-speed);
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        .content-area {
+            padding: var(--spacing-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-container {
+            padding: var(--spacing-lg);
+        }
+
+        .dashboard-header {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .dashboard-section {
+            background-color: var(--color-surface-secondary);
+            border: 1px solid var(--color-border-default);
+            border-radius: 8px;
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dashboard-section h2 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text-primary);
+        }
+
+        .task-card,
+        .survey-card {
+            background-color: var(--color-surface-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            transition: transform var(--transition-speed),
+                        box-shadow var(--transition-speed);
+        }
+
+        .task-card:hover,
+        .survey-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .task-title,
+        .survey-title {
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .task-description,
+        .survey-description {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .task-meta,
+        .survey-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .page__container {
+                padding-left: 0;
+            }
+
+            .content-area {
+                padding: var(--spacing-md);
+            }
+
+            .dashboard-container {
+                padding: var(--spacing-md);
+            }
+
+            .dashboard-content {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .dashboard-section {
+                padding: var(--spacing-md);
+            }
+        }
+    </style>
+</head>
+<body class="page">
+    <!-- Include navigation -->
+    <nav class="nav">
+        <div class="nav__container">
+            <div class="nav__left">
+                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
             </div>
-            <div class="dashboard-content">
-                <div class="dashboard-section">
-                    <h2>Active Tasks</h2>
-                    <div id="active-tasks">
-                        <!-- Active tasks will be populated here -->
-                    </div>
+            <div class="nav__menu">
+                <span id="userName" class="nav__link user-name">User</span>
+                <div id="navMenu" class="nav__dropdown" hidden>
+                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
                 </div>
-                <div class="dashboard-section">
-                    <h2>Available Surveys</h2>
-                    <div id="available-surveys">
-                        <!-- Available surveys will be populated here -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Include sidebar -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
+        <div class="sidebar__brand">
+            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+        </div>
+        <div id="menu-items">
+            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+        </div>
+        <div class="sidebar__footer">
+            <a href="#" class="sidebar__link logout-link">Logout</a>
+            <a href="#" class="sidebar__link exit-button">Exit</a>
+        </div>
+    </div>
+
+    <div class="page__container">
+        <div class="content-area">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1 class="page-title">Volunteer Dashboard</h1>
+                </div>
+
+                <div class="dashboard-content">
+                    <div class="dashboard-section">
+                        <h2>Active Tasks</h2>
+                        <div id="active-tasks">
+                            <!-- Active tasks will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h2>Available Surveys</h2>
+                        <div id="available-surveys">
+                            <!-- Available surveys will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -34,25 +215,109 @@
     </div>
 
     <script type="module">
-        import ComponentLoader from '../static/js/modules/componentLoader.js';
-        
-        // Load components
-        async function initializePage() {
-            await ComponentLoader.insertComponent('#header-component', '../components/header.html', {
-                pageTitle: 'Volunteer Dashboard',
-                additionalStyles: ''
-            });
-
-            await ComponentLoader.insertComponent('#nav-component', '../components/nav.html', {
-                userName: localStorage.getItem('userName') || 'User'
-            });
-
-            await ComponentLoader.insertComponent('#sidebar-component', '../components/sidebar.html');
-        }
+        import navigation from '/src/services/navigation/navigation.js';
+        import { User } from '/src/models/user.js';
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', initializePage);
+        async function initPage() {
+            try {
+                // Check authentication
+                if (!User.isAuthenticated()) {
+                    window.location.href = '/src/views/pages/login.html';
+                    throw new Error('User not logged in');
+                }
+
+                // Setup navigation components
+                const hamburger = document.getElementById('hamburger');
+                const sidebar = document.getElementById('sidebar');
+                const closeBtn = document.getElementById('close-sidebar');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const logoutLink = document.querySelector('.logout-link');
+                const exitButton = document.querySelector('.exit-button');
+                const userNameEl = document.getElementById('userName');
+                const navMenu = document.getElementById('navMenu');
+
+                // Setup hamburger menu
+                if (hamburger && sidebar) {
+                    hamburger.addEventListener('click', () => {
+                        sidebar.classList.toggle('sidebar--open');
+                    });
+                }
+
+                // Setup close button
+                if (closeBtn && sidebar) {
+                    closeBtn.addEventListener('click', () => {
+                        sidebar.classList.remove('sidebar--open');
+                    });
+                }
+
+                // Setup logout functionality
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => navigation.logout());
+                }
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.logout();
+                    });
+                }
+
+                // Setup exit functionality
+                if (exitButton) {
+                    exitButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.exitApplication();
+                    });
+                }
+
+                // Setup username display and dropdown
+                if (userNameEl) {
+                    const userName = sessionStorage.getItem('username') || "User";
+                    userNameEl.textContent = userName;
+
+                    userNameEl.addEventListener('click', () => {
+                        navMenu.toggleAttribute('hidden');
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.nav__menu')) {
+                            navMenu.setAttribute('hidden', '');
+                        }
+                    });
+                }
+
+                // Setup navigation links
+                const links = document.querySelectorAll('.sidebar__link[href]');
+                links.forEach(link => {
+                    if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            navigation.navigateTo(link.getAttribute('href'));
+                        });
+                    }
+                });
+
+                // Show/hide admin-only elements
+                const userRole = sessionStorage.getItem('userRole');
+                const adminElements = document.querySelectorAll('.admin-only');
+                adminElements.forEach(el => {
+                    el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+                });
+
+                // TODO: Load and display tasks and surveys
+                // This will be implemented when the functionality is ready
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
     </script>
-    <script src="../static/js/volunteerdashboard.js"></script>
 </body>
 </html>

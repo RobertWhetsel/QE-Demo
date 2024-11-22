@@ -9,38 +9,34 @@ export const LogLevel = {
 class Logger {
     static #logBuffer = [];
     static #maxBufferSize = 100;
-    static #fileHandle = null;
+    static #storageKey = 'appLogs';
 
-    static async #initializeFileHandle() {
-        try {
-            // Request permission to access file system
-            const handle = await window.showSaveFilePicker({
-                suggestedName: 'app.log',
-                types: [{
-                    description: 'Log File',
-                    accept: {'text/plain': ['.log']},
-                }],
-            });
-            this.#fileHandle = handle;
-        } catch (error) {
-            console.warn('Unable to initialize file logging:', error);
+    static async #writeToConsole(level, formattedMessage, ...args) {
+        switch (level) {
+            case LogLevel.ERROR:
+                console.error(formattedMessage, ...args);
+                break;
+            case LogLevel.WARN:
+                console.warn(formattedMessage, ...args);
+                break;
+            case LogLevel.DEBUG:
+                console.debug(formattedMessage, ...args);
+                break;
+            default:
+                console.log(formattedMessage, ...args);
         }
     }
 
-    static async #writeToFile(entry) {
-        if (!this.#fileHandle) {
-            await this.#initializeFileHandle();
-        }
-
-        if (this.#fileHandle) {
-            try {
-                const writable = await this.#fileHandle.createWritable({ keepExistingData: true });
-                await writable.seek((await this.#fileHandle.getFile()).size);
-                await writable.write(entry);
-                await writable.close();
-            } catch (error) {
-                console.error('Error writing to log file:', error);
-            }
+    static #saveToStorage(entry) {
+        try {
+            // Get existing logs
+            let logs = localStorage.getItem(this.#storageKey) || '';
+            // Append new entry
+            logs += entry;
+            // Save back to storage
+            localStorage.setItem(this.#storageKey, logs);
+        } catch (error) {
+            console.error('Error saving to storage:', error);
         }
     }
 
@@ -61,28 +57,14 @@ class Logger {
 
         const logEntry = formattedMessage + additionalInfo + '\n';
 
-        // Always log to console
-        switch (level) {
-            case LogLevel.ERROR:
-                console.error(formattedMessage, ...args);
-                break;
-            case LogLevel.WARN:
-                console.warn(formattedMessage, ...args);
-                break;
-            case LogLevel.DEBUG:
-                console.debug(formattedMessage, ...args);
-                break;
-            default:
-                console.log(formattedMessage, ...args);
-        }
+        // Write to console
+        await this.#writeToConsole(level, formattedMessage, ...args);
 
         // Add to buffer
         this.#logBuffer.push(logEntry);
+        
         if (this.#logBuffer.length >= this.#maxBufferSize) {
-            // Write buffer to file
-            const buffer = this.#logBuffer.join('');
-            this.#logBuffer = [];
-            await this.#writeToFile(buffer);
+            await this.flush();
         }
     }
 
@@ -102,14 +84,47 @@ class Logger {
         await this.log(LogLevel.DEBUG, message, ...args);
     }
 
+    static getLogs() {
+        return localStorage.getItem(this.#storageKey) || '';
+    }
+
+    static downloadLogs() {
+        const logs = this.getLogs();
+        const blob = new Blob([logs], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'app.log';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
+
+    static clearLogs() {
+        localStorage.removeItem(this.#storageKey);
+        this.#logBuffer = [];
+    }
+
+    // Initialize logger
+    static init() {
+        // Set up window unload handler to flush logs
+        window.addEventListener('beforeunload', () => {
+            this.flush();
+        });
+    }
+
     // Flush remaining buffer
     static async flush() {
         if (this.#logBuffer.length > 0) {
             const buffer = this.#logBuffer.join('');
             this.#logBuffer = [];
-            await this.#writeToFile(buffer);
+            this.#saveToStorage(buffer);
         }
     }
 }
+
+// Initialize logger when imported
+Logger.init();
 
 export default Logger;
