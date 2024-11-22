@@ -1,143 +1,257 @@
-/* Root level styles */
+/* Base layout styles */
 :root {
-    /* Ensure smooth transitions */
-    transition: background-color var(--transition-speed) ease,
-                color var(--transition-speed) ease,
-                font-family var(--transition-speed) ease;
+    /* Theme-independent variables */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --transition-speed: 0.3s;
+    
+    /* Default light theme */
+    --color-brand-primary: #007bff;
+    --color-brand-primary-hover: #0056b3;
+    --color-surface-primary: #ffffff;
+    --color-surface-secondary: #f8f9fa;
+    --color-text-primary: #212529;
+    --color-text-secondary: #6c757d;
+    --color-text-on-brand: #ffffff;
+    --color-border: #dee2e6;
+    --color-error: #dc3545;
+    --color-error-bg: #f8d7da;
+    --color-success: #28a745;
+    --color-success-bg: #d4edda;
+
+    /* Font family - will be overridden by FontManager */
+    --font-family-custom: Arial, sans-serif;
 }
 
-/* Base styles using BEM methodology */
-html {
+/* Dark theme */
+[data-theme="dark"] {
+    --color-brand-primary: #0d6efd;
+    --color-brand-primary-hover: #0b5ed7;
+    --color-surface-primary: #212529;
+    --color-surface-secondary: #343a40;
+    --color-text-primary: #f8f9fa;
+    --color-text-secondary: #adb5bd;
+    --color-text-on-brand: #ffffff;
+    --color-border: #495057;
+    --color-error: #dc3545;
+    --color-error-bg: #2c0b0e;
+    --color-success: #28a745;
+    --color-success-bg: #0a2c0f;
+}
+
+/* Apply font family globally */
+body {
+    font-family: var(--font-family-custom);
     margin: 0;
     padding: 0;
-    min-height: 100vh;
     background-color: var(--color-surface-primary);
     color: var(--color-text-primary);
-    font-family: var(--font-family-custom);
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed);
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    font-family: inherit;
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-base);
-    background-color: inherit;
-    color: inherit;
-}
-
+/* Page layout */
 .page {
-    margin: 0;
-    padding: 0;
-    font-family: inherit;
-    background-color: inherit;
-    color: inherit;
+    min-height: 100vh;
+    padding-top: 60px; /* Height of nav bar */
+    background-color: var(--color-surface-primary);
+    transition: background-color var(--transition-speed);
 }
 
 .page__container {
-    min-height: 100vh;
-    overflow-x: hidden;
+    padding-left: 250px; /* Width of sidebar */
+    transition: padding-left var(--transition-speed);
 }
 
-/* Reset defaults with font inheritance */
-h1, h2, h3, h4, h5, h6, p {
-    margin: 0;
-    padding: 0;
-    font-family: inherit;
+/* Container */
+.l-container {
+    padding: var(--spacing-lg);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* Links */
-.link {
-    color: var(--color-brand-primary);
-    text-decoration: none;
+/* Responsive */
+@media (max-width: 768px) {
+    .page__container {
+        padding-left: 0;
+    }
+}
+
+/* Typography */
+.page-title {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text-primary);
     transition: color var(--transition-speed);
-    font-family: inherit;
 }
 
-.link:hover {
-    color: var(--color-brand-primary-hover);
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+    color: var(--color-text-primary);
+    transition: color var(--transition-speed);
 }
 
-/* Lists */
-.list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    font-family: inherit;
+/* Forms */
+.form-group {
+    margin-bottom: var(--spacing-md);
 }
 
-/* Images */
-.img {
-    max-width: 100%;
-    height: auto;
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text-primary);
+    transition: color var(--transition-speed);
 }
 
-/* Focus styles */
-:focus {
-    outline: 2px solid var(--color-brand-primary);
-    outline-offset: 2px;
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed),
+                border-color var(--transition-speed);
 }
 
-:focus:not(:focus-visible) {
-    outline: none;
+.required-field::after {
+    content: '*';
+    color: var(--color-error);
+    margin-left: var(--spacing-xs);
 }
 
-:focus-visible {
-    outline: 2px solid var(--color-brand-primary);
-    outline-offset: 2px;
+/* Buttons */
+.button {
+    display: inline-block;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed);
+    font-family: var(--font-family-custom);
 }
 
-/* Accessibility */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/* Selection */
-::selection {
+.button--primary {
     background-color: var(--color-brand-primary);
     color: var(--color-text-on-brand);
 }
 
-/* Global font inheritance */
-* {
-    font-family: inherit;
+.button--primary:hover {
+    background-color: var(--color-brand-primary-hover);
 }
 
-/* Form elements font inheritance */
+.button--danger {
+    background-color: var(--color-error);
+    color: var(--color-text-on-brand);
+}
+
+.button--danger:hover {
+    background-color: #c82333;
+}
+
+.button--small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.875rem;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--spacing-lg);
+}
+
+.table th,
+.table td {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed),
+                border-color var(--transition-speed);
+}
+
+.table th {
+    background-color: var(--color-surface-secondary);
+    font-weight: bold;
+    color: var(--color-text-primary);
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color var(--transition-speed);
+}
+
+.status-indicator--active {
+    background-color: var(--color-success);
+}
+
+.status-indicator--inactive {
+    background-color: var(--color-error);
+}
+
+/* Sections */
+.section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background-color: var(--color-surface-secondary);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+/* Messages */
+.error-message {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-error);
+    background-color: var(--color-error-bg);
+    border-radius: 4px;
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed);
+}
+
+.success-message {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-success);
+    background-color: var(--color-success-bg);
+    border-radius: 4px;
+    transition: background-color var(--transition-speed),
+                color var(--transition-speed);
+}
+
+/* Focus styles */
+input:focus,
+select:focus,
+button:focus {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 2px;
+}
+
+/* Ensure proper font inheritance */
 input,
-button,
 select,
-textarea,
-option {
-    font-family: inherit;
-    color: inherit;
-}
-
-/* Ensure font changes are smooth */
-* {
-    transition: font-family var(--transition-speed) ease;
-}
-
-/* Force font inheritance for problematic elements */
-pre,
-code,
-kbd,
-samp,
-tt {
-    font-family: inherit;
-}
-
-/* Ensure iframes and embedded content inherit fonts */
-iframe,
-embed,
-object {
+button,
+textarea {
     font-family: inherit;
 }

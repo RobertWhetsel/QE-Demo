@@ -1,15 +1,12 @@
-<!-- Core variables -->
-<link rel="stylesheet" href="/src/views/styles/core/variables.css">
+<!-- Font styles (load first to prevent FOUC) -->
+<link rel="stylesheet" href="/src/views/styles/fonts.css">
+
+<!-- Core styles -->
+<link rel="stylesheet" href="/src/views/styles/core/base.css">
 
 <!-- Theme styles -->
 <link rel="stylesheet" href="/src/views/styles/themes/light.css">
 <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-
-<!-- Font styles - Must be before base styles -->
-<link rel="stylesheet" href="/src/views/styles/fonts.css">
-
-<!-- Base styles -->
-<link rel="stylesheet" href="/src/views/styles/core/base.css">
 
 <!-- Layout styles -->
 <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
@@ -18,6 +15,122 @@
 <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
 <link rel="stylesheet" href="/src/views/styles/components/button.css">
 <link rel="stylesheet" href="/src/views/styles/components/message.css">
+<link rel="stylesheet" href="/src/views/styles/components/profile.css">
+<link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
 
-<!-- Initialize application state -->
-<script type="module" src="/src/services/init.js"></script>
+<!-- Initialize User Model -->
+<script type="module">
+    import { User } from '/src/models/user.js';
+    import ThemeManager from '/src/services/state/thememanager.js';
+    import FontManager from '/src/services/state/fontmanager.js';
+
+    // Make User model available globally
+    window.QE = window.QE || {};
+    window.QE.User = User;
+
+    // Initialize managers first
+    try {
+        console.log('Initializing ThemeManager');
+        ThemeManager.initialize();
+        console.log('ThemeManager initialized');
+        
+        console.log('Initializing FontManager');
+        FontManager.initialize();
+        console.log('FontManager initialized');
+    } catch (error) {
+        console.error('Error initializing managers:', error);
+    }
+
+    // Initialize user data if authenticated
+    if (User.isAuthenticated()) {
+        try {
+            const currentUser = User.getCurrentUser();
+            if (currentUser) {
+                // Store user data in a global object
+                window.QE.currentUser = currentUser;
+                window.QE.userRole = currentUser.role;
+                
+                // Initialize theme and font based on user preferences
+                const preferences = User.getUserPreferences();
+                if (preferences) {
+                    console.log('Setting theme:', preferences.theme);
+                    if (preferences.theme) {
+                        ThemeManager.setTheme(preferences.theme);
+                    }
+                    
+                    console.log('Setting font:', preferences.fontFamily);
+                    if (preferences.fontFamily) {
+                        FontManager.setFont(preferences.fontFamily);
+                    }
+                }
+
+                // Dispatch event when user data is ready
+                document.dispatchEvent(new CustomEvent('userDataReady', {
+                    detail: {
+                        user: currentUser,
+                        role: currentUser.role,
+                        preferences: preferences
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('Error initializing user data:', error);
+        }
+    }
+
+    // Listen for theme changes
+    window.addEventListener('storage', (event) => {
+        try {
+            if (event.key === 'theme_change') {
+                const data = JSON.parse(event.newValue || '{}');
+                if (data.theme) {
+                    ThemeManager.applyTheme(data.theme);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling theme change:', error);
+        }
+    });
+
+    // Listen for font changes
+    window.addEventListener('storage', (event) => {
+        try {
+            if (event.key?.startsWith('user_preferences_')) {
+                const preferences = JSON.parse(event.newValue || '{}');
+                if (preferences.fontFamily) {
+                    FontManager.applyFont(preferences.fontFamily);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling font change:', error);
+        }
+    });
+
+    // Listen for user data changes
+    window.addEventListener('storage', (event) => {
+        try {
+            if (event.key === 'currentUser' || event.key === 'users_csv' || event.key === 'users_json') {
+                // Reload user data
+                const currentUser = User.getCurrentUser();
+                if (currentUser) {
+                    window.QE.currentUser = currentUser;
+                    window.QE.userRole = currentUser.role;
+                    
+                    // Dispatch event for components to update
+                    document.dispatchEvent(new CustomEvent('userDataUpdated', {
+                        detail: {
+                            user: currentUser,
+                            role: currentUser.role
+                        }
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error('Error handling user data change:', error);
+        }
+    });
+
+    // Dispatch event when head is ready
+    document.dispatchEvent(new CustomEvent('headReady'));
+    console.log('Common head content loaded successfully');
+</script>

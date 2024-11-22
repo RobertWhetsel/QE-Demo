@@ -1,192 +1,138 @@
-export class NavigationService {
-    /**
-     * Initialize navigation component
-     */
-    initializeNavigation() {
-        const userNameEl = document.getElementById('userName');
-        const navMenu = document.getElementById('navMenu');
-        const logoutBtn = document.getElementById('logoutBtn');
+import { User } from '../../models/user.js';
 
-        // Display username
-        const userName = sessionStorage.getItem('username') || "User";
-        if (userNameEl) {
-            userNameEl.textContent = userName;
+class Navigation {
+    constructor() {
+        if (!Navigation.instance) {
+            Navigation.instance = this;
         }
-
-        // Setup logout button
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.logout());
-        }
-
-        // Setup dropdown toggle
-        if (userNameEl && navMenu) {
-            userNameEl.addEventListener('click', () => {
-                navMenu.toggleAttribute('hidden');
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.nav__menu')) {
-                    navMenu.setAttribute('hidden', '');
-                }
-            });
-        }
+        return Navigation.instance;
     }
 
-    /**
-     * Initialize sidebar with role-specific menu
-     */
-    initializeSidebar(menuType = 'genesisAdmin-menu') {
-        const sidebar = document.getElementById('sidebar');
-        const hamburger = document.getElementById('hamburger');
-        const closeBtn = document.getElementById('close-sidebar');
+    navigateTo(path) {
+        console.log('Navigating to:', path);
         
-        // Setup menu template
-        const menuTemplate = document.getElementById(menuType);
-        if (menuTemplate && sidebar) {
-            const menuContent = menuTemplate.content.cloneNode(true);
-            const menuContainer = sidebar.querySelector('#menu-items') || sidebar;
-            menuContainer.appendChild(menuContent);
+        // Normalize path to include /src/ prefix if missing
+        if (!path.startsWith('/src/')) {
+            path = '/src' + (path.startsWith('/') ? '' : '/') + path;
         }
 
-        // Setup sidebar toggle
-        if (hamburger) {
-            hamburger.addEventListener('click', () => {
-                sidebar.classList.toggle('sidebar--open');
-            });
+        // Special case for login page
+        if (path.includes('login.html')) {
+            window.location.href = path;
+            return;
         }
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                sidebar.classList.remove('sidebar--open');
-            });
+        if (!User.isAuthenticated()) {
+            console.log('User not authenticated, redirecting to login');
+            window.location.href = '/src/views/pages/login.html';
+            return;
         }
 
-        // Setup navigation links
-        const links = sidebar.querySelectorAll('.sidebar__link');
-        links.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const page = link.getAttribute('data-content');
-                if (page) {
-                    e.preventDefault();
-                    this.navigateTo(page);
-                }
-            });
-        });
+        // Check if user has permission to access the page
+        const userRole = User.getCurrentUserRole();
+        console.log('Current user role:', userRole);
+        
+        if (!this.hasPermission(path, userRole)) {
+            console.log('User does not have permission to access:', path);
+            this.navigateToDefaultPage(userRole);
+            return;
+        }
 
-        // Setup logout and exit links
-        const logoutLink = sidebar.querySelector('.logout-link');
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
+        console.log('Navigation authorized to:', path);
+        window.location.href = path;
+    }
+
+    hasPermission(path, role) {
+        console.log('Checking permission for:', { path, role });
+        
+        // Common pages accessible to all authenticated users
+        const commonPages = [
+            '/src/views/pages/settings.html',
+            '/src/views/pages/userProfile.html'
+        ];
+
+        // Define role-based access rules
+        const accessRules = {
+            'Genesis Admin': [
+                ...commonPages,
+                '/src/views/pages/adminControlPanel.html',
+                '/src/views/pages/platformAdmin.html',
+                '/src/views/pages/genesisAdmin.html',
+                '/src/views/pages/research.html',
+                '/src/views/pages/researchDashboard.html'
+            ],
+            'Platform Admin': [
+                ...commonPages,
+                '/src/views/pages/platformAdmin.html',
+                '/src/views/pages/adminControlPanel.html',
+                '/src/views/pages/research.html'
+            ],
+            'User Admin': [
+                ...commonPages,
+                '/src/views/pages/platformAdmin.html',
+                '/src/views/pages/adminControlPanel.html'
+            ],
+            'User': [
+                ...commonPages,
+                '/src/views/pages/dashboard.html',
+                '/src/views/pages/volunteerDashboard.html',
+                '/src/views/pages/tasks.html',
+                '/src/views/pages/messages.html',
+                '/src/views/pages/survey.html',
+                '/src/views/pages/availableSurveys.html',
+                '/src/views/pages/completedSurveys.html'
+            ],
+            'Guest': [
+                '/src/views/pages/login.html',
+                '/src/views/pages/forgot-password.html'
+            ]
+        };
+
+        // Check if role exists and path is allowed
+        if (!accessRules[role]) {
+            console.error('Invalid role:', role);
+            return false;
+        }
+
+        const hasAccess = accessRules[role].includes(path);
+        console.log('Access check result:', hasAccess);
+        return hasAccess;
+    }
+
+    navigateToDefaultPage(role) {
+        console.log('Navigating to default page for role:', role);
+        
+        switch (role) {
+            case 'Genesis Admin':
+                window.location.href = '/src/views/pages/adminControlPanel.html';
+                break;
+            case 'Platform Admin':
+            case 'User Admin':
+                window.location.href = '/src/views/pages/platformAdmin.html';
+                break;
+            case 'User':
+                window.location.href = '/src/views/pages/dashboard.html';
+                break;
+            case 'Guest':
+                window.location.href = '/src/views/pages/login.html';
+                break;
+            default:
+                console.log('No default page for role:', role);
                 this.logout();
-            });
-        }
-
-        const exitLink = sidebar.querySelector('.exit-button');
-        if (exitLink) {
-            exitLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.exitApplication();
-            });
         }
     }
 
-    /**
-     * Check if user is authenticated
-     */
-    isAuthenticated() {
-        return sessionStorage.getItem('isAuthenticated') === 'true' || 
-               sessionStorage.getItem('username') !== null;
-    }
-
-    /**
-     * Navigates to a specified page
-     */
-    navigateTo(page) {
-        try {
-            // Check authentication
-            if (!this.isAuthenticated() && !page.includes('login.html') && !page.includes('genesisAdmin.html')) {
-                window.location.href = "/src/views/pages/login.html";
-                return;
-            }
-
-            // Ensure path starts with /src/views/pages/
-            if (!page.startsWith('/')) {
-                page = '/' + page;
-            }
-            if (!page.startsWith('/src/views/pages/')) {
-                // Add .html extension if not present
-                if (!page.endsWith('.html')) {
-                    page += '.html';
-                }
-                page = `/src/views/pages${page}`;
-            }
-
-            console.log('Navigating to:', page);
-            window.location.href = page;
-        } catch (error) {
-            console.error('Navigation error:', error);
-            const message = document.createElement('div');
-            message.className = 'message message-error';
-            message.textContent = 'Navigation failed. Please try again.';
-            document.body.appendChild(message);
-            setTimeout(() => message.remove(), 3000);
-        }
-    }
-
-    /**
-     * Clears the session data except for appData
-     */
-    clearSessionData() {
-        // Preserve appData
-        const appData = sessionStorage.getItem('appData');
-        
-        // Clear session storage
-        sessionStorage.clear();
-        
-        // Restore appData
-        if (appData) {
-            sessionStorage.setItem('appData', appData);
-        }
-    }
-
-    /**
-     * Clears all session data including appData
-     */
-    clearAllData() {
-        // Clear all session storage
-        sessionStorage.clear();
-        
-        // Clear browser cache
-        if (window.caches) {
-            caches.keys().then(names => {
-                names.forEach(name => {
-                    caches.delete(name);
-                });
-            });
-        }
-    }
-
-    /**
-     * Logout user
-     */
     logout() {
-        this.clearSessionData(); // Preserves appData
-        this.navigateTo('/login');
+        console.log('Logging out...');
+        User.logout(); // This will redirect to login without clearing storage
     }
 
-    /**
-     * Exit application
-     */
     exitApplication() {
-        this.clearAllData(); // Clears everything including appData
-        window.close();
-        // Fallback if window.close() is blocked
-        this.navigateTo('/login');
+        console.log('Exiting application...');
+        User.exitApplication(); // This will clear storage and redirect to login
     }
 }
 
-// Export a singleton instance
-const navigation = new NavigationService();
+// Create and export singleton instance
+const navigation = new Navigation();
 export default navigation;

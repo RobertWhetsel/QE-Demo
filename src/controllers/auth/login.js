@@ -1,9 +1,11 @@
-import { NavigationService } from '../../services/navigation/navigation.js';
+import navigation from '../../services/navigation/navigation.js';
+import { User } from '../../models/user.js';
+import ThemeManager from '../../services/state/thememanager.js';
+import FontManager from '../../services/state/fontmanager.js';
 
 export class Auth {
     constructor() {
         this.form = document.getElementById('login-form');
-        this.navigation = new NavigationService();
         this.init();
     }
 
@@ -26,54 +28,48 @@ export class Auth {
         }
 
         try {
-            // Get users from sessionStorage (loaded by index.html)
+            // Get users from sessionStorage (loaded by init.js)
             const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
-            console.log('Login attempt with:', { username, appData }); // Debug log
+            console.log('Login attempt with:', { username }); // Debug log
             
             // Check if user exists
-            const user = appData.users.find(
+            const userData = appData.users.find(
                 (user) => user.username === username && user.password === password
             );
 
-            if (user) {
-                console.log('User found:', user); // Debug log
+            if (userData) {
+                console.log('User found:', userData); // Debug log
                 
-                // Set session data consistently
+                // Set session data through User model
                 sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('userRole', user.role);
-                sessionStorage.setItem('username', user.username);
+                sessionStorage.setItem('userRole', userData.role);
+                sessionStorage.setItem('username', userData.username);
+
+                // Create user instance
+                const user = new User(userData);
 
                 // Initialize user preferences if they don't exist
-                const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${user.username}`) || '{}');
-                if (Object.keys(userPreferences).length === 0) {
-                    userPreferences.theme = 'light';
-                    userPreferences.fontFamily = 'Arial';
-                    userPreferences.notifications = false;
-                    localStorage.setItem(`user_preferences_${user.username}`, JSON.stringify(userPreferences));
-                }
+                const userPreferences = User.getUserPreferences() || {
+                    theme: 'light',
+                    fontFamily: 'Arial',
+                    notifications: false
+                };
+                User.updateUserPreferences(userPreferences);
 
-                // Load and apply user preferences
-                const [ThemeManager, FontManager] = await Promise.all([
-                    import('/src/services/state/thememanager.js'),
-                    import('/src/services/state/fontmanager.js')
-                ]);
-
-                ThemeManager.default.applyTheme(userPreferences.theme || 'light');
-                FontManager.default.applyFont(userPreferences.fontFamily || 'Arial');
+                // Apply user preferences
+                ThemeManager.applyTheme(userPreferences.theme || 'light');
+                FontManager.applyFont(userPreferences.fontFamily || 'Arial');
 
                 // Redirect based on role with strict role-based access
-                switch (user.role) {
+                switch (userData.role) {
                     case 'Genesis Admin':
                         // Genesis Admin manages other admins through the admin control panel
-                        this.navigation.navigateTo('/src/views/pages/adminControlPanel.html');
+                        navigation.navigateTo('/src/views/pages/adminControlPanel.html');
                         break;
                     case 'Platform Admin':
-                        // Platform Admin can only create teams
-                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
-                        break;
                     case 'User Admin':
-                        // User Admin can only create users
-                        this.navigation.navigateTo('/src/views/pages/adminDashboard.html');
+                        // Both Platform Admin and User Admin go to platform admin dashboard
+                        navigation.navigateTo('/src/views/pages/platformAdmin.html');
                         break;
                     default:
                         this.showError('Invalid user role');

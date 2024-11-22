@@ -8,6 +8,7 @@
     --color-text-primary: #ffffff;
     --color-text-secondary: #cccccc;
     --color-text-tertiary: #999999;
+    --color-text-on-brand: #ffffff;
     
     --color-border-default: rgba(255, 255, 255, 0.1);
     --color-border-hover: rgba(255, 255, 255, 0.2);
@@ -21,12 +22,16 @@
     /* Feedback Colors - Adjusted for dark theme */
     --color-success: #3cbd5c;
     --color-success-hover: #2ea548;
+    --color-success-bg: rgba(60, 189, 92, 0.15);
     --color-error: #e4545f;
     --color-error-hover: #d63d4a;
+    --color-error-bg: rgba(228, 84, 95, 0.15);
     --color-warning: #ffd11a;
     --color-warning-hover: #e6bc18;
+    --color-warning-bg: rgba(255, 209, 26, 0.15);
     --color-info: #29b9cc;
     --color-info-hover: #1fa3b8;
+    --color-info-bg: rgba(41, 185, 204, 0.15);
     
     /* Elevation - Adjusted for dark theme */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -37,20 +42,20 @@
     color-scheme: dark;
 }
 
-/* Ensure all elements inherit theme colors */
-[data-theme="dark"] *:not([class*="theme-preview"]) {
-    background-color: var(--color-surface-primary);
-    color: var(--color-text-primary);
-    border-color: var(--color-border-default);
-}
-
 /* Form elements */
 [data-theme="dark"] input:not([type="submit"]):not([type="button"]):not([type="reset"]),
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
     background-color: var(--color-surface-secondary) !important;
     color: var(--color-text-primary) !important;
-    border-color: var(--color-border-default) !important;
+    border: 1px solid var(--color-border-default) !important;
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    border-color: var(--color-brand-primary) !important;
+    box-shadow: 0 0 0 2px rgba(77, 159, 255, 0.25) !important;
 }
 
 /* Buttons */
@@ -63,21 +68,29 @@
     background-color: var(--color-brand-primary-hover);
 }
 
-/* Navigation */
-[data-theme="dark"] .nav {
-    background-color: var(--color-surface-secondary);
-    border-color: var(--color-border-default);
+/* Messages */
+[data-theme="dark"] .error-message {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border: 1px solid rgba(228, 84, 95, 0.3);
 }
 
-[data-theme="dark"] .sidebar {
-    background-color: var(--color-surface-secondary);
-    border-color: var(--color-border-default);
+[data-theme="dark"] .success-message {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid rgba(60, 189, 92, 0.3);
 }
 
-/* Sections */
-[data-theme="dark"] .section {
-    background-color: var(--color-surface-secondary);
-    border-color: var(--color-border-default);
+[data-theme="dark"] .warning-message {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: 1px solid rgba(255, 209, 26, 0.3);
+}
+
+[data-theme="dark"] .info-message {
+    background-color: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid rgba(41, 185, 204, 0.3);
 }
 
 /* Selection */
@@ -98,9 +111,35 @@
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
     background: var(--color-brand-secondary);
-    border-radius: var(--border-radius);
+    border-radius: 5px;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     background: var(--color-brand-secondary-hover);
+}
+
+/* Tables */
+[data-theme="dark"] .table th {
+    background-color: var(--color-surface-secondary);
+    border-bottom: 1px solid var(--color-border-default);
+}
+
+[data-theme="dark"] .table td {
+    border-bottom: 1px solid var(--color-border-default);
+}
+
+/* Cards and Sections */
+[data-theme="dark"] .section {
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Links */
+[data-theme="dark"] a {
+    color: var(--color-brand-primary);
+}
+
+[data-theme="dark"] a:hover {
+    color: var(--color-brand-primary-hover);
 }

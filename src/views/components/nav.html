@@ -2,27 +2,87 @@
     <div class="nav__container">
         <div class="nav__left">
             <button id="hamburger" class="nav__toggle">&#9776;</button>
-            <span class="nav__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-height: 40px; width: auto;"></span>
         </div>
         <div class="nav__menu">
             <span id="userName" class="nav__link user-name">User</span>
+            <div id="navMenu" class="nav__dropdown" hidden>
+                <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+            </div>
         </div>
     </div>
 </nav>
 
 <script type="module">
-document.addEventListener('DOMContentLoaded', () => {
-    const userNameEl = document.getElementById('userName');
-    
-    // Setup hamburger menu
-    document.getElementById('hamburger').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('sidebar--open');
-    });
-    
-    // Set username from session
-    const userName = sessionStorage.getItem('userName') || localStorage.getItem('userName') || "User";
-    if (userName) {
-        userNameEl.textContent = userName;
+import navigation from '/src/services/navigation/navigation.js';
+
+// Initialize nav when user data is ready
+Promise.resolve().then(() => {
+    if (!window.QE?.currentUser) {
+        return new Promise(resolve => {
+            document.addEventListener('userDataReady', resolve, { once: true });
+        });
     }
+}).then(() => {
+    console.log('Initializing nav with user:', window.QE?.currentUser);
+    const hamburger = document.getElementById('hamburger');
+    const userNameEl = document.getElementById('userName');
+    const navMenu = document.getElementById('navMenu');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    // Set username from global user data
+    if (userNameEl && window.QE?.currentUser) {
+        userNameEl.textContent = window.QE.currentUser.fullName || window.QE.currentUser.username;
+        userNameEl.dataset.role = window.QE.currentUser.role;
+        console.log('Username set:', userNameEl.textContent);
+    }
+
+    // Setup hamburger menu
+    if (hamburger) {
+        hamburger.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('sidebar--open');
+                console.log('Toggled sidebar');
+            } else {
+                console.error('Sidebar element not found');
+            }
+        });
+    }
+
+    // Setup username dropdown
+    if (userNameEl && navMenu) {
+        userNameEl.addEventListener('click', () => {
+            navMenu.toggleAttribute('hidden');
+            console.log('Toggled nav menu');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.nav__menu')) {
+                navMenu.setAttribute('hidden', '');
+            }
+        });
+    }
+
+    // Setup logout functionality
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            console.log('Logging out...');
+            navigation.logout();
+        });
+    }
+
+    // Dispatch event when nav is ready
+    const event = new CustomEvent('navReady', { 
+        detail: { 
+            username: window.QE?.currentUser?.username,
+            fullName: window.QE?.currentUser?.fullName,
+            role: window.QE?.currentUser?.role 
+        }
+    });
+    document.dispatchEvent(event);
+    console.log('Nav component ready');
+}).catch(error => {
+    console.error('Error initializing nav:', error);
 });
 </script>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test User Initialization</title>
+</head>
+<body>
+    <h2>User Initialization Test</h2>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import { User } from '../../models/user.js';
+
+        // Test default user initialization
+        console.log('Testing user initialization...');
+        const user = new User();
+        
+        // Display results
+        document.getElementById('output').textContent = JSON.stringify(user, null, 2);
+        
+        // Test default users CSV initialization
+        const defaultUsers = User.loadUsersFromCSV();
+        console.log('Default users:', defaultUsers);
+    </script>
+</body>
+</html>

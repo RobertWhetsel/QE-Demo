@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,39 +28,72 @@
     <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
     <link rel="stylesheet" href="/src/views/styles/components/button.css">
     <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    <link rel="stylesheet" href="/src/views/styles/components/profile.css">
-    <link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
     
     <style>
-        /* Settings specific styles */
+        :root {
+            --nav-height: 60px;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-family-custom);
+        }
+
+        .page {
+            padding-top: var(--nav-height);
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            transition: background-color var(--transition-speed);
+        }
+
+        .page__container {
+            padding-left: var(--sidebar-width);
+            transition: padding-left var(--transition-speed);
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        .content-area {
+            padding: var(--spacing-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         .settings-container {
-            padding: 2rem;
+            padding: var(--spacing-lg);
         }
         
         .settings-form {
             max-width: 600px;
-            margin: 2rem 0;
+            margin: var(--spacing-lg) 0;
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-lg);
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--spacing-sm);
             font-weight: 500;
+            color: var(--color-text-primary);
         }
         
         .form-group select,
         .form-group input[type="checkbox"],
         .form-group input[type="email"],
         .form-group input[type="tel"] {
-            padding: 0.5rem;
+            padding: var(--spacing-sm);
             border: 1px solid var(--color-border);
             border-radius: 4px;
             background-color: var(--color-surface-secondary);
             color: var(--color-text-primary);
+            transition: border-color var(--transition-speed),
+                        box-shadow var(--transition-speed);
         }
         
         .form-group select,
@@ -70,47 +103,68 @@
             max-width: 300px;
         }
 
+        .form-group select:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="tel"]:focus {
+            border-color: var(--color-brand-primary);
+            box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
+            outline: none;
+        }
+
         .notification-methods {
-            margin-top: 1rem;
+            margin-top: var(--spacing-md);
             display: flex;
-            gap: 1rem;
+            gap: var(--spacing-md);
         }
 
         .notification-method {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: var(--spacing-sm);
         }
 
         .notification-fields {
-            margin-top: 1rem;
+            margin-top: var(--spacing-md);
             display: none;
         }
 
         .notification-fields.show {
             display: block;
         }
-        
+
+        .notification-email-fields,
+        .notification-phone-fields {
+            display: none;
+            margin-top: var(--spacing-md);
+        }
+
+        .notification-email-fields.show,
+        .notification-phone-fields.show {
+            display: block;
+        }
+
         .section {
             background-color: var(--color-surface-secondary);
             border: 1px solid var(--color-border-default);
             border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
         }
-        
+
         .section-title {
             margin-top: 0;
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-lg);
             color: var(--color-text-primary);
         }
 
         /* Theme preview styles */
         .theme-preview {
-            margin-top: 1rem;
-            padding: 1rem;
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md);
             border-radius: 4px;
             border: 1px solid var(--color-border-default);
+            transition: all var(--transition-speed);
         }
 
         .theme-preview.light {
@@ -122,6 +176,28 @@
             background-color: #1c1c1c;
             color: #ffffff;
         }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .page__container {
+                padding-left: 0;
+            }
+
+            .content-area {
+                padding: var(--spacing-md);
+            }
+
+            .section {
+                padding: var(--spacing-md);
+                margin-bottom: var(--spacing-md);
+            }
+
+            .form-group select,
+            .form-group input[type="email"],
+            .form-group input[type="tel"] {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body class="page">
@@ -129,7 +205,7 @@
     <nav class="nav">
         <div class="nav__container">
             <div class="nav__left">
-                <button id="hamburger" class="nav__toggle">&#9776;</button>
+                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
             </div>
             <div class="nav__menu">
                 <span id="userName" class="nav__link user-name">User</span>
@@ -142,11 +218,13 @@
 
     <!-- Include sidebar -->
     <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
-        <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
+        <div class="sidebar__brand">
+            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+        </div>
         <div id="menu-items">
             <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
-            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
+            <a href="/src/views/pages/settings.html" class="sidebar__link active">Settings</a>
             <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
         </div>
         <div class="sidebar__footer">
@@ -156,7 +234,7 @@
     </div>
 
     <div class="page__container">
-        <div class="content-area l-container">
+        <div class="content-area">
             <div class="settings-container">
                 <h1 class="page-title">Settings</h1>
                 
@@ -192,6 +270,8 @@
                                 The quick brown fox jumps over the lazy dog
                             </div>
                         </div>
+
+                        <!-- Notifications section -->
                         <div class="form-group">
                             <label>Notifications</label>
                             <div class="notification-methods">
@@ -201,21 +281,22 @@
                                 </div>
                             </div>
                             <div id="notification-fields" class="notification-fields">
-                                <div class="form-group">
+                                <div class="notification-method">
+                                    <input type="checkbox" id="email-notifications" name="email-notifications">
+                                    <label for="email-notifications">Email Notifications</label>
+                                </div>
+                                <div class="notification-email-fields">
                                     <label for="notification-email">Email Address</label>
                                     <input type="email" id="notification-email" name="notification-email" placeholder="Enter your email">
-                                    <div class="notification-method">
-                                        <input type="checkbox" id="email-notifications" name="email-notifications">
-                                        <label for="email-notifications">Receive Email Notifications</label>
-                                    </div>
                                 </div>
-                                <div class="form-group">
+
+                                <div class="notification-method">
+                                    <input type="checkbox" id="sms-notifications" name="sms-notifications">
+                                    <label for="sms-notifications">Text Message Notifications</label>
+                                </div>
+                                <div class="notification-phone-fields">
                                     <label for="notification-phone">Phone Number</label>
                                     <input type="tel" id="notification-phone" name="notification-phone" placeholder="Enter your phone number">
-                                    <div class="notification-method">
-                                        <input type="checkbox" id="sms-notifications" name="sms-notifications">
-                                        <label for="sms-notifications">Receive Text Message Notifications</label>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -228,199 +309,201 @@
 
     <script type="module">
         import navigation from '/src/services/navigation/navigation.js';
+        import { User } from '/src/models/user.js';
         import ThemeManager from '/src/services/state/thememanager.js';
         import FontManager from '/src/services/state/fontmanager.js';
 
-        // Check if user is logged in
-        if (!navigation.isAuthenticated()) {
-            window.location.href = '/src/views/pages/login.html';
-            throw new Error('User not logged in');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const closeBtn = document.getElementById('close-sidebar');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const logoutLink = document.querySelector('.logout-link');
-            const exitButton = document.querySelector('.exit-button');
-            const userNameEl = document.getElementById('userName');
-            const navMenu = document.getElementById('navMenu');
-            const themeSelect = document.getElementById('theme');
-            const themePreview = document.getElementById('theme-preview');
-            const fontSelect = document.getElementById('font-family');
-            const fontPreview = document.getElementById('font-preview');
-            const notificationsCheckbox = document.getElementById('notifications');
-            const notificationFields = document.getElementById('notification-fields');
-
-            // Function to update font preview
-            function updateFontPreview(fontFamily) {
-                const fontConfig = FontManager.fontMap[fontFamily];
-                if (fontConfig) {
-                    fontPreview.style.fontFamily = fontConfig.cssFamily;
-                    fontSelect.value = fontFamily;
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                if (!User.isAuthenticated()) {
+                    window.location.href = '/src/views/pages/login.html';
+                    throw new Error('User not logged in');
                 }
-            }
 
-            // Load user preferences
-            const username = sessionStorage.getItem('username');
-            const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
+                // Setup navigation components
+                const hamburger = document.getElementById('hamburger');
+                const sidebar = document.getElementById('sidebar');
+                const closeBtn = document.getElementById('close-sidebar');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const logoutLink = document.querySelector('.logout-link');
+                const exitButton = document.querySelector('.exit-button');
+                const userNameEl = document.getElementById('userName');
+                const navMenu = document.getElementById('navMenu');
 
-            // Load notification preferences
-            if (userPreferences.notifications) {
-                notificationsCheckbox.checked = true;
-                notificationFields.classList.add('show');
-                document.getElementById('notification-email').value = userPreferences.notificationEmail || '';
-                document.getElementById('notification-phone').value = userPreferences.notificationPhone || '';
-                document.getElementById('email-notifications').checked = userPreferences.emailNotifications || false;
-                document.getElementById('sms-notifications').checked = userPreferences.smsNotifications || false;
-            }
-
-            // Load theme preference
-            const currentTheme = ThemeManager.getTheme();
-            themeSelect.value = currentTheme;
-            updateThemePreview(currentTheme);
-
-            // Load font preference and update preview
-            const currentFont = FontManager.getFont();
-            if (currentFont) {
-                updateFontPreview(currentFont);
-            }
-
-            // Handle notifications toggle
-            notificationsCheckbox.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    notificationFields.classList.add('show');
-                } else {
-                    notificationFields.classList.remove('show');
-                }
-            });
-
-            // Handle font changes
-            fontSelect.addEventListener('change', (e) => {
-                const newFont = e.target.value;
-                FontManager.setFont(newFont);
-                updateFontPreview(newFont);
-            });
-
-            // Listen for font changes from other sources
-            window.addEventListener('fontchange', (event) => {
-                if (event.detail && event.detail.fontFamily) {
-                    updateFontPreview(event.detail.fontFamily);
-                }
-            });
-
-            // Handle theme changes
-            themeSelect.addEventListener('change', (e) => {
-                const newTheme = e.target.value;
-                ThemeManager.setTheme(newTheme);
-                updateThemePreview(newTheme);
-            });
-
-            // Update theme preview
-            function updateThemePreview(theme) {
-                themePreview.className = `theme-preview ${theme}`;
-            }
-
-            // Setup hamburger menu
-            if (hamburger && sidebar) {
-                hamburger.addEventListener('click', () => {
-                    sidebar.classList.toggle('sidebar--open');
-                });
-            }
-
-            // Setup close button
-            if (closeBtn && sidebar) {
-                closeBtn.addEventListener('click', () => {
-                    sidebar.classList.remove('sidebar--open');
-                });
-            }
-
-            // Setup logout functionality
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => navigation.logout());
-            }
-            if (logoutLink) {
-                logoutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigation.logout();
-                });
-            }
-
-            // Setup exit functionality
-            if (exitButton) {
-                exitButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigation.exitApplication();
-                });
-            }
-
-            // Setup username display and dropdown
-            if (userNameEl) {
-                const userName = sessionStorage.getItem('username') || "User";
-                userNameEl.textContent = userName;
-
-                userNameEl.addEventListener('click', () => {
-                    navMenu.toggleAttribute('hidden');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.nav__menu')) {
-                        navMenu.setAttribute('hidden', '');
-                    }
-                });
-            }
-
-            // Setup navigation links
-            const links = document.querySelectorAll('.sidebar__link[href]');
-            links.forEach(link => {
-                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.navigateTo(link.getAttribute('href'));
+                // Setup hamburger menu
+                if (hamburger && sidebar) {
+                    hamburger.addEventListener('click', () => {
+                        sidebar.classList.toggle('sidebar--open');
                     });
                 }
-            });
 
-            // Show/hide admin-only elements
-            const userRole = sessionStorage.getItem('userRole');
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
-            });
-
-            // Handle settings form submission
-            document.getElementById('settings-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                // Get username and existing preferences
-                const username = sessionStorage.getItem('username');
-                const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-                
-                // Update all preferences while preserving existing ones
-                userPreferences.notifications = document.getElementById('notifications').checked;
-                userPreferences.fontFamily = document.getElementById('font-family').value;
-                userPreferences.theme = document.getElementById('theme').value;
-                
-                // Save notification preferences if enabled
-                if (userPreferences.notifications) {
-                    userPreferences.notificationEmail = document.getElementById('notification-email').value;
-                    userPreferences.notificationPhone = document.getElementById('notification-phone').value;
-                    userPreferences.emailNotifications = document.getElementById('email-notifications').checked;
-                    userPreferences.smsNotifications = document.getElementById('sms-notifications').checked;
+                // Setup close button
+                if (closeBtn && sidebar) {
+                    closeBtn.addEventListener('click', () => {
+                        sidebar.classList.remove('sidebar--open');
+                    });
                 }
 
-                // Save all preferences to localStorage
-                localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+                // Setup logout functionality
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => navigation.logout());
+                }
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.logout();
+                    });
+                }
 
-                // Apply theme and font changes
-                ThemeManager.setTheme(userPreferences.theme);
-                FontManager.setFont(userPreferences.fontFamily);
-                
-                alert('Settings saved successfully');
-            });
-        });
+                // Setup exit functionality
+                if (exitButton) {
+                    exitButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.exitApplication();
+                    });
+                }
+
+                // Setup username display and dropdown
+                if (userNameEl) {
+                    const userName = sessionStorage.getItem('username') || "User";
+                    userNameEl.textContent = userName;
+
+                    userNameEl.addEventListener('click', () => {
+                        navMenu.toggleAttribute('hidden');
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.nav__menu')) {
+                            navMenu.setAttribute('hidden', '');
+                        }
+                    });
+                }
+
+                // Setup navigation links
+                const links = document.querySelectorAll('.sidebar__link[href]');
+                links.forEach(link => {
+                    if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            navigation.navigateTo(link.getAttribute('href'));
+                        });
+                    }
+                });
+
+                // Show/hide admin-only elements
+                const userRole = sessionStorage.getItem('userRole');
+                const adminElements = document.querySelectorAll('.admin-only');
+                adminElements.forEach(el => {
+                    el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+                });
+
+                // Load user preferences
+                const preferences = User.getUserPreferences();
+                if (preferences) {
+                    // Load notification preferences
+                    if (preferences.notifications) {
+                        document.getElementById('notifications').checked = true;
+                        document.getElementById('notification-fields').classList.add('show');
+                        
+                        if (preferences.emailNotifications) {
+                            document.getElementById('email-notifications').checked = true;
+                            document.querySelector('.notification-email-fields').classList.add('show');
+                            document.getElementById('notification-email').value = preferences.notificationEmail || '';
+                        }
+                        
+                        if (preferences.smsNotifications) {
+                            document.getElementById('sms-notifications').checked = true;
+                            document.querySelector('.notification-phone-fields').classList.add('show');
+                            document.getElementById('notification-phone').value = preferences.notificationPhone || '';
+                        }
+                    }
+
+                    // Load theme and font preferences
+                    document.getElementById('theme').value = preferences.theme || 'light';
+                    document.getElementById('font-family').value = preferences.fontFamily || 'Arial';
+                    
+                    // Update previews
+                    document.getElementById('theme-preview').className = `theme-preview ${preferences.theme || 'light'}`;
+                    document.getElementById('font-preview').style.fontFamily = FontManager.fontMap[preferences.fontFamily || 'Arial'].cssFamily;
+                }
+
+                // Handle notifications toggle
+                document.getElementById('notifications').addEventListener('change', (e) => {
+                    const notificationFields = document.getElementById('notification-fields');
+                    notificationFields.classList.toggle('show', e.target.checked);
+                    if (!e.target.checked) {
+                        document.getElementById('email-notifications').checked = false;
+                        document.getElementById('sms-notifications').checked = false;
+                        document.querySelector('.notification-email-fields').classList.remove('show');
+                        document.querySelector('.notification-phone-fields').classList.remove('show');
+                    }
+                });
+
+                // Handle email notifications toggle
+                document.getElementById('email-notifications').addEventListener('change', (e) => {
+                    document.querySelector('.notification-email-fields').classList.toggle('show', e.target.checked);
+                });
+
+                // Handle SMS notifications toggle
+                document.getElementById('sms-notifications').addEventListener('change', (e) => {
+                    document.querySelector('.notification-phone-fields').classList.toggle('show', e.target.checked);
+                });
+
+                // Handle theme changes
+                document.getElementById('theme').addEventListener('change', (e) => {
+                    const newTheme = e.target.value;
+                    ThemeManager.setTheme(newTheme);
+                    document.getElementById('theme-preview').className = `theme-preview ${newTheme}`;
+                });
+
+                // Handle font changes
+                document.getElementById('font-family').addEventListener('change', (e) => {
+                    const newFont = e.target.value;
+                    FontManager.setFont(newFont);
+                    document.getElementById('font-preview').style.fontFamily = FontManager.fontMap[newFont].cssFamily;
+                });
+
+                // Handle settings form submission
+                document.getElementById('settings-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    const preferences = {
+                        notifications: document.getElementById('notifications').checked,
+                        fontFamily: document.getElementById('font-family').value,
+                        theme: document.getElementById('theme').value
+                    };
+                    
+                    // Save notification preferences if enabled
+                    if (preferences.notifications) {
+                        preferences.notificationEmail = document.getElementById('notification-email').value;
+                        preferences.notificationPhone = document.getElementById('notification-phone').value;
+                        preferences.emailNotifications = document.getElementById('email-notifications').checked;
+                        preferences.smsNotifications = document.getElementById('sms-notifications').checked;
+                    }
+
+                    if (User.updateUserPreferences(preferences)) {
+                        // Apply theme and font changes
+                        ThemeManager.setTheme(preferences.theme);
+                        FontManager.setFont(preferences.fontFamily);
+                        alert('Settings saved successfully');
+                    } else {
+                        alert('Failed to save settings');
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
     </script>
 </body>
 </html>

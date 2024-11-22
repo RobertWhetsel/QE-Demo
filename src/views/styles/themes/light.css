@@ -1,5 +1,6 @@
 /* Light Theme */
 :root[data-theme="light"] {
+    /* Base colors */
     --color-surface-primary: #ffffff;
     --color-surface-secondary: #f8f9fa;
     --color-surface-tertiary: #e9ecef;
@@ -12,23 +13,75 @@
     --color-border-default: rgba(0, 0, 0, 0.1);
     --color-border-hover: rgba(0, 0, 0, 0.2);
     
+    /* Brand Colors */
     --color-brand-primary: #007bff;
     --color-brand-primary-hover: #0056b3;
     --color-brand-secondary: #6c757d;
     --color-brand-secondary-hover: #545b62;
     
+    /* Feedback Colors */
     --color-success: #28a745;
     --color-success-hover: #218838;
+    --color-success-bg: #d4edda;
     --color-error: #dc3545;
     --color-error-hover: #c82333;
+    --color-error-bg: #f8d7da;
     --color-warning: #ffc107;
     --color-warning-hover: #e0a800;
+    --color-warning-bg: #fff3cd;
     --color-info: #17a2b8;
     --color-info-hover: #138496;
+    --color-info-bg: #d1ecf1;
     
+    /* Elevation */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
 
+    /* System */
     color-scheme: light;
+}
+
+/* Form elements */
+[data-theme="light"] input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+}
+
+/* Buttons */
+[data-theme="light"] .button {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+[data-theme="light"] .button:hover {
+    background-color: var(--color-brand-primary-hover);
+}
+
+/* Selection */
+[data-theme="light"] ::selection {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+}
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+    background: var(--color-surface-secondary);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: var(--color-brand-secondary);
+    border-radius: 5px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-secondary-hover);
 }

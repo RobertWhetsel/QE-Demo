@@ -1,37 +1,43 @@
-export default class ThemeManager {
-    static getTheme() {
-        const username = sessionStorage.getItem('username');
-        if (!username) return 'light';
+import { User } from '../../models/user.js';
 
-        const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-        return userPreferences.theme || 'light';
+class ThemeManager {
+    constructor() {
+        this.initialize();
+    }
+
+    getTheme() {
+        if (!User.isAuthenticated()) return 'light';
+
+        const preferences = User.getUserPreferences();
+        return preferences?.theme || 'light';
     }
     
-    static setTheme(theme) {
-        console.log('Setting theme:', theme); // Debug log
-        const username = sessionStorage.getItem('username');
-        if (!username) return;
+    setTheme(theme) {
+        console.log('Setting theme:', theme);
+        if (!User.isAuthenticated()) return;
 
-        // Save theme preference
-        const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-        userPreferences.theme = theme;
-        localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+        // Get current preferences and update theme
+        const preferences = User.getUserPreferences() || {};
+        preferences.theme = theme;
         
-        // Apply theme
-        this.applyTheme(theme);
+        // Save updated preferences
+        if (User.updateUserPreferences(preferences)) {
+            // Apply theme
+            this.applyTheme(theme);
 
-        // Notify other windows/tabs
-        const changeEvent = {
-            theme,
-            timestamp: Date.now(),
-            username
-        };
-        localStorage.setItem('theme_change', JSON.stringify(changeEvent));
-        console.log('Theme change event dispatched:', changeEvent); // Debug log
+            // Notify other windows/tabs
+            const changeEvent = {
+                theme,
+                timestamp: Date.now(),
+                username: User.getCurrentUser()?.username
+            };
+            localStorage.setItem('theme_change', JSON.stringify(changeEvent));
+            console.log('Theme change event dispatched:', changeEvent);
+        }
     }
     
-    static applyTheme(theme) {
-        console.log('Applying theme:', theme); // Debug log
+    applyTheme(theme) {
+        console.log('Applying theme:', theme);
         
         // Remove any existing theme
         document.documentElement.removeAttribute('data-theme');
@@ -49,23 +55,24 @@ export default class ThemeManager {
         });
         window.dispatchEvent(event);
         
-        console.log('Theme applied:', theme); // Debug log
+        console.log('Theme applied:', theme);
     }
     
-    static initialize() {
-        console.log('Initializing ThemeManager'); // Debug log
+    initialize() {
+        console.log('Initializing ThemeManager');
         
         // Apply theme immediately
         const theme = this.getTheme();
-        console.log('Initial theme:', theme); // Debug log
+        console.log('Initial theme:', theme);
         this.applyTheme(theme);
 
         // Listen for changes from other tabs/windows
         window.addEventListener('storage', (event) => {
             if (event.key === 'theme_change') {
                 const data = JSON.parse(event.newValue || '{}');
-                console.log('Theme change detected:', data); // Debug log
-                if (data.theme && data.username === sessionStorage.getItem('username')) {
+                console.log('Theme change detected:', data);
+                const currentUser = User.getCurrentUser();
+                if (data.theme && data.username === currentUser?.username) {
                     this.applyTheme(data.theme);
                 }
             }
@@ -73,9 +80,13 @@ export default class ThemeManager {
 
         // Listen for theme changes from within the application
         window.addEventListener('themechange', (event) => {
-            console.log('Theme change event received:', event.detail); // Debug log
+            console.log('Theme change event received:', event.detail);
         });
 
-        console.log('ThemeManager initialized'); // Debug log
+        console.log('ThemeManager initialized');
     }
 }
+
+// Export singleton instance
+const themeManager = new ThemeManager();
+export default themeManager;

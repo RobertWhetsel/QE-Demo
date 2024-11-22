@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Admin Dashboard - Quantum Eye</title>
+    
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
+    
+    <!-- Load common head content and components -->
+    <script type="module">
+        import { loadCommonHead, loadCommonComponents } from '/src/utils/loadCommonHead.js';
+        loadCommonHead();
+        loadCommonComponents();
+    </script>
+    
+    <style>
+        .dashboard-container {
+            padding: 2rem;
+        }
+        
+        .dashboard-section {
+            background-color: var(--color-surface-secondary);
+            border: 1px solid var(--color-border-default);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background-color: var(--color-surface-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-brand-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--color-brand-primary);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: var(--color-brand-primary-hover);
+        }
+    </style>
+</head>
+<body class="page">
+    <div class="page__container">
+        <div class="content-area l-container">
+            <div class="dashboard-container">
+                <h1 class="page-title">Platform Admin Dashboard</h1>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="userCount">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeUsers">0</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="pendingTasks">0</div>
+                        <div class="stat-label">Pending Tasks</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-button" id="createTeam">Create Team</button>
+                    <button class="action-button" id="manageUsers">Manage Users</button>
+                    <button class="action-button" id="viewReports">View Reports</button>
+                </div>
+
+                <div class="dashboard-section">
+                    <h2>Recent Activity</h2>
+                    <div id="activityLog"></div>
+                </div>
+
+                <div class="dashboard-section">
+                    <h2>System Status</h2>
+                    <div id="systemStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { NavigationService } from '/src/services/navigation/navigation.js';
+        import ThemeManager from '/src/services/state/thememanager.js';
+        import FontManager from '/src/services/state/fontmanager.js';
+
+        // Check if user is logged in
+        const navigation = new NavigationService();
+        if (!navigation.isAuthenticated()) {
+            window.location.href = '/src/views/pages/login.html';
+            throw new Error('User not logged in');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load dashboard data
+            const loadDashboardData = () => {
+                try {
+                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
+                    
+                    // Update stats
+                    document.getElementById('userCount').textContent = appData.users.length;
+                    document.getElementById('activeUsers').textContent = appData.users.filter(user => user.active).length;
+                    document.getElementById('pendingTasks').textContent = '0'; // TODO: Implement task tracking
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                }
+            };
+
+            // Load dashboard data immediately
+            loadDashboardData();
+
+            // Handle action button clicks
+            document.getElementById('createTeam').addEventListener('click', () => {
+                alert('Create Team functionality coming soon');
+            });
+
+            document.getElementById('manageUsers').addEventListener('click', () => {
+                alert('Manage Users functionality coming soon');
+            });
+
+            document.getElementById('viewReports').addEventListener('click', () => {
+                alert('View Reports functionality coming soon');
+            });
+        });
+    </script>
+</body>
+</html>

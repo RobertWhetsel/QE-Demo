@@ -5,29 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{pageTitle}} - Quantum Eye</title>
 
-    <!-- Core variables -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    
-    <!-- Theme styles - Must be after variables -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles - Must be before base styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-
     <!-- Initialize application state -->
     <script type="module" src="/src/services/init.js"></script>
+    
+    <!-- Load common head content and components -->
+    <script type="module">
+        import { loadCommonHead, loadCommonComponents } from '/src/utils/loadCommonHead.js';
+        loadCommonHead();
+        loadCommonComponents();
+    </script>
 
     <!-- Additional styles -->
     <script>
@@ -40,9 +26,11 @@
         }
     </script>
 </head>
-<body class="{{pageClass}}">
-    <div id="main-content">
-        {{content}}
+<body class="page {{pageClass}}">
+    <div class="page__container">
+        <div class="content-area l-container">
+            {{content}}
+        </div>
     </div>
 
     <script type="module">

@@ -1,0 +1,85 @@
+[2024-11-22T00:37:10.710Z] [INFO] Application Initialization Started
+[2024-11-22T00:37:10.710Z] [INFO] Current location:
+/src/views/pages/adminControlPanel.html
+[2024-11-22T00:37:10.710Z] [INFO] Initial storage state:
+{
+  "sessionStorage": {
+    "keys": [
+      "phantom.contentScript.providerInjectionOptions.v3",
+      "userRole",
+      "isAuthenticated",
+      "fullName",
+      "IsThisFirstTime_Log_From_LiveServer",
+      "username",
+      "currentUser"
+    ],
+    "isAuthenticated": "true",
+    "username": "genesis",
+    "userRole": "Genesis Admin"
+  },
+  "localStorage": {
+    "keys": [
+      "setupComplete",
+      "theme_change",
+      "users_json",
+      "font_change",
+      "user_preferences_rwhetsel",
+      "user_preferences_genesis",
+      "users_csv",
+      "admins"
+    ],
+    "hasUsersCsv": true,
+    "hasUsersJson": true
+  }
+}
+[2024-11-22T00:37:10.710Z] [INFO] Is login page:
+false
+[2024-11-22T00:37:10.710Z] [INFO] Initializing theme manager
+[2024-11-22T00:37:10.711Z] [INFO] Initializing font manager
+[2024-11-22T00:37:10.712Z] [INFO] Setting up global QE object
+[2024-11-22T00:37:10.712Z] [INFO] Checking authentication status
+[2024-11-22T00:37:10.712Z] [INFO] Authentication check:
+{
+  "isAuthenticated": true,
+  "username": "genesis"
+}
+[2024-11-22T00:37:10.712Z] [INFO] Loading user data for:
+genesis
+[2024-11-22T00:37:10.712Z] [INFO] Retrieving current user data
+[2024-11-22T00:37:10.712Z] [INFO] Current user data:
+{
+  "username": "genesis",
+  "role": "Genesis Admin",
+  "status": "active"
+}
+[2024-11-22T00:37:10.712Z] [INFO] Setting global user data
+[2024-11-22T00:37:10.712Z] [INFO] Loading user preferences
+[2024-11-22T00:37:10.712Z] [INFO] User preferences loaded:
+{
+  "theme": "light",
+  "fontFamily": "Arial",
+  "fontSize": "medium",
+  "highContrast": false,
+  "notifications": false,
+  "emailNotifications": false,
+  "smsNotifications": false,
+  "notificationEmail": "admin@example.com",
+  "notificationPhone": "555-0000",
+  "language": "en",
+  "timezone": "America/Denver",
+  "dateFormat": "MM/DD/YYYY",
+  "timeFormat": "12h",
+  "screenReader": false,
+  "motionReduced": false,
+  "showEmail": false,
+  "showPhone": false
+}
+[2024-11-22T00:37:10.712Z] [INFO] Applying theme:
+light
+[2024-11-22T00:37:10.713Z] [INFO] Applying font:
+Arial
+[2024-11-22T00:37:10.713Z] [INFO] Setting up preference change listener
+[2024-11-22T00:37:10.713Z] [INFO] Dispatching userDataReady event
+[2024-11-22T00:37:10.713Z] [INFO] User data ready event dispatched
+[2024-11-22T00:37:10.713Z] [INFO] Dispatching appInitialized event
+[2024-11-22T00:37:10.713Z] [INFO] Application initialization complete

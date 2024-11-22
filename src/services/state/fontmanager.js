@@ -1,6 +1,8 @@
-export default class FontManager {
+import { User } from '../../models/user.js';
+
+class FontManager {
     // Map of display names to CSS-safe values and full font-family strings
-    static fontMap = {
+    fontMap = {
         'Arial': {
             dataFont: 'arial',
             cssFamily: 'Arial, sans-serif'
@@ -47,23 +49,22 @@ export default class FontManager {
         }
     };
 
-    static getFont() {
-        // Get username if logged in
-        const username = sessionStorage.getItem('username');
-        if (!username) return 'Arial';
+    constructor() {
+        this.initialize();
+    }
 
-        // Get preferences from localStorage
-        const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-        
-        // Return font preference or default to Arial
-        const fontFamily = userPreferences.fontFamily || 'Arial';
+    getFont() {
+        if (!User.isAuthenticated()) return 'Arial';
+
+        const preferences = User.getUserPreferences();
+        const fontFamily = preferences?.fontFamily || 'Arial';
         
         // Validate the font exists in our map
         return this.fontMap[fontFamily] ? fontFamily : 'Arial';
     }
     
-    static setFont(fontFamily) {
-        console.log('Setting font:', fontFamily); // Debug log
+    setFont(fontFamily) {
+        console.log('Setting font:', fontFamily);
         
         // Validate font family
         if (!this.fontMap[fontFamily]) {
@@ -72,24 +73,18 @@ export default class FontManager {
         }
 
         // If user is logged in, save preference
-        const username = sessionStorage.getItem('username');
-        if (username) {
-            // Get all existing preferences
-            const userPreferences = JSON.parse(localStorage.getItem(`user_preferences_${username}`) || '{}');
-            
-            // Update font preference while preserving other preferences
-            userPreferences.fontFamily = fontFamily;
-            
-            // Save all preferences back to localStorage
-            localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+        if (User.isAuthenticated()) {
+            const preferences = User.getUserPreferences() || {};
+            preferences.fontFamily = fontFamily;
+            User.updateUserPreferences(preferences);
         }
         
         // Apply font regardless of login state
         this.applyFont(fontFamily);
     }
     
-    static applyFont(fontFamily) {
-        console.log('Applying font:', fontFamily); // Debug log
+    applyFont(fontFamily) {
+        console.log('Applying font:', fontFamily);
         
         // Validate font family and get config
         const fontConfig = this.fontMap[fontFamily];
@@ -114,11 +109,11 @@ export default class FontManager {
         });
         window.dispatchEvent(event);
         
-        console.log('Font applied:', fontFamily, 'with data-font:', fontConfig.dataFont, 'and CSS family:', fontConfig.cssFamily); // Debug log
+        console.log('Font applied:', fontFamily, 'with data-font:', fontConfig.dataFont, 'and CSS family:', fontConfig.cssFamily);
     }
     
-    static initialize() {
-        console.log('Initializing FontManager'); // Debug log
+    initialize() {
+        console.log('Initializing FontManager');
         
         // Get current font (handles both logged-in and non-logged-in states)
         const currentFont = this.getFont();
@@ -127,12 +122,12 @@ export default class FontManager {
         this.applyFont(currentFont);
 
         // If user is logged in, set up storage event listener
-        const username = sessionStorage.getItem('username');
-        if (username) {
+        if (User.isAuthenticated()) {
+            const username = User.getCurrentUser()?.username;
             window.addEventListener('storage', (event) => {
                 if (event.key === `user_preferences_${username}`) {
                     const preferences = JSON.parse(event.newValue || '{}');
-                    console.log('Preferences change detected:', preferences); // Debug log
+                    console.log('Preferences change detected:', preferences);
                     if (preferences.fontFamily && this.fontMap[preferences.fontFamily]) {
                         this.applyFont(preferences.fontFamily);
                     }
@@ -142,9 +137,13 @@ export default class FontManager {
 
         // Listen for font changes from within the application
         window.addEventListener('fontchange', (event) => {
-            console.log('Font change event received:', event.detail); // Debug log
+            console.log('Font change event received:', event.detail);
         });
 
-        console.log('FontManager initialized with font:', currentFont); // Debug log
+        console.log('FontManager initialized with font:', currentFont);
     }
 }
+
+// Export singleton instance
+const fontManager = new FontManager();
+export default fontManager;

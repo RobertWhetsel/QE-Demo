@@ -1,74 +1,96 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const stateManager = StateManager.getInstance();
-  const registerForm = document.getElementById('registerForm');
-  const errorMessage = document.getElementById('errorMessage');
-  const backBtn = document.getElementById('backBtn');
+import { NavigationService } from '../navigation/navigation.js';
 
-  registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorMessage.textContent = ''; // Clear any previous errors
-
-    try {
-      const newUser = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('confirmPassword').value,
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        username: document.getElementById('username').value,
-        cellPhone: document.getElementById('cellPhone').value,
-        registrationDate: new Date().toISOString()
-      };
-
-      // Validate passwords match
-      if (newUser.password !== newUser.confirmPassword) {
-        throw new Error('Passwords do not match');
-      }
-
-      // Remove confirmPassword as it's not needed in storage
-      delete newUser.confirmPassword;
-
-      // Check if this is the first user (Genesis Admin)
-      const { users } = stateManager.getState();
-      const isGenesisAdmin = users.length === 0;
-
-      if (isGenesisAdmin) {
-        newUser.role = 'Admin';
-        stateManager.addUser(newUser);
-        alert('Welcome! Thank you for Registering! You are the Genesis Admin.');
-        window.location.href = 'adminDashboard.html';
-      } else {
-        newUser.role = null;
-        stateManager.addPendingUser(newUser);
-        alert('Registration successful! An admin will assign your role. Please check back later to log in.');
-        window.location.href = 'index.html';
-      }
-    } catch (error) {
-      errorMessage.textContent = error.message;
-      console.error('Registration error:', error);
+export class Registration {
+    constructor() {
+        this.form = document.getElementById('registration-form');
+        this.navigation = new NavigationService();
+        this.init();
     }
-  });
 
-  backBtn.addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
-
-  // Form validation
-  const validateForm = () => {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    const submitBtn = document.querySelector('button[type="submit"]');
-    
-    if (password && confirmPassword && password !== confirmPassword) {
-      errorMessage.textContent = 'Passwords do not match';
-      submitBtn.disabled = true;
-    } else {
-      errorMessage.textContent = '';
-      submitBtn.disabled = false;
+    init() {
+        if (this.form) {
+            this.form.addEventListener('submit', (e) => this.handleRegistration(e));
+        }
     }
-  };
 
-  // Add real-time password validation
-  document.getElementById('password').addEventListener('input', validateForm);
-  document.getElementById('confirmPassword').addEventListener('input', validateForm);
-});
+    async handleRegistration(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const role = document.getElementById('role').value;
+
+        if (!username || !password) {
+            this.showError('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            // Get existing users
+            const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+            
+            // Check if username already exists
+            if (appData.users.some(user => user.username === username)) {
+                this.showError('Username already exists');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                username,
+                password,
+                role,
+                created: new Date().toISOString()
+            };
+
+            // Add to users array
+            appData.users.push(newUser);
+            
+            // Save updated data
+            sessionStorage.setItem('appData', JSON.stringify(appData));
+
+            // Set session data
+            sessionStorage.setItem('isAuthenticated', 'true');
+            sessionStorage.setItem('userRole', role);
+            sessionStorage.setItem('username', username);
+
+            // Initialize preferences
+            const userPreferences = {
+                theme: 'light',
+                fontFamily: 'Arial',
+                notifications: false
+            };
+            localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+
+            // Navigate based on role
+            if (role === 'Genesis Admin') {
+                alert('Welcome! Thank you for Registering! You are the Genesis Admin.');
+                window.location.href = 'platformAdmin.html';
+            } else {
+                window.location.href = 'platformAdmin.html';
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            this.showError('An error occurred during registration');
+        }
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+
+        const existingError = document.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        this.form.insertBefore(errorDiv, this.form.firstChild);
+
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 3000);
+    }
+}

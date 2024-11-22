@@ -4,78 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quantum Eye</title>
+
+    <!-- Initialize application state -->
+    <script type="module" src="/src/services/init.js"></script>
     
     <!-- Load common head content -->
     <script type="module">
         import { loadCommonHead } from '/src/utils/loadCommonHead.js';
         loadCommonHead();
     </script>
-    
+
     <style>
-        .auth-container {
+        .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--color-surface-secondary, #f8f9fa);
             min-height: 100vh;
+            background-color: var(--color-surface-primary);
         }
 
-        .auth-box {
-            background: var(--color-surface-primary, #ffffff);
+        .login-form {
+            background-color: var(--color-surface-secondary);
             padding: 2rem;
-            border-radius: 4px;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
         }
 
-        .auth-box h1 {
-            text-align: center;
-            margin-bottom: 1rem;
-            color: var(--color-brand-primary, #007bff);
-        }
-
-        .auth-box h2 {
+        .login-header {
             text-align: center;
             margin-bottom: 2rem;
-            color: var(--color-text-primary, #495057);
-            font-size: 1.25rem;
         }
 
-        .login-form {
-            display: grid;
-            gap: 1rem;
+        .login-logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 1rem;
         }
 
         .form-group {
-            display: grid;
-            gap: 0.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
-            color: var(--color-text-primary, #495057);
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
         }
 
-        .form-group input,
-        .form-group select {
-            padding: 0.5rem;
-            border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
             border-radius: 4px;
-            font-size: 1rem;
             background-color: var(--color-surface-primary);
             color: var(--color-text-primary);
         }
 
-        .form-actions {
-            display: grid;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .primary-button {
-            background: var(--color-brand-primary, #007bff);
-            color: var(--color-text-on-brand, #ffffff);
-            padding: 0.5rem 1rem;
+        .button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--color-brand-primary);
+            color: var(--color-text-on-brand);
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -83,82 +74,79 @@
             transition: background-color 0.2s;
         }
 
-        .primary-button:hover {
-            background: var(--color-brand-primary-hover, #0056b3);
-        }
-
-        .forgot-password {
-            text-align: center;
-            color: var(--color-brand-primary, #007bff);
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-
-        .forgot-password:hover {
-            color: var(--color-brand-primary-hover, #0056b3);
-            text-decoration: underline;
+        .button:hover {
+            background-color: var(--color-brand-primary-hover);
         }
 
         .error-message {
-            background: var(--color-error, #dc3545);
-            color: var(--color-text-on-error, #ffffff);
-            padding: 0.5rem 1rem;
+            background-color: var(--color-error-bg);
+            color: var(--color-error);
+            padding: 0.75rem;
             border-radius: 4px;
             margin-bottom: 1rem;
             text-align: center;
-            animation: fadeIn 0.3s ease-in-out;
+            display: none;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .error-message.show {
+            display: block;
         }
     </style>
 </head>
-<body class="page">
-    <main class="auth-container">
-        <div class="auth-box">
-            <h1>Quantum Eye</h1>
-            <h2>Login</h2>
+<body>
+    <div class="login-container">
+        <form id="login-form" class="login-form" autocomplete="off">
+            <div class="login-header">
+                <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" class="login-logo">
+                <h1>Login</h1>
+            </div>
 
-            <form id="login-form" class="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" autocomplete="username" required>
-                </div>
+            <div id="error-message" class="error-message"></div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" autocomplete="current-password" required>
-                </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                >
+            </div>
 
-                <div class="form-group" id="role-group" style="display: none;">
-                    <label for="role">Create Account Type</label>
-                    <select id="role" name="role">
-                        <option value="User Admin">User Admin</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    autocomplete="off"
+                >
+            </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="primary-button">Login</button>
-                    <a href="/src/views/pages/forgot-password.html" class="forgot-password">Forgot Password?</a>
-                </div>
-            </form>
-        </div>
-    </main>
+            <button type="submit" class="button">Login</button>
+        </form>
+    </div>
 
     <script type="module">
-        import { Auth } from '/src/controllers/auth/login.js';
+        import { Auth } from '/src/services/auth/login.js';
         
-        // Initialize Auth when document is ready
         document.addEventListener('DOMContentLoaded', () => {
-            new Auth();
+            // Initialize Auth class for form handling
+            const auth = new Auth();
+            
+            // Reset form on page load
+            const form = document.getElementById('login-form');
+            form.reset();
+
+            // Prevent form data from being saved
+            form.setAttribute('autocomplete', 'off');
+            document.getElementById('username').setAttribute('autocomplete', 'new-username');
+            document.getElementById('password').setAttribute('autocomplete', 'new-password');
         });
     </script>
 </body>

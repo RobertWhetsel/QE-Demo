@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,34 +28,67 @@
     <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
     <link rel="stylesheet" href="/src/views/styles/components/button.css">
     <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    <link rel="stylesheet" href="/src/views/styles/components/profile.css">
     
     <style>
+        :root {
+            --nav-height: 60px;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-family-custom);
+        }
+
+        .page {
+            padding-top: var(--nav-height);
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+            transition: background-color var(--transition-speed);
+        }
+
+        .page__container {
+            padding-left: var(--sidebar-width);
+            transition: padding-left var(--transition-speed);
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        .content-area {
+            padding: var(--spacing-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         .profile-container {
-            padding: 2rem;
+            padding: var(--spacing-lg);
         }
         
         .profile-section {
             background-color: var(--color-surface-secondary);
             border: 1px solid var(--color-border-default);
             border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
         }
         
         .profile-section h2 {
             margin-top: 0;
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-lg);
             color: var(--color-text-primary);
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: var(--spacing-lg);
         }
         
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--spacing-sm);
             font-weight: 500;
             color: var(--color-text-primary);
         }
@@ -63,11 +96,39 @@
         .form-group input {
             width: 100%;
             max-width: 300px;
-            padding: 0.5rem;
+            padding: var(--spacing-sm);
             border: 1px solid var(--color-border);
             border-radius: 4px;
             background-color: var(--color-surface-secondary);
             color: var(--color-text-primary);
+            transition: border-color var(--transition-speed),
+                        box-shadow var(--transition-speed);
+        }
+
+        .form-group input:focus {
+            border-color: var(--color-brand-primary);
+            box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
+            outline: none;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .page__container {
+                padding-left: 0;
+            }
+
+            .content-area {
+                padding: var(--spacing-md);
+            }
+
+            .profile-section {
+                padding: var(--spacing-md);
+                margin-bottom: var(--spacing-md);
+            }
+
+            .form-group input {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -76,7 +137,7 @@
     <nav class="nav">
         <div class="nav__container">
             <div class="nav__left">
-                <button id="hamburger" class="nav__toggle">&#9776;</button>
+                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
             </div>
             <div class="nav__menu">
                 <span id="userName" class="nav__link user-name">User</span>
@@ -89,12 +150,14 @@
 
     <!-- Include sidebar -->
     <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
-        <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
+        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
+        <div class="sidebar__brand">
+            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+        </div>
         <div id="menu-items">
             <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
             <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
-            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+            <a href="/src/views/pages/userProfile.html" class="sidebar__link active">User Profile</a>
         </div>
         <div class="sidebar__footer">
             <a href="#" class="sidebar__link logout-link">Logout</a>
@@ -103,7 +166,7 @@
     </div>
 
     <div class="page__container">
-        <div class="content-area l-container">
+        <div class="content-area">
             <div class="profile-container">
                 <h1 class="page-title">User Profile</h1>
                 
@@ -153,173 +216,154 @@
     </div>
 
     <script type="module">
-        import { NavigationService } from '/src/services/navigation/navigation.js';
-        import ThemeManager from '/src/services/state/thememanager.js';
-        import FontManager from '/src/services/state/fontmanager.js';
+        import navigation from '/src/services/navigation/navigation.js';
+        import { User } from '/src/models/user.js';
 
-        const navigation = new NavigationService();
-
-        // Check if user is logged in
-        if (!navigation.isAuthenticated()) {
-            window.location.href = '/src/views/pages/login.html';
-            throw new Error('User not logged in');
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const hamburger = document.getElementById('hamburger');
-            const sidebar = document.getElementById('sidebar');
-            const closeBtn = document.getElementById('close-sidebar');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const logoutLink = document.querySelector('.logout-link');
-            const exitButton = document.querySelector('.exit-button');
-            const userNameEl = document.getElementById('userName');
-            const navMenu = document.getElementById('navMenu');
-
-            // Load user data
-            const loadUserData = () => {
-                try {
-                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
-                    const username = sessionStorage.getItem('username');
-                    const userData = appData.users.find(user => user.username === username);
-                    
-                    if (userData) {
-                        // Populate form fields
-                        document.getElementById('username').value = userData.username || '';
-                        document.getElementById('fullName').value = userData.fullName || '';
-                        document.getElementById('email').value = userData.email || '';
-                        document.getElementById('phone').value = userData.phoneNumber || '';
-                        
-                        // Update username in nav
-                        userNameEl.textContent = userData.username || "User";
-                    }
-                } catch (error) {
-                    console.error('Error loading user data:', error);
+        // Initialize page
+        async function initPage() {
+            try {
+                // Check authentication
+                if (!User.isAuthenticated()) {
+                    window.location.href = '/src/views/pages/login.html';
+                    throw new Error('User not logged in');
                 }
-            };
 
-            // Load user data immediately
-            loadUserData();
+                // Setup navigation components
+                const hamburger = document.getElementById('hamburger');
+                const sidebar = document.getElementById('sidebar');
+                const closeBtn = document.getElementById('close-sidebar');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const logoutLink = document.querySelector('.logout-link');
+                const exitButton = document.querySelector('.exit-button');
+                const userNameEl = document.getElementById('userName');
+                const navMenu = document.getElementById('navMenu');
 
-            // Setup hamburger menu
-            if (hamburger && sidebar) {
-                hamburger.addEventListener('click', () => {
-                    sidebar.classList.toggle('sidebar--open');
-                });
-            }
-
-            // Setup close button
-            if (closeBtn && sidebar) {
-                closeBtn.addEventListener('click', () => {
-                    sidebar.classList.remove('sidebar--open');
-                });
-            }
-
-            // Setup logout functionality
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => navigation.logout());
-            }
-            if (logoutLink) {
-                logoutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigation.logout();
-                });
-            }
-
-            // Setup exit functionality
-            if (exitButton) {
-                exitButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigation.exitApplication();
-                });
-            }
-
-            // Setup username display and dropdown
-            if (userNameEl) {
-                userNameEl.addEventListener('click', () => {
-                    navMenu.toggleAttribute('hidden');
-                });
-
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.nav__menu')) {
-                        navMenu.setAttribute('hidden', '');
-                    }
-                });
-            }
-
-            // Setup navigation links
-            const links = document.querySelectorAll('.sidebar__link[href]');
-            links.forEach(link => {
-                if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.navigateTo(link.getAttribute('href'));
+                // Setup hamburger menu
+                if (hamburger && sidebar) {
+                    hamburger.addEventListener('click', () => {
+                        sidebar.classList.toggle('sidebar--open');
                     });
                 }
-            });
 
-            // Show/hide admin-only elements
-            const userRole = sessionStorage.getItem('userRole');
-            const adminElements = document.querySelectorAll('.admin-only');
-            adminElements.forEach(el => {
-                el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
-            });
+                // Setup close button
+                if (closeBtn && sidebar) {
+                    closeBtn.addEventListener('click', () => {
+                        sidebar.classList.remove('sidebar--open');
+                    });
+                }
 
-            // Handle form submissions
-            document.getElementById('personal-info-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                try {
-                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
-                    const username = sessionStorage.getItem('username');
-                    const userIndex = appData.users.findIndex(user => user.username === username);
-                    
-                    if (userIndex !== -1) {
-                        appData.users[userIndex] = {
-                            ...appData.users[userIndex],
-                            fullName: document.getElementById('fullName').value,
-                            email: document.getElementById('email').value,
-                            phoneNumber: document.getElementById('phone').value
-                        };
-                        
-                        sessionStorage.setItem('appData', JSON.stringify(appData));
-                        alert('Personal information updated successfully');
+                // Setup logout functionality
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => navigation.logout());
+                }
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.logout();
+                    });
+                }
+
+                // Setup exit functionality
+                if (exitButton) {
+                    exitButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigation.exitApplication();
+                    });
+                }
+
+                // Setup username display and dropdown
+                if (userNameEl) {
+                    const userName = sessionStorage.getItem('username') || "User";
+                    userNameEl.textContent = userName;
+
+                    userNameEl.addEventListener('click', () => {
+                        navMenu.toggleAttribute('hidden');
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.nav__menu')) {
+                            navMenu.setAttribute('hidden', '');
+                        }
+                    });
+                }
+
+                // Setup navigation links
+                const links = document.querySelectorAll('.sidebar__link[href]');
+                links.forEach(link => {
+                    if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            navigation.navigateTo(link.getAttribute('href'));
+                        });
                     }
-                } catch (error) {
-                    console.error('Error updating profile:', error);
-                    alert('Failed to update personal information');
+                });
+
+                // Show/hide admin-only elements
+                const userRole = sessionStorage.getItem('userRole');
+                const adminElements = document.querySelectorAll('.admin-only');
+                adminElements.forEach(el => {
+                    el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
+                });
+
+                // Load user data
+                const currentUser = User.getCurrentUser();
+                if (currentUser) {
+                    document.getElementById('username').value = currentUser.username;
+                    document.getElementById('fullName').value = currentUser.fullName;
+                    document.getElementById('email').value = currentUser.email;
+                    document.getElementById('phone').value = currentUser.phoneNumber;
                 }
-            });
 
-            document.getElementById('account-settings-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
+                // Handle form submissions
+                document.getElementById('personal-info-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const updates = {
+                        fullName: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phoneNumber: document.getElementById('phone').value
+                    };
 
-                if (newPassword !== confirmPassword) {
-                    alert('New passwords do not match');
-                    return;
-                }
+                    if (User.updateUser(currentUser.username, updates)) {
+                        alert('Personal information updated successfully');
+                    } else {
+                        alert('Failed to update personal information');
+                    }
+                });
 
-                try {
-                    const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[]}');
-                    const username = sessionStorage.getItem('username');
-                    const userIndex = appData.users.findIndex(user => user.username === username);
-                    
-                    if (userIndex !== -1 && appData.users[userIndex].password === currentPassword) {
-                        appData.users[userIndex].password = newPassword;
-                        sessionStorage.setItem('appData', JSON.stringify(appData));
+                document.getElementById('account-settings-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const currentPassword = document.getElementById('currentPassword').value;
+                    const newPassword = document.getElementById('newPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+
+                    if (newPassword !== confirmPassword) {
+                        alert('New passwords do not match');
+                        return;
+                    }
+
+                    const updates = {
+                        password: newPassword
+                    };
+
+                    if (User.updateUser(currentUser.username, updates)) {
                         alert('Password updated successfully');
                         document.getElementById('account-settings-form').reset();
                     } else {
-                        alert('Current password is incorrect');
+                        alert('Failed to update password');
                     }
-                } catch (error) {
-                    console.error('Error updating password:', error);
-                    alert('Failed to update password');
-                }
-            });
-        });
+                });
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
     </script>
 </body>
 </html>

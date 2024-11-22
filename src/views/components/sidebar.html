@@ -1,47 +1,9 @@
-<div id="sidebar" class="sidebar" style="width: 0;">
+<div id="sidebar" class="sidebar">
     <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar">&times;</a>
     <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
     <div id="menu-items">
-        <!-- Genesis Admin Menu -->
-        <template id="genesisAdmin-menu">
-            <a href="#" class="sidebar__link" data-content="adminControlPanel.html">Genesis Admin Control Panel</a>
-            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
-            <a href="#" class="sidebar__link" data-content="userProfile.html">User Profile</a>
-        </template>
-
-        <!-- Platform Admin Menu -->
-        <template id="platformAdmin-menu">
-            <a href="#" class="sidebar__link" data-content="adminDashboard.html">Dashboard</a>
-            <a href="#" class="sidebar__link" data-content="userProfile.html">My Profile</a>
-            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
-            <a href="#" class="sidebar__link" data-content="research.html">Research Management</a>
-        </template>
-
-        <!-- User Admin Menu -->
-        <template id="userAdmin-menu">
-            <a href="#" class="sidebar__link" data-content="adminDashboard.html">Dashboard</a>
-            <a href="#" class="sidebar__link" data-content="userProfile.html">My Profile</a>
-            <a href="#" class="sidebar__link" data-content="settings.html">Settings</a>
-            <a href="#" class="sidebar__link" data-content="volunteerDashboard.html">Volunteer Management</a>
-        </template>
-
-        <!-- Volunteer Menu -->
-        <template id="volunteer-menu">
-            <a href="#" class="sidebar__link" data-content="volunteerDashboard.html">Dashboard</a>
-            <a href="#" class="sidebar__link" data-content="availableSurveys.html">Available Surveys</a>
-            <a href="#" class="sidebar__link" data-content="completedSurveys.html">Completed Surveys</a>
-            <a href="#" class="sidebar__link" data-content="messages.html">Messages & Help</a>
-        </template>
-
-        <!-- Research Menu -->
-        <template id="research-menu">
-            <a href="#" class="sidebar__link" data-content="researchDashboard.html">Dashboard</a>
-            <a href="#" class="sidebar__link" data-content="survey.html">Survey Management</a>
-            <a href="#" class="sidebar__link" data-content="messages.html">Messages</a>
-        </template>
+        <!-- Menu items will be loaded here based on role -->
     </div>
-    
-    <!-- Common Menu Items -->
     <div class="sidebar__footer">
         <a href="#" class="sidebar__link logout-link">Logout</a>
         <a href="#" class="sidebar__link exit-button">Exit</a>
@@ -49,36 +11,113 @@
 </div>
 
 <script type="module">
-import navigation from '../js/modules/navigation.js';
+import navigation from '/src/services/navigation/navigation.js';
 
-// Initialize sidebar with all functionality
-navigation.initializeSidebar();
+// Initialize sidebar when user data is ready
+Promise.resolve().then(() => {
+    if (!window.QE?.currentUser) {
+        return new Promise(resolve => {
+            document.addEventListener('userDataReady', resolve, { once: true });
+        });
+    }
+}).then(() => {
+    console.log('Initializing sidebar with user:', window.QE?.currentUser);
+    const sidebar = document.getElementById('sidebar');
+    const closeBtn = document.getElementById('close-sidebar');
+    const menuContainer = document.getElementById('menu-items');
+    const logoutLink = document.querySelector('.logout-link');
+    const exitButton = document.querySelector('.exit-button');
+    
+    // Setup close button
+    if (closeBtn && sidebar) {
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('sidebar--open');
+        });
+    }
 
-// Add direct event listeners for critical functions
-const closeBtn = document.getElementById('close-sidebar');
-if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigation.closeNav();
+    // Load menu items if user data is available
+    if (window.QE?.currentUser && menuContainer) {
+        const userRole = window.QE.currentUser.role;
+        console.log('Loading menu for role:', userRole);
+
+        // Define menu items based on role
+        const menuItems = {
+            'Genesis Admin': [
+                { href: '/src/views/pages/adminControlPanel.html', text: 'Genesis Admin Control Panel' },
+                { href: '/src/views/pages/settings.html', text: 'Settings' },
+                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
+            ],
+            'Platform Admin': [
+                { href: '/src/views/pages/platformAdmin.html', text: 'Dashboard' },
+                { href: '/src/views/pages/settings.html', text: 'Settings' },
+                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
+            ],
+            'User Admin': [
+                { href: '/src/views/pages/platformAdmin.html', text: 'Dashboard' },
+                { href: '/src/views/pages/settings.html', text: 'Settings' },
+                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
+            ]
+        };
+
+        // Get menu items for current role
+        const roleMenu = menuItems[userRole];
+        console.log('Menu items for role:', userRole, roleMenu);
+
+        if (roleMenu) {
+            // Clear existing menu items
+            menuContainer.innerHTML = '';
+            
+            // Add menu items
+            roleMenu.forEach(item => {
+                const link = document.createElement('a');
+                link.href = item.href;
+                link.className = 'sidebar__link';
+                link.textContent = item.text;
+                
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navigation.navigateTo(item.href);
+                });
+                
+                menuContainer.appendChild(link);
+            });
+            console.log('Menu items added:', menuContainer.children.length);
+        } else {
+            console.error('No menu items found for role:', userRole);
+        }
+    } else {
+        console.error('User data not found in global scope or menu container missing');
+    }
+
+    // Setup logout functionality
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigation.logout();
+        });
+    }
+
+    // Setup exit functionality
+    if (exitButton) {
+        exitButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigation.exitApplication();
+        });
+    }
+
+    // Dispatch event when sidebar is ready
+    const event = new CustomEvent('sidebarReady', { 
+        detail: { 
+            userRole: window.QE?.currentUser?.role,
+            menuItems: Array.from(menuContainer?.children || []).map(link => ({
+                href: link.getAttribute('href'),
+                text: link.textContent
+            }))
+        }
     });
-}
-
-const logoutLink = document.querySelector('.logout-link');
-if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigation.logout();
-    });
-}
-
-const exitButton = document.querySelector('.exit-button');
-if (exitButton) {
-    exitButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigation.exitApplication();
-    });
-}
+    document.dispatchEvent(event);
+    console.log('Sidebar component ready');
+}).catch(error => {
+    console.error('Error initializing sidebar:', error);
+});
 </script>
