@@ -23,11 +23,21 @@ export class User {
         try {
             // Try to fetch users data from CSV first
             try {
-                const response = await fetch('../models/data/users.csv');
+                const response = await fetch('/src/models/data/users.csv');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch users.csv: ${response.status} ${response.statusText}`);
+                }
+                
                 const csvText = await response.text();
+                if (!csvText.trim()) {
+                    throw new Error('users.csv is empty');
+                }
                 
                 // Parse CSV manually since we're in browser
                 const users = this.parseCSV(csvText);
+                if (!users || users.length === 0) {
+                    throw new Error('No users found in CSV');
+                }
                 
                 // Find matching user
                 const user = users.find(u => 
@@ -69,24 +79,36 @@ export class User {
             return null;
         } catch (error) {
             console.error('Login error:', error);
-            throw error;
+            throw new Error('Login failed: ' + (error.message || 'Unknown error'));
         }
     }
 
     static parseCSV(csvText) {
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-        
-        return lines.slice(1)
-            .filter(line => line.trim())
-            .map(line => {
-                const values = line.split(',').map(v => v.trim());
-                const user = {};
-                headers.forEach((header, i) => {
-                    user[header] = values[i];
+        try {
+            const lines = csvText.split('\n');
+            if (lines.length < 2) {
+                throw new Error('CSV must have headers and at least one user');
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            if (!headers.includes('username') || !headers.includes('password') || !headers.includes('role')) {
+                throw new Error('CSV missing required headers');
+            }
+            
+            return lines.slice(1)
+                .filter(line => line.trim())
+                .map(line => {
+                    const values = line.split(',').map(v => v.trim());
+                    const user = {};
+                    headers.forEach((header, i) => {
+                        user[header] = values[i] || '';
+                    });
+                    return user;
                 });
-                return user;
-            });
+        } catch (error) {
+            console.error('CSV parsing error:', error);
+            throw new Error('Failed to parse users.csv: ' + error.message);
+        }
     }
 
     static async logout() {
@@ -96,6 +118,7 @@ export class User {
     static async clearAllStorage() {
         sessionStorage.clear();
         localStorage.removeItem('userPreferences');
+        localStorage.removeItem('users_json');
     }
 
     static verifyStorageConsistency() {
@@ -108,12 +131,22 @@ export class User {
     }
 
     static getUserPreferences() {
-        const prefs = localStorage.getItem('userPreferences');
-        return prefs ? JSON.parse(prefs) : null;
+        try {
+            const prefs = localStorage.getItem('userPreferences');
+            return prefs ? JSON.parse(prefs) : null;
+        } catch (error) {
+            console.error('Error reading user preferences:', error);
+            return null;
+        }
     }
 
     static updateUserPreferences(preferences) {
-        localStorage.setItem('userPreferences', JSON.stringify(preferences));
+        try {
+            localStorage.setItem('userPreferences', JSON.stringify(preferences));
+        } catch (error) {
+            console.error('Error saving user preferences:', error);
+            throw new Error('Failed to save user preferences');
+        }
     }
 
     static getDefaultUsers() {
@@ -122,18 +155,41 @@ export class User {
                 username: 'genesis',
                 password: 'admin123',
                 role: 'Genesis Admin',
-                status: 'active'
+                status: 'active',
+                email: 'genesis.admin@system.local',
+                created: new Date().toISOString()
             },
             {
                 username: 'admin',
                 password: 'admin123',
                 role: 'Platform Admin',
-                status: 'active'
+                status: 'active',
+                email: 'admin@system.local',
+                created: new Date().toISOString()
             }
         ];
     }
 
     static saveUsers(users) {
-        localStorage.setItem('users_json', JSON.stringify(users));
+        try {
+            if (!Array.isArray(users)) {
+                throw new Error('Users must be an array');
+            }
+            localStorage.setItem('users_json', JSON.stringify(users));
+            
+            // Also update CSV format for consistency
+            const headers = ['username', 'fullName', 'email', 'phoneNumber', 'role', 'status', 'created', 'password'];
+            const csvContent = [
+                headers.join(','),
+                ...users.map(user => 
+                    headers.map(header => user[header] || '').join(',')
+                )
+            ].join('\n');
+            
+            localStorage.setItem('users_csv', csvContent);
+        } catch (error) {
+            console.error('Error saving users:', error);
+            throw new Error('Failed to save users');
+        }
     }
 }

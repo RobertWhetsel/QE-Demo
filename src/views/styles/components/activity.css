@@ -1,0 +1,32 @@
+/* Activity Component */
+.activity {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: var(--spacing-md);
+}
+
+.activity__list {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.activity__item {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    background: var(--color-background);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-speed),
+                transform var(--transition-speed);
+}
+
+.activity__item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .activity__list {
+        gap: var(--spacing-md);
+    }
+}

@@ -1,0 +1,59 @@
+/* Form Component */
+.form {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.form__group {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.form__label {
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.form__input {
+    padding: var(--spacing-md);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transition: border-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+}
+
+.form__input:focus {
+    border-color: var(--color-button);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
+    outline: none;
+}
+
+.form__input:hover {
+    border-color: var(--color-button);
+}
+
+.form__input--error {
+    border-color: var(--color-error);
+}
+
+.form__error {
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+}
+
+.form__actions {
+    display: grid;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form {
+        gap: var(--spacing-md);
+    }
+}

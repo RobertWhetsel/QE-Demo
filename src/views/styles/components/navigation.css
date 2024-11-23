@@ -58,6 +58,7 @@
 }
 
 .nav__link.is-active {
+    background-color: var(--color-primary-100);
     color: var(--color-button);
 }
 

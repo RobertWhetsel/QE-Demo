@@ -1,166 +1,86 @@
-@import url(styles.css);
+@import url('./styles.css');
+@import url('./components/button.css');
+@import url('./components/card.css');
+@import url('./components/empty.css');
+@import url('./utilities/utilities.css');
 
-/* Layout */
-.l-survey {
+/* Survey Block */
+.survey {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
 }
 
-.l-survey-header {
+.survey__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: var(--spacing-lg);
 }
 
-.l-survey-content {
+.survey__content {
     flex: 1;
     transition: margin-left var(--transition-speed);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
 }
 
-.sidebar.is-open + .l-survey-content {
-    margin-left: 250px;
-}
-
-.l-survey-filters {
+.survey__filters {
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
     align-items: center;
+    margin-bottom: var(--spacing-xl);
 }
 
-.l-survey-list {
+.survey__list {
     display: grid;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
 }
 
-/* Survey Filters */
-.survey-filters__select {
-    padding: var(--spacing-sm);
+/* Filter Block */
+.filter__select {
+    padding: var(--spacing-md);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius);
     background: var(--color-background);
     color: var(--color-text);
+    transition: border-color var(--transition-speed),
+                box-shadow var(--transition-speed);
 }
 
-/* Survey Card Block */
-.survey-card {
-    background: var(--color-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    padding: var(--spacing-md);
-    display: grid;
-    gap: var(--spacing-md);
-    position: relative;
-    overflow: hidden;
+.filter__select:hover {
+    border-color: var(--color-button);
 }
 
-.survey-card.is-completed .survey-card__status {
-    border-color: transparent var(--color-success) transparent transparent;
+.filter__select:focus {
+    border-color: var(--color-button);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
+    outline: none;
 }
 
-.survey-card__status {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 3rem 3rem 0;
-    border-color: transparent var(--color-button) transparent transparent;
-}
-
-.survey-card__content {
-    display: grid;
-    gap: var(--spacing-sm);
-}
-
-.survey-card__title {
-    margin: 0;
-    color: var(--color-text);
-    font-size: 1.25rem;
-}
-
-.survey-card__description {
-    color: var(--color-text);
-    opacity: 0.8;
-    margin: 0;
-}
-
-.survey-card__meta {
-    display: flex;
-    gap: var(--spacing-md);
-    color: var(--color-text);
-    opacity: 0.6;
-    font-size: 0.875rem;
-}
-
-.survey-card__actions {
-    display: flex;
-    gap: var(--spacing-md);
-}
-
-/* Survey Buttons */
-.survey-button {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color var(--transition-speed);
-}
-
-.survey-button--start {
-    background: var(--color-button);
-    color: var(--color-text-on-brand);
-}
-
-.survey-button--start:hover {
-    background: var(--color-primary-900);
-}
-
-.survey-button--view {
-    background: var(--color-primary-100);
-    color: var(--color-text);
-}
-
-.survey-button--view:hover {
-    background: var(--color-primary-900);
-    color: var(--color-text-on-brand);
-}
-
-/* Empty State */
-.survey-empty {
-    text-align: center;
-    padding: var(--spacing-xl);
-    color: var(--color-text);
-    opacity: 0.8;
-    background: var(--color-background);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-}
-
-.survey-empty__text {
-    margin-top: var(--spacing-md);
-}
-
-/* State Classes */
-.u-hidden {
-    display: none;
+/* Sidebar Modifier */
+.sidebar.is-open + .survey__content {
+    margin-left: 250px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .l-survey-filters {
+    .survey {
+        padding: var(--spacing-md);
+    }
+
+    .survey__content {
+        padding: var(--spacing-md);
+    }
+
+    .survey__filters {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
     }
 
-    .survey-card__actions {
-        flex-direction: column;
-    }
-
-    .survey-button {
+    .button {
         width: 100%;
     }
 }

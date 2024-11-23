@@ -64,27 +64,6 @@
             margin: 0 auto;
         }
 
-        .research-container {
-            padding: var(--spacing-lg);
-        }
-
-        .research-filters {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .research-data {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
         /* Responsive styles */
         @media (max-width: 768px) {
             .page__container {
@@ -93,16 +72,6 @@
 
             .content-area {
                 padding: var(--spacing-md);
-            }
-
-            .research-container {
-                padding: var(--spacing-md);
-            }
-
-            .research-filters,
-            .research-data {
-                padding: var(--spacing-md);
-                margin-bottom: var(--spacing-md);
             }
         }
     </style>
@@ -142,15 +111,15 @@
 
     <div class="page__container">
         <div class="content-area">
-            <div class="research-container">
+            <div class="research">
                 <h1 class="page-title">Research</h1>
 
-                <div class="research-filters">
+                <div class="filter">
                     <h2>Filters</h2>
                     <!-- Filters will be populated here -->
                 </div>
 
-                <div class="research-data" id="research-data">
+                <div class="data" id="research-data">
                     <!-- Research data will be populated here -->
                 </div>
             </div>

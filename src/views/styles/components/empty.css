@@ -1,0 +1,25 @@
+/* Empty State Component */
+.empty {
+    text-align: center;
+    padding: var(--spacing-lg);
+    color: var(--color-text);
+    opacity: 0.8;
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin: var(--spacing-lg) 0;
+}
+
+.empty__text {
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .empty {
+        padding: var(--spacing-md);
+        margin: var(--spacing-md) 0;
+    }
+}
