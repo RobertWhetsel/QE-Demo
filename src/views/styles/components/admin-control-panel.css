@@ -1,83 +1,235 @@
-/* Admin Control Panel Styles */
-.admin-control-panel {
+/* Admin Control Panel Component */
+
+/* Admin Panel Block */
+.admin-panel {
     padding: var(--spacing-lg);
 }
 
-/* Form specific styles */
-.user-form {
+.admin-panel__header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-panel__title {
+    font-size: 1.5em;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.admin-panel__description {
+    color: var(--color-text);
+    opacity: 0.8;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Admin Panel Elements - Form */
+.admin-panel__form {
     max-width: 600px;
+    margin-bottom: var(--spacing-xl);
 }
 
-.form-group input,
-.form-group select {
+.admin-panel__form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.admin-panel__form-label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.admin-panel__form-input {
+    width: 100%;
     max-width: 300px;
+    padding: var(--spacing-sm);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background);
+    color: var(--color-text);
 }
 
-/* Admin list table */
-.admin-list {
+.admin-panel__form-input:focus {
+    border-color: var(--color-button);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-primary-100);
+}
+
+.admin-panel__form-input--error {
+    border-color: var(--color-error);
+}
+
+.admin-panel__form-error {
+    color: var(--color-error);
+    font-size: 0.875em;
+    margin-top: var(--spacing-xs);
+}
+
+.admin-panel__form-help {
+    color: var(--color-text);
+    opacity: 0.8;
+    font-size: 0.875em;
+    margin-top: var(--spacing-xs);
+}
+
+/* Admin Panel Elements - Table */
+.admin-panel__table {
     width: 100%;
     border-collapse: collapse;
     margin-top: var(--spacing-md);
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
-.admin-list th,
-.admin-list td {
+.admin-panel__table-header {
+    background-color: var(--color-primary-100);
+}
+
+.admin-panel__table-header-cell {
     padding: var(--spacing-sm);
     text-align: left;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.admin-list th {
     font-weight: 600;
-    background-color: var(--color-surface-secondary);
+    color: var(--color-text);
+    border-bottom: 2px solid var(--color-border);
 }
 
-/* Action buttons container */
-.action-buttons {
+.admin-panel__table-cell {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.admin-panel__table-row:hover {
+    background-color: var(--color-primary-100);
+}
+
+.admin-panel__table-actions {
     display: flex;
     gap: var(--spacing-sm);
 }
 
-/* No admins message */
-.no-admins-message {
+/* Admin Panel Elements - Empty State */
+.admin-panel__empty {
     text-align: center;
     padding: var(--spacing-xl);
-    color: var(--color-text-secondary);
+    background-color: var(--color-background);
+    border-radius: var(--border-radius);
+    margin: var(--spacing-lg) 0;
 }
 
-/* Form description */
-.form-description {
-    margin-bottom: var(--spacing-lg);
-    color: var(--color-text-secondary);
+.admin-panel__empty-icon {
+    font-size: 2em;
+    color: var(--color-text);
+    opacity: 0.6;
+    margin-bottom: var(--spacing-md);
 }
 
-/* Responsive styles */
+.admin-panel__empty-text {
+    color: var(--color-text);
+    opacity: 0.8;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Admin Panel Elements - Actions */
+.admin-panel__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.admin-panel__actions--right {
+    justify-content: flex-end;
+}
+
+.admin-panel__actions--center {
+    justify-content: center;
+}
+
+/* Admin Panel Elements - Button */
+.admin-panel__button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.admin-panel__button--primary {
+    background: var(--color-button);
+    color: var(--color-text-on-brand);
+}
+
+.admin-panel__button--primary:hover {
+    background: var(--color-primary-900);
+}
+
+.admin-panel__button--secondary {
+    background: var(--color-primary-100);
+    color: var(--color-text);
+}
+
+.admin-panel__button--secondary:hover {
+    background: var(--color-primary-900);
+    color: var(--color-text-on-brand);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .admin-control-panel {
+    .admin-panel {
         padding: var(--spacing-md);
     }
 
-    .section {
-        padding: var(--spacing-md);
+    .admin-panel__form {
+        max-width: 100%;
     }
 
-    .admin-list {
+    .admin-panel__form-input {
+        max-width: 100%;
+    }
+
+    .admin-panel__table {
         display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
-    .form-group input,
-    .form-group select {
-        max-width: 100%;
-    }
-
-    .action-buttons {
+    .admin-panel__table-actions {
         flex-direction: column;
         gap: var(--spacing-xs);
     }
 
-    .action-buttons .button {
+    .admin-panel__table-actions .button {
         width: 100%;
+    }
+
+    .admin-panel__actions {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .admin-panel__actions .button {
+        width: 100%;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .admin-panel {
+        padding: 0;
+    }
+
+    .admin-panel__actions,
+    .admin-panel__form-help,
+    .admin-panel__table-actions {
+        display: none;
+    }
+
+    .admin-panel__table {
+        border: 1px solid #000;
+    }
+
+    .admin-panel__table-header-cell,
+    .admin-panel__table-cell {
+        border: 1px solid #000;
     }
 }

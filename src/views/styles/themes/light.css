@@ -1,21 +1,31 @@
 /* Light Theme */
 :root[data-theme="light"] {
-    /* Base colors */
+    /* Primary Colors */
+    --color-primary-100: #e6f0ff;
+    --color-primary-500: #007bff;
+    --color-primary-900: #004085;
+    
+    /* Semantic Colors */
+    --color-text: var(--color-primary-900);
+    --color-button: var(--color-primary-500);
+    --color-background: var(--color-primary-100);
+    
+    /* Legacy Support */
     --color-surface-primary: #ffffff;
-    --color-surface-secondary: #f8f9fa;
+    --color-surface-secondary: var(--color-primary-100);
     --color-surface-tertiary: #e9ecef;
     
-    --color-text-primary: #212529;
-    --color-text-secondary: #495057;
+    --color-text-primary: var(--color-text);
+    --color-text-secondary: var(--color-primary-900);
     --color-text-tertiary: #6c757d;
     --color-text-on-brand: #ffffff;
     
-    --color-border-default: rgba(0, 0, 0, 0.1);
+    --color-border: rgba(0, 0, 0, 0.1);
     --color-border-hover: rgba(0, 0, 0, 0.2);
     
-    /* Brand Colors */
-    --color-brand-primary: #007bff;
-    --color-brand-primary-hover: #0056b3;
+    /* Brand Colors for Legacy Support */
+    --color-brand-primary: var(--color-button);
+    --color-brand-primary-hover: var(--color-primary-900);
     --color-brand-secondary: #6c757d;
     --color-brand-secondary-hover: #545b62;
     
@@ -46,24 +56,32 @@
 [data-theme="light"] input:not([type="submit"]):not([type="button"]):not([type="reset"]),
 [data-theme="light"] textarea,
 [data-theme="light"] select {
-    background-color: var(--color-surface-primary);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-default);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] select:focus {
+    border-color: var(--color-button);
+    box-shadow: 0 0 0 2px var(--color-primary-100);
+    outline: none;
 }
 
 /* Buttons */
 [data-theme="light"] .button {
-    background-color: var(--color-brand-primary);
+    background-color: var(--color-button);
     color: var(--color-text-on-brand);
 }
 
 [data-theme="light"] .button:hover {
-    background-color: var(--color-brand-primary-hover);
+    background-color: var(--color-primary-900);
 }
 
 /* Selection */
 [data-theme="light"] ::selection {
-    background-color: var(--color-brand-primary);
+    background-color: var(--color-button);
     color: var(--color-text-on-brand);
 }
 
@@ -74,14 +92,25 @@
 }
 
 [data-theme="light"] ::-webkit-scrollbar-track {
-    background: var(--color-surface-secondary);
+    background: var(--color-background);
 }
 
 [data-theme="light"] ::-webkit-scrollbar-thumb {
-    background: var(--color-brand-secondary);
+    background: var(--color-button);
     border-radius: 5px;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-brand-secondary-hover);
+    background: var(--color-primary-900);
+}
+
+/* Links */
+[data-theme="light"] a {
+    color: var(--color-button);
+    text-decoration: none;
+}
+
+[data-theme="light"] a:hover {
+    color: var(--color-primary-900);
+    text-decoration: underline;
 }

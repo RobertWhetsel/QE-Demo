@@ -1,36 +1,52 @@
 @import url(styles.css);
 
-.survey-container {
+/* Layout */
+.l-survey {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
     padding: var(--spacing-md);
 }
 
-.survey-header {
+.l-survey-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
 }
 
-.survey-filters {
+.l-survey-content {
+    flex: 1;
+    transition: margin-left var(--transition-speed);
+    padding: var(--spacing-md);
+}
+
+.sidebar.is-open + .l-survey-content {
+    margin-left: 250px;
+}
+
+.l-survey-filters {
     display: flex;
     gap: var(--spacing-md);
     align-items: center;
 }
 
-.survey-filters select {
-    padding: var(--spacing-sm);
-    border: var(--border-width) solid var(--color-border-default);
-    border-radius: var(--border-radius);
-    background: var(--color-surface-primary);
-}
-
-.survey-list {
+.l-survey-list {
     display: grid;
     gap: var(--spacing-md);
 }
 
+/* Survey Filters */
+.survey-filters__select {
+    padding: var(--spacing-sm);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+/* Survey Card Block */
 .survey-card {
-    background: var(--color-surface-primary);
+    background: var(--color-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
     padding: var(--spacing-md);
@@ -40,7 +56,11 @@
     overflow: hidden;
 }
 
-.survey-status {
+.survey-card.is-completed .survey-card__status {
+    border-color: transparent var(--color-success) transparent transparent;
+}
+
+.survey-card__status {
     position: absolute;
     top: 0;
     right: 0;
@@ -48,42 +68,41 @@
     height: 0;
     border-style: solid;
     border-width: 0 3rem 3rem 0;
-    border-color: transparent var(--color-brand-primary) transparent transparent;
+    border-color: transparent var(--color-button) transparent transparent;
 }
 
-.survey-card.completed .survey-status {
-    border-color: transparent var(--color-success) transparent transparent;
-}
-
-.survey-content {
+.survey-card__content {
     display: grid;
     gap: var(--spacing-sm);
 }
 
-.survey-title {
+.survey-card__title {
     margin: 0;
-    color: var(--color-text-primary);
+    color: var(--color-text);
     font-size: 1.25rem;
 }
 
-.survey-description {
-    color: var(--color-text-secondary);
+.survey-card__description {
+    color: var(--color-text);
+    opacity: 0.8;
     margin: 0;
 }
 
-.survey-meta {
+.survey-card__meta {
     display: flex;
     gap: var(--spacing-md);
-    color: var(--color-text-tertiary);
+    color: var(--color-text);
+    opacity: 0.6;
     font-size: 0.875rem;
 }
 
-.survey-actions {
+.survey-card__actions {
     display: flex;
     gap: var(--spacing-md);
 }
 
-.survey-actions button {
+/* Survey Buttons */
+.survey-button {
     padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     border-radius: var(--border-radius);
@@ -91,46 +110,57 @@
     transition: background-color var(--transition-speed);
 }
 
-.start-survey {
-    background: var(--color-brand-primary);
+.survey-button--start {
+    background: var(--color-button);
     color: var(--color-text-on-brand);
 }
 
-.start-survey:hover {
-    background: var(--color-brand-primary-hover);
+.survey-button--start:hover {
+    background: var(--color-primary-900);
 }
 
-.view-results {
-    background: var(--color-brand-secondary);
+.survey-button--view {
+    background: var(--color-primary-100);
+    color: var(--color-text);
+}
+
+.survey-button--view:hover {
+    background: var(--color-primary-900);
     color: var(--color-text-on-brand);
 }
 
-.view-results:hover {
-    background: var(--color-brand-secondary-hover);
-}
-
-.no-surveys {
+/* Empty State */
+.survey-empty {
     text-align: center;
     padding: var(--spacing-xl);
-    color: var(--color-text-secondary);
-    background: var(--color-surface-primary);
+    color: var(--color-text);
+    opacity: 0.8;
+    background: var(--color-background);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
 }
 
-.no-surveys p {
+.survey-empty__text {
     margin-top: var(--spacing-md);
 }
 
-.hidden {
+/* State Classes */
+.u-hidden {
     display: none;
 }
 
-.content-area {
-    transition: margin-left var(--transition-speed);
-    padding: var(--spacing-md);
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .l-survey-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-.sidebar--open + .content-area {
-    margin-left: 250px;
+    .survey-card__actions {
+        flex-direction: column;
+    }
+
+    .survey-button {
+        width: 100%;
+    }
 }

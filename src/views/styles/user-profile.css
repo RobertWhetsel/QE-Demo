@@ -1,0 +1,194 @@
+@import url(styles.css);
+
+/* Layout */
+.l-profile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.l-profile-container {
+    padding: var(--spacing-md);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.l-profile-content {
+    flex: 1;
+    transition: margin-left var(--transition-speed);
+    padding: var(--spacing-md);
+}
+
+.sidebar.is-open + .l-profile-content {
+    margin-left: 250px;
+}
+
+/* Profile Header Block */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+/* Profile Avatar Block */
+.profile-avatar {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.profile-avatar__image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-avatar__button {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-button);
+    color: var(--color-text-on-brand);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+/* Profile Summary Block */
+.profile-summary {
+    flex: 1;
+}
+
+.profile-summary__title {
+    margin: 0;
+    color: var(--color-text);
+}
+
+.profile-summary__text {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-text);
+    opacity: 0.8;
+}
+
+/* Profile Navigation Block */
+.profile-nav {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border-bottom: var(--border-width) solid var(--color-border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.profile-nav__button {
+    background: none;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    color: var(--color-text);
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition-speed);
+}
+
+.profile-nav__button.is-active {
+    color: var(--color-button);
+    border-bottom-color: var(--color-button);
+}
+
+/* Profile Section Block */
+.profile-section {
+    display: none;
+    background: var(--color-background);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-section.is-active {
+    display: block;
+}
+
+/* Profile Form Block */
+.profile-form__group {
+    margin-bottom: var(--spacing-md);
+}
+
+.profile-form__label {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.profile-form__input {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.profile-form__input:focus {
+    border-color: var(--color-button);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-primary-100);
+}
+
+.profile-form__checkbox-group {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.profile-form__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.profile-form__actions {
+    margin-top: var(--spacing-lg);
+}
+
+.profile-form__button {
+    background: var(--color-button);
+    color: var(--color-text-on-brand);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-form__button:hover {
+    background: var(--color-primary-900);
+}
+
+/* Activity List Block */
+.activity-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-md);
+    }
+
+    .profile-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

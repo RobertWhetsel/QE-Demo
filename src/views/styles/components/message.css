@@ -1,4 +1,6 @@
-/* Message Components using BEM methodology */
+/* Message Component */
+
+/* Message Block */
 .message {
     position: fixed;
     top: var(--spacing-md);
@@ -12,25 +14,8 @@
     box-shadow: var(--shadow-md);
 }
 
-/* Message Variants */
-.message--success {
-    background-color: var(--color-success);
-}
-
-.message--error {
-    background-color: var(--color-error);
-}
-
-.message--info {
-    background-color: var(--color-info);
-}
-
-.message--warning {
-    background-color: var(--color-warning);
-}
-
-/* Message Layout */
-.message__content {
+/* Message Elements */
+.message__container {
     display: flex;
     align-items: flex-start;
     gap: var(--spacing-sm);
@@ -41,12 +26,21 @@
     font-size: 1.25em;
 }
 
-.message__text {
+.message__content {
     flex-grow: 1;
-    margin: 0;
 }
 
-.message__close {
+.message__title {
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.message__text {
+    margin: 0;
+    font-size: 0.875em;
+}
+
+.message__button {
     position: absolute;
     top: var(--spacing-xs);
     right: var(--spacing-xs);
@@ -59,18 +53,82 @@
     transition: opacity var(--transition-speed);
 }
 
-.message__close:hover {
+.message__button:hover {
     opacity: 1;
 }
 
-/* Error Modal */
+.message__button--close {
+    font-size: 1.25em;
+}
+
+/* Message Modifiers - States */
+.message--success {
+    background-color: var(--color-success);
+    border-left: 4px solid var(--color-success-hover);
+}
+
+.message--error {
+    background-color: var(--color-error);
+    border-left: 4px solid var(--color-error-hover);
+}
+
+.message--info {
+    background-color: var(--color-info);
+    border-left: 4px solid var(--color-info-hover);
+}
+
+.message--warning {
+    background-color: var(--color-warning);
+    border-left: 4px solid var(--color-warning-hover);
+    color: var(--color-text);
+}
+
+/* Message Modifiers - Position */
+.message--top-right {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    left: auto;
+    bottom: auto;
+}
+
+.message--top-left {
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    right: auto;
+    bottom: auto;
+}
+
+.message--bottom-right {
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+    top: auto;
+    left: auto;
+}
+
+.message--bottom-left {
+    bottom: var(--spacing-md);
+    left: var(--spacing-md);
+    top: auto;
+    right: auto;
+}
+
+/* Message Modifiers - Behavior */
+.message--dismissible {
+    padding-right: calc(var(--spacing-md) + 24px);
+}
+
+.message--persistent {
+    animation: none;
+}
+
+/* Error Modal Block */
 .error-modal {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--color-surface-primary);
-    color: var(--color-text-primary);
+    background-color: var(--color-background);
+    color: var(--color-text);
     padding: var(--spacing-lg);
     border-radius: var(--border-radius);
     text-align: center;
@@ -86,32 +144,33 @@
     color: var(--color-error);
 }
 
-.error-modal__message {
+.error-modal__content {
     margin-bottom: var(--spacing-md);
 }
 
-.error-modal__button {
-    background-color: var(--color-error);
-    color: var(--color-text-on-brand);
-    border: none;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color var(--transition-speed);
+.error-modal__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-sm);
 }
 
-.error-modal__button:hover {
-    background-color: var(--color-error-hover);
-}
-
-/* Module Error */
-.module-error {
+/* Error Message Block */
+.error-message {
     padding: var(--spacing-md);
-    margin: var(--spacing-md);
-    background-color: var(--color-surface-primary);
+    margin: var(--spacing-md) 0;
+    background-color: var(--color-error-bg);
     color: var(--color-error);
     border-radius: var(--border-radius);
     border: var(--border-width) solid var(--color-error);
+}
+
+.error-message__title {
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.error-message__content {
+    font-size: 0.875em;
 }
 
 /* Animations */
@@ -126,12 +185,25 @@
     }
 }
 
+@keyframes message-slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .message {
         width: 90%;
+        max-width: none;
         top: var(--spacing-sm);
         right: 5%;
+        left: 5%;
     }
 
     .error-modal {
