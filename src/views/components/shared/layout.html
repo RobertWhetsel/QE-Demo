@@ -1,0 +1,44 @@
+<!-- Navigation -->
+<nav class="nav">
+    <div class="nav__container">
+        <div class="nav__left">
+            <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
+        </div>
+        <div class="nav__menu">
+            <span id="userName" class="nav__link user-name">User</span>
+            <div id="navMenu" class="nav__dropdown" hidden>
+                <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar">
+    <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
+    <div class="sidebar__brand">
+        <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+    </div>
+    <div id="menu-items">
+        <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only" data-page="adminControlPanel">Genesis Admin Control Panel</a>
+        <a href="/src/views/pages/settings.html" class="sidebar__link" data-page="settings">Settings</a>
+        <a href="/src/views/pages/userProfile.html" class="sidebar__link" data-page="userProfile">User Profile</a>
+    </div>
+    <div class="sidebar__footer">
+        <a href="#" class="sidebar__link logout-link">Logout</a>
+        <a href="#" class="sidebar__link exit-button">Exit</a>
+    </div>
+</div>
+
+<script>
+    // Set active link based on current page
+    const currentPath = window.location.pathname;
+    const menuLinks = document.querySelectorAll('.sidebar__link[data-page]');
+    menuLinks.forEach(link => {
+        if (currentPath.includes(link.dataset.page)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+</script>

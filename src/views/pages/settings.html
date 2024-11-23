@@ -10,6 +10,7 @@
     
     <!-- Core styles -->
     <link rel="stylesheet" href="/src/views/styles/core/variables.css">
+    <link rel="stylesheet" href="/src/views/styles/core/base.css">
     
     <!-- Theme styles -->
     <link rel="stylesheet" href="/src/views/styles/themes/light.css">
@@ -18,236 +19,31 @@
     <!-- Font styles -->
     <link rel="stylesheet" href="/src/views/styles/fonts.css">
     
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-    
     <!-- Component styles -->
     <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
     <link rel="stylesheet" href="/src/views/styles/components/button.css">
     <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    
-    <style>
-        :root {
-            --nav-height: 60px;
-            --sidebar-width: 250px;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            font-family: var(--font-family-custom);
-        }
-
-        .page {
-            padding-top: var(--nav-height);
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            transition: background-color var(--transition-speed);
-        }
-
-        .page__container {
-            padding-left: var(--sidebar-width);
-            transition: padding-left var(--transition-speed);
-            min-height: calc(100vh - var(--nav-height));
-        }
-
-        .content-area {
-            padding: var(--spacing-lg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .settings-container {
-            padding: var(--spacing-lg);
-        }
-        
-        .settings-form {
-            max-width: 600px;
-            margin: var(--spacing-lg) 0;
-        }
-        
-        .form-group {
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: var(--spacing-sm);
-            font-weight: 500;
-            color: var(--color-text-primary);
-        }
-        
-        .form-group select,
-        .form-group input[type="checkbox"],
-        .form-group input[type="email"],
-        .form-group input[type="tel"] {
-            padding: var(--spacing-sm);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            background-color: var(--color-surface-secondary);
-            color: var(--color-text-primary);
-            transition: border-color var(--transition-speed),
-                        box-shadow var(--transition-speed);
-        }
-        
-        .form-group select,
-        .form-group input[type="email"],
-        .form-group input[type="tel"] {
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .form-group select:focus,
-        .form-group input[type="email"]:focus,
-        .form-group input[type="tel"]:focus {
-            border-color: var(--color-brand-primary);
-            box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
-            outline: none;
-        }
-
-        .notification-methods {
-            margin-top: var(--spacing-md);
-            display: flex;
-            gap: var(--spacing-md);
-        }
-
-        .notification-method {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .notification-fields {
-            margin-top: var(--spacing-md);
-            display: none;
-        }
-
-        .notification-fields.show {
-            display: block;
-        }
-
-        .notification-email-fields,
-        .notification-phone-fields {
-            display: none;
-            margin-top: var(--spacing-md);
-        }
-
-        .notification-email-fields.show,
-        .notification-phone-fields.show {
-            display: block;
-        }
-
-        .section {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .section-title {
-            margin-top: 0;
-            margin-bottom: var(--spacing-lg);
-            color: var(--color-text-primary);
-        }
-
-        /* Theme preview styles */
-        .theme-preview {
-            margin-top: var(--spacing-md);
-            padding: var(--spacing-md);
-            border-radius: 4px;
-            border: 1px solid var(--color-border-default);
-            transition: all var(--transition-speed);
-        }
-
-        .theme-preview.light {
-            background-color: #ffffff;
-            color: #212529;
-        }
-
-        .theme-preview.dark {
-            background-color: #1c1c1c;
-            color: #ffffff;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .page__container {
-                padding-left: 0;
-            }
-
-            .content-area {
-                padding: var(--spacing-md);
-            }
-
-            .section {
-                padding: var(--spacing-md);
-                margin-bottom: var(--spacing-md);
-            }
-
-            .form-group select,
-            .form-group input[type="email"],
-            .form-group input[type="tel"] {
-                max-width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/src/views/styles/shared/form-layouts.css">
 </head>
 <body class="page">
-    <!-- Include navigation -->
-    <nav class="nav">
-        <div class="nav__container">
-            <div class="nav__left">
-                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
-            </div>
-            <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">User</span>
-                <div id="navMenu" class="nav__dropdown" hidden>
-                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Include sidebar -->
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
-        <div class="sidebar__brand">
-            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
-        </div>
-        <div id="menu-items">
-            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
-            <a href="/src/views/pages/settings.html" class="sidebar__link active">Settings</a>
-            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
-        </div>
-        <div class="sidebar__footer">
-            <a href="#" class="sidebar__link logout-link">Logout</a>
-            <a href="#" class="sidebar__link exit-button">Exit</a>
-        </div>
-    </div>
+    <!-- Include shared layout -->
+    <div id="layout-container"></div>
 
     <div class="page__container">
         <div class="content-area">
             <div class="settings-container">
                 <h1 class="page-title">Settings</h1>
                 
-                <div class="section">
+                <div class="content-section">
                     <h2 class="section-title">Appearance</h2>
-                    <form id="settings-form" class="settings-form">
+                    <form id="settings-form">
                         <div class="form-group">
                             <label for="theme">Theme</label>
                             <select id="theme" name="theme">
                                 <option value="light">Light Theme</option>
                                 <option value="dark">Dark Theme</option>
                             </select>
-                            <div id="theme-preview" class="theme-preview">
+                            <div id="theme-preview" class="preview-box">
                                 Theme Preview
                             </div>
                         </div>
@@ -266,7 +62,7 @@
                                 <option value="Monaco">Monaco</option>
                                 <option value="system-ui">System Default</option>
                             </select>
-                            <div id="font-preview" class="theme-preview">
+                            <div id="font-preview" class="preview-box">
                                 The quick brown fox jumps over the lazy dog
                             </div>
                         </div>
@@ -312,6 +108,15 @@
         import { User } from '/src/models/user.js';
         import ThemeManager from '/src/services/state/thememanager.js';
         import FontManager from '/src/services/state/fontmanager.js';
+
+        // Load shared layout
+        fetch('/src/views/components/shared/layout.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('layout-container').innerHTML = html;
+                initPage();
+            })
+            .catch(error => console.error('Error loading layout:', error));
 
         // Initialize page
         async function initPage() {
@@ -426,7 +231,7 @@
                     document.getElementById('font-family').value = preferences.fontFamily || 'Arial';
                     
                     // Update previews
-                    document.getElementById('theme-preview').className = `theme-preview ${preferences.theme || 'light'}`;
+                    document.getElementById('theme-preview').className = `preview-box ${preferences.theme || 'light'}`;
                     document.getElementById('font-preview').style.fontFamily = FontManager.fontMap[preferences.fontFamily || 'Arial'].cssFamily;
                 }
 
@@ -456,7 +261,7 @@
                 document.getElementById('theme').addEventListener('change', (e) => {
                     const newTheme = e.target.value;
                     ThemeManager.setTheme(newTheme);
-                    document.getElementById('theme-preview').className = `theme-preview ${newTheme}`;
+                    document.getElementById('theme-preview').className = `preview-box ${newTheme}`;
                 });
 
                 // Handle font changes
@@ -496,13 +301,6 @@
             } catch (error) {
                 console.error('Error initializing page:', error);
             }
-        }
-
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            initPage();
         }
     </script>
 </body>
