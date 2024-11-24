@@ -47,22 +47,22 @@
     </script>
 </head>
 <body>
-    <div class="welcome-container">
-        <img id="logoImg" alt="Quantum Eye Logo" class="logo">
-        <div class="instructions">
-            <h2>Login Instructions</h2>
-            <p>Welcome to the Quantum Eye system. Please follow these steps:</p>
-            <ol>
-                <li>Click the Begin button below to start</li>
-                <li>The system will check for existing users</li>
-                <li>If users exist, you'll be taken to the login page</li>
-                <li>If no users exist, you'll be directed to create a Genesis Admin account</li>
+    <div class="welcome">
+        <img id="logoImg" alt="Quantum Eye Logo" class="welcome__logo">
+        <div class="welcome__content">
+            <h2 class="welcome__title">Login Instructions</h2>
+            <p class="welcome__text">Welcome to the Quantum Eye system. Please follow these steps:</p>
+            <ol class="welcome__list">
+                <li class="welcome__list-item">Click the Begin button below to start</li>
+                <li class="welcome__list-item">The system will check for existing users</li>
+                <li class="welcome__list-item">If users exist, you'll be taken to the login page</li>
+                <li class="welcome__list-item">If no users exist, you'll be directed to create a Genesis Admin account</li>
             </ol>
         </div>
-        <button id="begin-button" class="begin-button">Begin</button>
+        <button id="begin-button" class="button button--primary">Begin Login Process</button>
     </div>
 
-    <button id="logsButton" class="logs-button">
+    <button id="logsButton" class="button button--secondary button--fixed">
         View Logs
     </button>
 

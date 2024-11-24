@@ -1,26 +1,64 @@
-import paths from '/config/paths.js';
-import { User } from '/src/models/user.js';
-import { ROLES } from '/src/models/index.js';
-import DataService from '/src/models/dataservice.js';
-import Logger from '/src/utils/logging/logger.js';
-import navigation from '/src/services/navigation/navigation.js';
+import paths from '../../../config/paths.js';
+
+// Import modules using paths.getModulePath
+const { modules } = paths.core;
+
+let User, DataService, Logger, navigation;
+
+// Load dependencies
+async function loadDependencies() {
+    const [userModule, dataServiceModule, loggerModule, navigationModule] = await Promise.all([
+        import(paths.resolve(modules.user, true)),
+        import(paths.resolve(modules.dataService, true)),
+        import(paths.resolve(modules.logger, true)),
+        import(paths.resolve(modules.navigation, true))
+    ]);
+
+    User = userModule.User;
+    DataService = dataServiceModule.DataService;
+    Logger = loggerModule.default;
+    navigation = navigationModule.default;
+}
 
 export class AdminControlPanel {
     constructor() {
-        Logger.info('AdminControlPanel constructor called');
-        this.initialize();
+        loadDependencies().then(() => {
+            Logger.info('AdminControlPanel constructor called');
+            // Wait for user data to be ready before checking auth
+            document.addEventListener('userDataReady', (event) => {
+                Logger.info('User data ready event received:', event.detail);
+                
+                // Get current user data
+                const user = User.getCurrentUser();
+                Logger.info('Current user:', user);
+
+                // Verify Genesis Admin role
+                const isAuthenticated = User.isAuthenticated();
+                const userRole = User.getCurrentUserRole();
+
+                Logger.info('Auth check:', { isAuthenticated, userRole });
+
+                if (!isAuthenticated || userRole !== 'Genesis Admin') {
+                    Logger.warn('Auth failed:', { isAuthenticated, userRole });
+                    navigation.navigateToPage('login');
+                    return;
+                }
+
+                Logger.info('Auth successful, initializing admin panel');
+                this.initialize();
+            });
+        }).catch(error => {
+            Logger.error('Error loading AdminControlPanel dependencies:', error);
+        });
     }
 
     async initialize() {
         Logger.info('Initializing Admin Control Panel');
         
         try {
-            // Verify Genesis Admin authentication
-            if (!this.checkAuth()) {
-                Logger.warn('Unauthorized access attempt to admin control panel');
-                navigation.navigateToPage('login');
-                return;
-            }
+            // Initialize DataService
+            this.dataService = DataService.getInstance();
+            await this.dataService.init();
 
             // Initialize form handler
             this.setupFormHandler();
@@ -31,15 +69,8 @@ export class AdminControlPanel {
             Logger.info('Admin Control Panel initialized successfully');
         } catch (error) {
             Logger.error('Initialization error:', error);
-            this.showMessage('Failed to initialize admin panel', 'error');
+            this.showError('Failed to initialize admin panel');
         }
-    }
-
-    checkAuth() {
-        const isAuthenticated = User.isAuthenticated();
-        const userRole = User.getCurrentUserRole();
-        Logger.info('Checking auth:', { isAuthenticated, userRole });
-        return isAuthenticated && userRole === ROLES.GENESIS_ADMIN;
     }
 
     setupFormHandler() {
@@ -53,19 +84,18 @@ export class AdminControlPanel {
 
     async displayData() {
         try {
-            const dataService = DataService.getInstance();
-            const data = await dataService.getData();
-            Logger.info('Displaying admin data', { recordCount: data?.length });
+            const data = this.dataService.getData();
+            Logger.info('Displaying admin data', { recordCount: data?.users?.length });
             
             const container = document.getElementById('admin-list-container');
             if (!container) return;
             
-            if (!data || data.length === 0) {
+            if (!data?.users || data.users.length === 0) {
                 container.innerHTML = '<p class="no-data-message">No data available.</p>';
                 return;
             }
             
-            container.innerHTML = this.createTableHTML(data);
+            container.innerHTML = this.createTableHTML(data.users);
 
             // Update system status
             const statusSection = document.getElementById('system-status');
@@ -73,6 +103,8 @@ export class AdminControlPanel {
                 statusSection.innerHTML = `
                     <p>Current Site Status: <strong>${paths.SITE_STATE}</strong></p>
                     <p>Base URL: <strong>${paths.BASE_URL}</strong></p>
+                    <p>Total Users: <strong>${data.users.length}</strong></p>
+                    <p>Pending Users: <strong>${data.pendingUsers?.length || 0}</strong></p>
                 `;
             }
         } catch (error) {
@@ -81,24 +113,24 @@ export class AdminControlPanel {
         }
     }
 
-    createTableHTML(data) {
+    createTableHTML(users) {
         return `
             <table class="data-list">
                 <thead>
                     <tr>
-                        ${['ID', 'Username', 'Email', 'Type', 'Created']
+                        ${['Username', 'Email', 'Role', 'Status', 'Created']
                             .map(header => `<th>${header}</th>`)
                             .join('')}
                     </tr>
                 </thead>
                 <tbody>
-                    ${data.map(row => `
+                    ${users.map(user => `
                         <tr>
-                            <td>${row.id}</td>
-                            <td>${row.name}</td>
-                            <td>${row.email}</td>
-                            <td>${row.type}</td>
-                            <td>${new Date(row.created).toLocaleString()}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.role}</td>
+                            <td>${user.status || 'Active'}</td>
+                            <td>${user.created ? new Date(user.created).toLocaleString() : 'N/A'}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -114,23 +146,23 @@ export class AdminControlPanel {
             const formData = this.getFormData();
             this.validateFormData(formData);
             
-            const dataService = DataService.getInstance();
-            
             // Check for existing user
-            const existingData = await dataService.getData();
-            if (existingData.some(user => user.name === formData.name)) {
+            const data = this.dataService.getData();
+            if (data.users.some(user => user.username === formData.username)) {
                 throw new Error('Username already exists');
             }
             
-            // Add new record
-            if (await dataService.addRecord(formData)) {
-                Logger.info('Admin user created successfully');
-                this.showSuccess('Admin user created successfully!');
-                event.target.reset();
-                await this.displayData();
-            } else {
-                throw new Error('Failed to save record');
-            }
+            // Add new user
+            await this.dataService.addUser({
+                ...formData,
+                status: 'active',
+                created: new Date().toISOString()
+            });
+
+            Logger.info('Admin user created successfully');
+            this.showSuccess('Admin user created successfully!');
+            event.target.reset();
+            await this.displayData();
         } catch (error) {
             Logger.error('Error creating admin record:', error);
             this.showError(error.message);
@@ -139,17 +171,15 @@ export class AdminControlPanel {
 
     getFormData() {
         return {
-            id: Date.now().toString(),
-            name: document.getElementById('username').value.trim(),
+            username: document.getElementById('username').value.trim(),
             email: document.getElementById('email').value.trim(),
             password: document.getElementById('password').value,
-            type: document.getElementById('role').value,
-            created: new Date().toISOString()
+            role: document.getElementById('role').value
         };
     }
 
     validateFormData(formData) {
-        if (!formData.name || !formData.email || !formData.password || !formData.type) {
+        if (!formData.username || !formData.email || !formData.password || !formData.role) {
             throw new Error('All fields are required');
         }
 

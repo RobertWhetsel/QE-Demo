@@ -45,10 +45,12 @@ export async function initializeApp() {
         await dataService.init();
         window.QE.DataService = dataService;
 
-        // Clear any existing auth data on login page
-        if (isLoginPage) {
-            await Logger.info('Login page detected, clearing auth data');
+        // Clear auth data only when explicitly logging out and remove logout param
+        if (isLoginPage && window.location.search.includes('logout=true')) {
+            await Logger.info('Logout detected, clearing auth data');
             await User.clearAllStorage();
+            // Remove logout param to prevent loop
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
         
         // If on index or login page, just initialize theme and font
@@ -143,7 +145,23 @@ export async function initializeApp() {
                 await Logger.info('Logo source set');
             }
 
-            // Dispatch event when user data is ready
+            // Mark initialization as complete
+            document.documentElement.setAttribute('data-app-initialized', 'true');
+            
+            // Dispatch initialization complete event first
+            await Logger.info('Dispatching appInitialized event');
+            document.dispatchEvent(new CustomEvent('appInitialized', {
+                detail: {
+                    isAuthenticated,
+                    username,
+                    user: User.getCurrentUser()
+                }
+            }));
+
+            // Wait a moment for layout script to initialize
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Then dispatch user data event
             await Logger.info('Dispatching userDataReady event');
             document.dispatchEvent(new CustomEvent('userDataReady', {
                 detail: {
@@ -154,19 +172,6 @@ export async function initializeApp() {
             }));
         }
         
-        // Mark initialization as complete
-        document.documentElement.setAttribute('data-app-initialized', 'true');
-        
-        // Dispatch event when initialization is complete
-        await Logger.info('Dispatching appInitialized event');
-        const initEvent = new CustomEvent('appInitialized', {
-            detail: {
-                isAuthenticated,
-                username,
-                user: User.getCurrentUser()
-            }
-        });
-        document.dispatchEvent(initEvent);
         await Logger.info('Application initialization complete');
         
     } catch (error) {

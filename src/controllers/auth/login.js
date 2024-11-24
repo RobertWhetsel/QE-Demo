@@ -1,37 +1,64 @@
-import navigation from '/src/services/navigation/navigation.js';
-import { User } from '/src/models/user.js';
-import ThemeManager from '/src/services/state/thememanager.js';
-import FontManager from '/src/services/state/fontmanager.js';
-import Logger from '/src/utils/logging/logger.js';
-import config from '/config/client.js';
-import paths from '/config/paths.js';
+import paths from '../../../config/paths.js';
+
+// Get module paths from CORE_PATHS.modules
+const { modules } = paths.core;
+
+let User, navigation, ThemeManager, FontManager, Logger, config;
+
+// Load dependencies
+async function loadDependencies() {
+    const [
+        userModule,
+        navigationModule,
+        themeManagerModule,
+        fontManagerModule,
+        loggerModule,
+        configModule
+    ] = await Promise.all([
+        import(paths.resolve(modules.user, true)),
+        import(paths.resolve(modules.navigation, true)),
+        import(paths.resolve(modules.themeManager, true)),
+        import(paths.resolve(modules.fontManager, true)),
+        import(paths.resolve(modules.logger, true)),
+        import(paths.resolve(modules.config, true))
+    ]);
+
+    User = userModule.User;
+    navigation = navigationModule.default;
+    ThemeManager = themeManagerModule.default;
+    FontManager = fontManagerModule.default;
+    Logger = loggerModule.default;
+    config = configModule.default;
+}
 
 export class Auth {
     constructor() {
-        this.form = document.getElementById('login-form');
-        Logger.info('Initializing Auth controller');
-        this.init();
+        loadDependencies().then(() => {
+            Logger.info('Auth controller constructor called');
+            this.initialize();
+        }).catch(error => {
+            console.error('Error loading Auth dependencies:', error);
+        });
     }
 
-    init() {
-        // Add event listener to the login form
+    initialize() {
+        Logger.info('Initializing Auth controller');
+        this.setupFormHandler();
+    }
+
+    setupFormHandler() {
+        this.form = document.getElementById('login-form');
+        Logger.debug('Setting up login form handler:', { formFound: !!this.form });
+        
         if (this.form) {
-            Logger.debug('Setting up login form event listener');
-            this.form.addEventListener('submit', async (e) => {
-                // Prevent form submission
-                e.preventDefault();
-                e.stopPropagation();
-                // Handle login
-                await this.handleLogin();
-                // Return false to prevent default form action
-                return false;
-            });
+            this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         } else {
             Logger.warn('Login form not found during initialization');
         }
     }
 
-    async handleLogin() {
+    async handleFormSubmit(event) {
+        event.preventDefault();
         Logger.info('Login form submitted');
 
         const username = document.getElementById('username').value.trim();
@@ -46,9 +73,11 @@ export class Auth {
         try {
             Logger.info('Login attempt initiated', { username });
             
-            // Clear any existing storage before login attempt
-            Logger.debug('Clearing storage before login attempt');
-            await User.clearAllStorage();
+            // Only clear storage if explicitly logging out
+            if (window.location.search.includes('logout=true')) {
+                Logger.debug('Logout detected, clearing storage');
+                await User.clearAllStorage();
+            }
             
             // Attempt login through User model
             const user = await User.login(username, password);
@@ -64,7 +93,6 @@ export class Auth {
                 const isConsistent = User.verifyStorageConsistency();
                 if (!isConsistent) {
                     Logger.error('Storage consistency check failed after login');
-                    await User.clearAllStorage();
                     this.showError('Login failed due to storage inconsistency');
                     return;
                 }
@@ -98,14 +126,11 @@ export class Auth {
                     default:
                         Logger.error('Invalid user role detected', { role: user.role });
                         this.showError('Invalid user role');
-                        await User.clearAllStorage();
-                        await User.logout();
                         return;
                 }
 
             } else {
                 Logger.warn('Login failed: Invalid credentials', { username });
-                await User.clearAllStorage();
                 this.showError('Invalid username or password');
             }
         } catch (error) {
@@ -116,7 +141,6 @@ export class Auth {
                     stack: error.stack
                 }
             });
-            await User.clearAllStorage();
             this.showError('An error occurred. Please try again later.');
         }
     }

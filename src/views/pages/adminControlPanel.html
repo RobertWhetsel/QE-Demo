@@ -5,82 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genesis Admin Control Panel - Quantum Eye</title>
     
-    <!-- Import paths -->
+    <!-- Import paths and load CSS -->
     <script type="module">
-        import paths from '/config/paths.js';
+        import paths from '../../../config/paths.js';
         window.paths = paths; // Make paths available globally
-    </script>
-    
-    <!-- Initialize application state -->
-    <script type="module">
-        const init = paths.resolve('src/services/init.js');
-        document.write(`<script type="module" src="${init}"><\/script>`);
+
+        // Load CSS files in correct order
+        const cssPaths = paths.getCssPaths();
+        cssPaths.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        });
+
+        // Wait for CSS to load before initializing app
+        Promise.all(
+            Array.from(document.styleSheets).map(sheet => {
+                if (sheet.href) {
+                    return new Promise((resolve, reject) => {
+                        sheet.onload = resolve;
+                        sheet.onerror = reject;
+                    });
+                }
+                return Promise.resolve();
+            })
+        ).then(() => {
+            // Initialize application state
+            const init = paths.resolve('src/services/init.js', true);
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = init;
+            document.head.appendChild(script);
+        });
+
+        // Set logo source immediately after paths is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            const logoPath = paths.getAssetPath('logo');
+            document.getElementById('logoImg').src = logoPath;
+        });
     </script>
 </head>
-<body class="dashboard">
-    <!-- Include shared layout -->
+<body>
     <div id="layout-container"></div>
 
-    <!-- Main Content -->
     <div class="dashboard__content">
         <div class="admin-panel">
             <div class="admin-panel__header">
+                <img id="logoImg" alt="QE Logo" class="admin-panel__logo">
                 <h1 class="admin-panel__title">Genesis Admin Control Panel</h1>
-                <p class="admin-panel__description">Manage system configuration, users, and monitor system status.</p>
             </div>
-            
-            <div class="admin-panel__section">
-                <h2>System Configuration</h2>
-                <div class="admin-panel__form">
-                    <form id="admin-creation-form" class="admin-panel__form-group">
-                        <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="role">Role</label>
-                            <select id="role" name="role" required>
-                                <option value="">Select Role</option>
-                                <option value="Platform Admin">Platform Admin</option>
-                                <option value="User Admin">User Admin</option>
-                                <option value="User">User</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="admin-panel__button admin-panel__button--primary">Create User</button>
-                    </form>
-                </div>
+
+            <div class="admin-panel__section admin-panel__section--full">
+                <h2 class="admin-panel__section-title">User Management</h2>
+                <div id="admin-list-container" class="admin-panel__table"></div>
             </div>
-            
-            <div class="admin-panel__section">
-                <h2>User Management</h2>
-                <div id="admin-list-container" class="admin-panel__table">
-                    <!-- Table will be populated by controller -->
-                </div>
-            </div>
-            
-            <div class="admin-panel__section">
-                <h2>System Status</h2>
-                <div id="system-status" class="admin-panel__table">
-                    <!-- Status info will be populated by controller -->
+
+            <div class="admin-panel__grid">
+                <div class="admin-panel__section">
+                    <h2 class="admin-panel__section-title">System Status</h2>
+                    <div id="system-status"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="loading" class="loading">
+        <div class="loading__spinner"></div>
+    </div>
+
     <script type="module">
-        import { AdminControlPanel } from '/src/controllers/admin/admincontrolpanel.js';
+        import paths from '../../../config/paths.js';
         
-        // Initialize page after app is initialized
-        function initPage() {
-            new AdminControlPanel();
+        // Check auth before initializing page
+        async function checkAuth() {
+            const { User } = await import(paths.resolve('src/models/user.js', true));
+            const { default: navigation } = await import(paths.resolve('src/services/navigation/navigation.js', true));
+            
+            const isAuthenticated = User.isAuthenticated();
+            const userRole = User.getCurrentUserRole();
+            
+            if (!isAuthenticated || userRole !== 'Genesis Admin') {
+                navigation.navigateToPage('login');
+                return false;
+            }
+            return true;
+        }
+        
+        // Initialize page after auth check and app initialization
+        async function initPage() {
+            if (await checkAuth()) {
+                const { AdminControlPanel } = await import(paths.resolve('src/controllers/admin/admincontrolpanel.js', true));
+                new AdminControlPanel();
+            }
         }
 
         // Wait for app initialization before starting

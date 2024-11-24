@@ -29,20 +29,28 @@ const CORE_PATHS = {
     
     // CSS files in load order
     styles: {
+        // Base styles must be loaded first
         base: [
             `${STYLE_PATH}/base/_variables.css`,
             `${STYLE_PATH}/base/_reset.css`,
             `${STYLE_PATH}/base/_typography.css`
         ],
+        // Layout styles
         layouts: [
             `${STYLE_PATH}/layouts/_containers.css`,
             `${STYLE_PATH}/layouts/_grid.css`
         ],
+        // Component styles
         components: [
-            `${STYLE_PATH}/components/_buttons.css`,
-            `${STYLE_PATH}/components/_forms.css`,
-            `${STYLE_PATH}/components/_navigation.css`
+            `${STYLE_PATH}/components/_button.css`,
+            `${STYLE_PATH}/components/_form.css`,
+            `${STYLE_PATH}/components/_loading.css`,
+            `${STYLE_PATH}/components/_welcome.css`,
+            `${STYLE_PATH}/components/_login.css`,
+            `${STYLE_PATH}/components/_navigation.css`,
+            `${STYLE_PATH}/components/_admin-panel.css`
         ],
+        // Utility styles loaded last
         utilities: [
             `${STYLE_PATH}/utilities/_helpers.css`
         ]
@@ -70,7 +78,8 @@ const CORE_PATHS = {
     
     // Utils
     utils: {
-        logger: `${MODULE_PATH}/utils/logging/test-logger.html`
+        logger: `${MODULE_PATH}/utils/logging/test-logger.html`,
+        test: `${MODULE_PATH}/utils/testPage.html`
     },
 
     // Data files
@@ -96,7 +105,8 @@ const CORE_PATHS = {
         admincontrolpanel: `${MODULE_PATH}/controllers/admin/admincontrolpanel.js`,
         login: `${MODULE_PATH}/controllers/auth/login.js`,
         settings: `${MODULE_PATH}/controllers/user/settings.js`,
-        userprofile: `${MODULE_PATH}/controllers/user/userprofile.js`
+        userprofile: `${MODULE_PATH}/controllers/user/userprofile.js`,
+        test: `${MODULE_PATH}/controllers/test/testController.js`  // Added test controller path
     }
 };
 
@@ -137,6 +147,7 @@ const paths = {
 
     // Get all CSS paths in correct order
     getCssPaths: () => {
+        // Load all styles in correct order
         const allStyles = [
             ...CORE_PATHS.styles.base,
             ...CORE_PATHS.styles.layouts,

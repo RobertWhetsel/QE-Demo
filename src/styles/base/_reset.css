@@ -1,15 +1,15 @@
 /* Modern CSS Reset */
+
+/* Box sizing rules */
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* Remove default margin and set proper font baseline */
+/* Remove default margin and padding */
 body,
 h1,
 h2,
@@ -22,34 +22,30 @@ figure,
 blockquote,
 dl,
 dd {
-  margin: 0;
-}
-
-/* Set core root defaults */
-html {
-  scroll-behavior: smooth;
-  text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
+    margin: 0;
 }
 
 /* Set core body defaults */
 body {
-  min-height: 100vh;
-  text-rendering: optimizeSpeed;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    line-height: var(--line-height-base);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Remove list styles */
+ul,
+ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 /* Make images easier to work with */
 img,
-picture,
-video,
-canvas,
-svg {
-  max-width: 100%;
-  display: block;
-  height: auto;
+picture {
+    max-width: 100%;
+    display: block;
 }
 
 /* Inherit fonts for inputs and buttons */
@@ -57,82 +53,59 @@ input,
 button,
 textarea,
 select {
-  font: inherit;
-  color: inherit;
+    font: inherit;
 }
 
-/* Reset form elements */
-button,
-input,
-select,
-textarea {
-  background-color: transparent;
-  border: 1px solid WindowFrame;
-  border-radius: 0;
+/* Remove all animations and transitions for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
+/* Set core root defaults */
+html:focus-within {
+    scroll-behavior: smooth;
+}
+
+/* Remove default button styles */
 button {
-  padding: 0;
-  cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
 }
 
-[type='search'] {
-  -webkit-appearance: textfield;
-  outline-offset: -2px;
-}
-
-/* Remove list styles */
-ul[role='list'],
-ol[role='list'] {
-  list-style: none;
-}
-
-/* Set core link defaults */
+/* Set default link styles */
 a {
-  color: inherit;
-  text-decoration: inherit;
+    color: inherit;
+    text-decoration: none;
 }
 
-/* Table reset */
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  width: 100%;
-}
-
-/* Quote reset */
-blockquote, q {
-  quotes: none;
-}
-
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
-  content: '';
-  content: none;
+/* Make sure textareas without a rows attribute are not tiny */
+textarea:not([rows]) {
+    min-height: 10em;
 }
 
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
 @media (prefers-reduced-motion: reduce) {
-  html:focus-within {
-    scroll-behavior: auto;
-  }
-  
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Touch action optimization */
-a,
-button,
-input,
-textarea {
-  touch-action: manipulation;
+    html:focus-within {
+        scroll-behavior: auto;
+    }
+    
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

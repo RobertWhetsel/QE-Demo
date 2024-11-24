@@ -1,0 +1,103 @@
+/* Form component styles following BEM methodology */
+.form {
+    width: 100%;
+}
+
+.form__group {
+    margin-bottom: var(--spacing-md); /* Reduced from lg to md */
+}
+
+.form__label {
+    display: block;
+    margin-bottom: var(--spacing-xs); /* Reduced from sm to xs */
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm); /* Added smaller font size */
+}
+
+.form__input {
+    width: 100%;
+    padding: calc(var(--spacing-sm) - 2px) var(--spacing-md); /* Slightly reduced padding */
+    border: 1px solid var(--secondary);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    line-height: 1.4; /* Reduced from base to make more compact */
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 38px; /* Fixed height for consistency */
+}
+
+.form__input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form__input:disabled {
+    background-color: var(--bg-secondary);
+    cursor: not-allowed;
+}
+
+.form__input--error {
+    border-color: #dc3545;
+}
+
+.form__input--error:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.form__error {
+    color: #dc3545;
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+    display: none;
+}
+
+.form__error--visible {
+    display: block;
+}
+
+/* Form layout modifiers */
+.form--inline {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.form--inline .form__group {
+    margin-bottom: 0;
+    flex: 1;
+}
+
+/* Input type specific styles */
+.form__input[type="password"] {
+    letter-spacing: 0.2em;
+}
+
+.form__input[type="search"] {
+    padding-left: calc(var(--spacing-md) + 20px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: var(--spacing-sm) center;
+}
+
+/* Placeholder styling */
+.form__input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Autofill styling */
+.form__input:-webkit-autofill,
+.form__input:-webkit-autofill:hover,
+.form__input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    -webkit-text-fill-color: var(--text-primary);
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Button within form context */
+.form .button {
+    width: 100%;
+    margin-top: var(--spacing-md); /* Added margin top for button */
+    height: 38px; /* Match input height */
+}

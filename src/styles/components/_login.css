@@ -1,0 +1,50 @@
+/* Login component styles following BEM methodology */
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--spacing-md);
+    background-color: var(--bg-secondary);
+}
+
+.login__form {
+    width: 100%;
+    max-width: 500px; /* Increased from 400px */
+    padding: var(--spacing-lg); /* Reduced from xl to lg */
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.login__header {
+    text-align: center;
+    margin-bottom: var(--spacing-lg); /* Reduced from xl to lg */
+}
+
+.login__logo {
+    max-width: 120px; /* Reduced from 150px */
+    margin: 0 auto var(--spacing-md); /* Reduced bottom margin */
+    display: block;
+}
+
+.login__title {
+    color: var(--text-primary);
+    font-size: var(--font-size-xl);
+    margin-bottom: 0;
+}
+
+/* Message component within login context */
+.message {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md); /* Reduced from lg to md */
+    border-radius: var(--border-radius);
+    display: none; /* Hidden by default */
+}
+
+.message--error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    display: block; /* Shown when error class is applied */
+}

@@ -1,5 +1,5 @@
-import paths, { SITE_STATE } from '/config/paths.js';
-import Logger from '/src/utils/logging/logger.js';
+import paths, { SITE_STATE } from '../../../config/paths.js';
+import Logger from '../../utils/logging/logger.js';
 
 class Navigation {
     constructor() {
@@ -28,20 +28,14 @@ class Navigation {
                 return;
             }
 
-            // Get page path from paths.js
-            const pagePath = paths.core.pages[pageName];
-            Logger.info('Page path from config:', pagePath);
+            // Get resolved page path from paths.js
+            const resolvedPath = paths.getPagePath(pageName);
+            Logger.info('Resolved page path:', resolvedPath);
             
-            if (!pagePath) {
+            if (!resolvedPath) {
                 Logger.error('Page path not found:', pageName);
                 throw new Error(`Page path not found for: ${pageName}`);
             }
-
-            // For dev environment, ensure we're using the full URL
-            const resolvedPath = SITE_STATE === 'dev' 
-                ? paths.resolve(pagePath)
-                : pagePath;
-            Logger.info('Resolved page path:', resolvedPath);
             
             // Navigate to the page
             window.location.href = resolvedPath;
@@ -78,10 +72,10 @@ class Navigation {
             Logger.info('Toggling sidebar:', { state: this.sidebarState });
             
             if (this.sidebarState) {
-                sidebar.classList.add('is-open');
+                sidebar.classList.add('sidebar--open');
                 if (content) content.classList.add('dashboard__content--shifted');
             } else {
-                sidebar.classList.remove('is-open');
+                sidebar.classList.remove('sidebar--open');
                 if (content) content.classList.remove('dashboard__content--shifted');
             }
         }
@@ -95,7 +89,7 @@ class Navigation {
             this.sidebarState = false;
             Logger.info('Closing sidebar');
             
-            sidebar.classList.remove('is-open');
+            sidebar.classList.remove('sidebar--open');
             if (content) content.classList.remove('dashboard__content--shifted');
         }
     }

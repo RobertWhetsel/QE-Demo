@@ -1,0 +1,40 @@
+/* Welcome component styles following BEM methodology */
+.welcome {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+}
+
+.welcome__logo {
+    max-width: 200px;
+    margin: 0 auto 2rem;  /* Center the logo horizontally and add bottom margin */
+    display: block;  /* Ensure block display for margin auto to work */
+}
+
+.welcome__content {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.welcome__title {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.welcome__text {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.welcome__list {
+    padding-left: 1.5rem;
+}
+
+.welcome__list-item {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
