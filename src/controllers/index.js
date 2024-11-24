@@ -6,6 +6,7 @@ import config from '/config/client.js';
 
 export class IndexController {
     constructor() {
+        Logger.info('Index Controller constructor called');
         this.initialize();
     }
 
@@ -14,16 +15,22 @@ export class IndexController {
         
         // Setup logs button
         const logsButton = document.getElementById('logsButton');
+        Logger.info('Found logs button:', !!logsButton);
         if (logsButton) {
             logsButton.addEventListener('click', () => {
+                Logger.info('Logs button clicked');
                 navigation.navigateToUtil('logger');
             });
         }
 
         // Add click handler to begin button
         const beginButton = document.getElementById('begin-button');
+        Logger.info('Found begin button:', !!beginButton);
         if (beginButton) {
-            beginButton.addEventListener('click', () => this.handleBegin());
+            beginButton.addEventListener('click', () => {
+                Logger.info('Begin button clicked, calling handleBegin');
+                this.handleBegin();
+            });
         }
 
         Logger.info('Index Controller initialized');
@@ -31,17 +38,17 @@ export class IndexController {
 
     async handleBegin() {
         try {
-            Logger.info('Begin button clicked');
+            Logger.info('Begin button handler executing');
             
-            // Initialize DataService
-            const dataService = new DataService();
-            await dataService.init();
+            // Get DataService instance that was initialized by init.js
+            const dataService = window.QE.DataService;
+            Logger.info('Got DataService instance:', !!dataService);
             
-            const appData = dataService.getData();
+            const appData = await dataService.getData();
             Logger.info('App data loaded:', appData);
             
             // Check for existing users
-            if (appData.users && appData.users.length > 0) {
+            if (appData?.users && appData.users.length > 0) {
                 Logger.info('Users exist, redirecting to login');
                 navigation.navigateToPage('login');
             } else {
@@ -56,30 +63,17 @@ export class IndexController {
     }
 
     showError(message) {
-        Logger.info('Showing error message:', message);
+        Logger.warn('Showing error:', message);
         
         // Show error message on the page
         const messageElement = document.createElement('div');
-        messageElement.className = 'message message-error';
+        messageElement.className = 'message-error';
         messageElement.textContent = message;
-        messageElement.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 4px;
-            animation: slideIn 0.3s ease-out;
-            z-index: 1000;
-            background-color: #f44336;
-            color: white;
-        `;
-        
         document.body.appendChild(messageElement);
         
         // Remove message after timeout
         setTimeout(() => {
-            messageElement.style.animation = 'slideOut 0.3s ease-in';
-            setTimeout(() => messageElement.remove(), 300);
+            messageElement.remove();
         }, config.ui.toastDuration);
     }
 }

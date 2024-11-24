@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum Eye - Welcome</title>
-
+    
     <!-- Import paths and load CSS -->
     <script type="module">
         import paths from '/config/paths.js';
-        window.paths = paths;
+        window.paths = paths; // Make paths available globally
 
         // Load CSS files in correct order
         const cssPaths = paths.getCssPaths();
@@ -19,140 +19,32 @@
             document.head.appendChild(link);
         });
 
+        // Wait for CSS to load before initializing app
+        Promise.all(
+            Array.from(document.styleSheets).map(sheet => {
+                if (sheet.href) {
+                    return new Promise((resolve, reject) => {
+                        sheet.onload = resolve;
+                        sheet.onerror = reject;
+                    });
+                }
+                return Promise.resolve();
+            })
+        ).then(() => {
+            // Initialize application state
+            const init = paths.resolve('src/services/init.js');
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = init;
+            document.head.appendChild(script);
+        });
+
         // Set logo source immediately after paths is loaded
         window.addEventListener('DOMContentLoaded', () => {
             const logoPath = paths.getAssetPath('logo');
             document.getElementById('logoImg').src = logoPath;
         });
     </script>
-
-    <style>
-        body {
-            background-color: var(--color-surface-secondary);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .welcome-container {
-            background-color: var(--color-surface-primary);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            padding: var(--spacing-lg);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-            margin: var(--spacing-sm);
-        }
-
-        .logo {
-            max-width: 200px;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        h2 {
-            color: var(--color-text-primary);
-            font-size: 1.3rem;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .instructions {
-            margin: var(--spacing-md) 0;
-            text-align: left;
-        }
-
-        .instructions p {
-            color: var(--color-text-secondary);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .instructions ol {
-            color: var(--color-text-primary);
-            padding-left: var(--spacing-lg);
-            margin: 0;
-        }
-
-        .instructions li {
-            margin-bottom: var(--spacing-xs);
-            line-height: 1.4;
-        }
-
-        .begin-button {
-            background-color: var(--color-brand-primary);
-            color: var(--color-text-on-brand);
-            padding: var(--spacing-md) var(--spacing-xl);
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: all var(--transition-speed);
-            width: 100%;
-            max-width: 200px;
-            margin-top: var(--spacing-md);
-        }
-
-        .begin-button:hover {
-            background-color: var(--color-brand-primary-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .begin-button:active {
-            transform: translateY(0);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .logs-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-sm) var(--spacing-md);
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            opacity: 0.6;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .logs-button:hover {
-            opacity: 1;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .message-error {
-            background-color: var(--color-error-bg);
-            color: var(--color-error);
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin: 1rem;
-            text-align: center;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -10px);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="welcome-container">
@@ -175,20 +67,15 @@
     </button>
 
     <script type="module">
-        import paths from '/config/paths.js';
+        import { IndexController } from '/src/controllers/index.js';
         
-        // Initialize page
-        async function initPage() {
-            const { IndexController } = await import(paths.getModulePath('index'));
+        // Initialize page after app is initialized
+        function initPage() {
             new IndexController();
         }
 
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            initPage();
-        }
+        // Wait for app initialization before starting
+        document.addEventListener('appInitialized', initPage);
     </script>
 </body>
 </html>

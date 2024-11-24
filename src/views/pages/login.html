@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quantum Eye</title>
-
-    <!-- Import paths and load CSS -->
+    
+    <!-- Import paths -->
     <script type="module">
         import paths from '/config/paths.js';
-        window.paths = paths;
+        window.paths = paths; // Make paths available globally
 
         // Load CSS files in correct order
         const cssPaths = paths.getCssPaths();
@@ -25,153 +25,16 @@
             document.getElementById('logoImg').src = logoPath;
         });
     </script>
-
-    <style>
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-        }
-
-        .login-form {
-            background-color: var(--color-surface-secondary);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: var(--shadow-md);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .login-logo {
-            max-width: 150px;
-            height: auto;
-            margin-bottom: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--color-text-primary);
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            transition: border-color var(--transition-speed),
-                        box-shadow var(--transition-speed);
-        }
-
-        .form-group input:focus {
-            border-color: var(--color-brand-primary);
-            box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
-            outline: none;
-        }
-
-        .button {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: var(--color-brand-primary);
-            color: var(--color-text-on-brand);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: background-color var(--transition-speed),
-                        transform var(--transition-speed);
-        }
-
-        .button:hover {
-            background-color: var(--color-brand-primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .button:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            background-color: var(--color-error-bg);
-            color: var(--color-error);
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            text-align: center;
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-
-        .loading.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--color-surface-primary);
-            border-top-color: var(--color-brand-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-    </style>
+    
+    <!-- Initialize application state -->
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
 </head>
 <body>
     <div class="login-container">
-        <form id="login-form" class="login-form" autocomplete="off">
+        <form id="login-form" class="login-form" autocomplete="off" onsubmit="return false;">
             <div class="login-header">
                 <img id="logoImg" alt="Quantum Eye Logo" class="login-logo">
                 <h1>Login</h1>
@@ -213,22 +76,15 @@
     </div>
 
     <script type="module">
-        import paths from '/config/paths.js';
         import { Auth } from '/src/controllers/auth/login.js';
-        import config from '/config/client.js';
         
-        // Initialize page
+        // Initialize page after app is initialized
         function initPage() {
-            // Initialize Auth
             new Auth();
         }
 
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            initPage();
-        }
+        // Wait for app initialization before starting
+        document.addEventListener('appInitialized', initPage);
     </script>
 </body>
 </html>

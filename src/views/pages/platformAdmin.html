@@ -9,6 +9,21 @@
     <script type="module">
         import paths from '/config/paths.js';
         window.paths = paths; // Make paths available globally
+
+        // Load CSS files in correct order
+        const cssPaths = paths.getCssPaths();
+        cssPaths.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        });
+
+        // Set logo source immediately after paths is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            const logoPath = paths.getAssetPath('logo');
+            document.getElementById('logoImg').src = logoPath;
+        });
     </script>
     
     <!-- Initialize application state -->
@@ -16,188 +31,10 @@
         const init = paths.resolve('src/services/init.js');
         document.write(`<script type="module" src="${init}"><\/script>`);
     </script>
-    
-    <!-- Core styles -->
-    <script>
-        const styleLinks = [
-            paths.resolve('src/views/styles/core/variables.css'),
-            paths.resolve('src/views/styles/themes/light.css'),
-            paths.resolve('src/views/styles/themes/dark.css'),
-            paths.resolve('src/views/styles/fonts.css'),
-            paths.resolve('src/views/styles/core/base.css'),
-            paths.resolve('src/views/styles/layouts/container.css'),
-            paths.resolve('src/views/styles/components/navigation.css'),
-            paths.resolve('src/views/styles/components/button.css'),
-            paths.resolve('src/views/styles/components/message.css')
-        ];
-        
-        styleLinks.forEach(href => {
-            document.write(`<link rel="stylesheet" href="${href}">`);
-        });
-    </script>
-    
-    <style>
-        :root {
-            --nav-height: 60px;
-            --sidebar-width: 250px;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            font-family: var(--font-family-custom);
-        }
-
-        .page {
-            padding-top: var(--nav-height);
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            transition: background-color var(--transition-speed);
-        }
-
-        .page__container {
-            padding-left: var(--sidebar-width);
-            transition: padding-left var(--transition-speed);
-            min-height: calc(100vh - var(--nav-height));
-        }
-
-        .content-area {
-            padding: var(--spacing-lg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .dashboard-container {
-            padding: var(--spacing-lg);
-        }
-        
-        .dashboard-section {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .dashboard-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .stat-card {
-            background-color: var(--color-surface-primary);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            padding: var(--spacing-md);
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-            transition: transform var(--transition-speed),
-                        box-shadow var(--transition-speed);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--color-brand-primary);
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        .stat-label {
-            color: var(--color-text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-            flex-wrap: wrap;
-        }
-
-        .action-button {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: none;
-            border-radius: 4px;
-            background-color: var(--color-brand-primary);
-            color: var(--color-text-on-brand);
-            cursor: pointer;
-            transition: background-color var(--transition-speed),
-                        transform var(--transition-speed);
-        }
-
-        .action-button:hover {
-            background-color: var(--color-brand-primary-hover);
-            transform: translateY(-1px);
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .page__container {
-                padding-left: 0;
-            }
-
-            .content-area {
-                padding: var(--spacing-md);
-            }
-
-            .dashboard-section {
-                padding: var(--spacing-md);
-                margin-bottom: var(--spacing-md);
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .action-button {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body class="page">
-    <!-- Include navigation -->
-    <nav class="nav">
-        <div class="nav__container">
-            <div class="nav__left">
-                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
-            </div>
-            <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">User</span>
-                <div id="navMenu" class="nav__dropdown" hidden>
-                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Include sidebar -->
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
-        <div class="sidebar__brand">
-            <img id="logoImg" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
-        </div>
-        <div id="menu-items">
-            <a href="#" id="adminControlLink" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
-            <a href="#" id="settingsLink" class="sidebar__link">Settings</a>
-            <a href="#" id="userProfileLink" class="sidebar__link">User Profile</a>
-        </div>
-        <div class="sidebar__footer">
-            <a href="#" class="sidebar__link logout-link">Logout</a>
-            <a href="#" class="sidebar__link exit-button">Exit</a>
-        </div>
-    </div>
+    <!-- Include shared layout -->
+    <div id="layout-container"></div>
 
     <div class="page__container">
         <div class="content-area">
@@ -239,145 +76,15 @@
     </div>
 
     <script type="module">
-        import paths from '/config/paths.js';
-        import navigation from '/src/services/navigation/navigation.js';
-        import { User } from '/src/models/user.js';
-
-        // Initialize page
-        async function initPage() {
-            try {
-                // Set logo source using paths
-                document.getElementById('logoImg').src = paths.resolve('assets/qeLogoBW.png');
-
-                // Set navigation links using paths
-                document.getElementById('adminControlLink').href = paths.resolve('src/views/pages/adminControlPanel.html');
-                document.getElementById('settingsLink').href = paths.resolve('src/views/pages/settings.html');
-                document.getElementById('userProfileLink').href = paths.resolve('src/views/pages/userProfile.html');
-
-                // Check authentication
-                if (!User.isAuthenticated()) {
-                    window.location.href = paths.resolve('src/views/pages/login.html');
-                    throw new Error('User not logged in');
-                }
-
-                // Setup navigation components
-                const hamburger = document.getElementById('hamburger');
-                const sidebar = document.getElementById('sidebar');
-                const closeBtn = document.getElementById('close-sidebar');
-                const logoutBtn = document.getElementById('logoutBtn');
-                const logoutLink = document.querySelector('.logout-link');
-                const exitButton = document.querySelector('.exit-button');
-                const userNameEl = document.getElementById('userName');
-                const navMenu = document.getElementById('navMenu');
-
-                // Setup hamburger menu
-                if (hamburger && sidebar) {
-                    hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('is-open');
-                    });
-                }
-
-                // Setup close button
-                if (closeBtn && sidebar) {
-                    closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('is-open');
-                    });
-                }
-
-                // Setup logout functionality
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', () => navigation.logout());
-                }
-                if (logoutLink) {
-                    logoutLink.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.logout();
-                    });
-                }
-
-                // Setup exit functionality
-                if (exitButton) {
-                    exitButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.exitApplication();
-                    });
-                }
-
-                // Setup username display and dropdown
-                if (userNameEl) {
-                    const userName = sessionStorage.getItem('username') || "User";
-                    userNameEl.textContent = userName;
-
-                    userNameEl.addEventListener('click', () => {
-                        navMenu.toggleAttribute('hidden');
-                    });
-
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', (e) => {
-                        if (!e.target.closest('.nav__menu')) {
-                            navMenu.setAttribute('hidden', '');
-                        }
-                    });
-                }
-
-                // Setup navigation links
-                const links = document.querySelectorAll('.sidebar__link[href]');
-                links.forEach(link => {
-                    if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
-                        link.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
-                        });
-                    }
-                });
-
-                // Show/hide admin-only elements
-                const userRole = sessionStorage.getItem('userRole');
-                const adminElements = document.querySelectorAll('.admin-only');
-                adminElements.forEach(el => {
-                    el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
-                });
-
-                // Load dashboard data
-                const loadDashboardData = () => {
-                    try {
-                        const users = User.loadUsersFromCSV();
-                        
-                        // Update stats
-                        document.getElementById('userCount').textContent = users.length;
-                        document.getElementById('activeUsers').textContent = users.filter(user => user.status === 'active').length;
-                        document.getElementById('pendingTasks').textContent = '0'; // TODO: Implement task tracking
-                    } catch (error) {
-                        console.error('Error loading dashboard data:', error);
-                    }
-                };
-
-                // Load dashboard data immediately
-                loadDashboardData();
-
-                // Handle action button clicks
-                document.getElementById('createTeam').addEventListener('click', () => {
-                    alert('Create Team functionality coming soon');
-                });
-
-                document.getElementById('manageUsers').addEventListener('click', () => {
-                    alert('Manage Users functionality coming soon');
-                });
-
-                document.getElementById('viewReports').addEventListener('click', () => {
-                    alert('View Reports functionality coming soon');
-                });
-            } catch (error) {
-                console.error('Error initializing page:', error);
-            }
+        import { PlatformAdmin } from '/src/controllers/admin/platformadmin.js';
+        
+        // Initialize page after app is initialized
+        function initPage() {
+            new PlatformAdmin();
         }
 
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            initPage();
-        }
+        // Wait for app initialization before starting
+        document.addEventListener('appInitialized', initPage);
     </script>
 </body>
 </html>

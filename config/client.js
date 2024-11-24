@@ -13,11 +13,11 @@ const config = {
         storage: {
             type: 'localStorage',
             keys: {
-                userData: 'appData',
+                userData: 'userData',
                 auth: 'isAuthenticated',
                 userRole: 'userRole',
                 username: 'username',
-                users: 'users' // Added users storage key
+                users: 'users'
             }
         },
         paths: paths,
@@ -44,11 +44,11 @@ const config = {
         storage: {
             type: 'localStorage',
             keys: {
-                userData: 'appData',
+                userData: 'userData',
                 auth: 'isAuthenticated',
                 userRole: 'userRole',
                 username: 'username',
-                users: 'users' // Added users storage key
+                users: 'users'
             }
         },
         paths: paths,

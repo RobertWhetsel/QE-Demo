@@ -23,18 +23,10 @@ export async function initializeApp() {
             }
         });
 
-        // Check if we're on the login page
+        // Check if we're on index or login page
+        const isIndexPage = window.location.pathname === '/' || window.location.pathname.endsWith('index.html');
         const isLoginPage = window.location.pathname.includes('login.html');
-        await Logger.info('Is login page:', isLoginPage);
-
-        // Wait for CSS files to load
-        await new Promise(resolve => {
-            if (document.readyState === 'complete') {
-                resolve();
-            } else {
-                window.addEventListener('load', resolve);
-            }
-        });
+        await Logger.info('Page type:', { isIndexPage, isLoginPage });
 
         // Initialize managers
         await Logger.info('Initializing theme manager');
@@ -52,17 +44,35 @@ export async function initializeApp() {
         const dataService = new DataService();
         await dataService.init();
         window.QE.DataService = dataService;
-        
-        // If on login page, just initialize theme and font
+
+        // Clear any existing auth data on login page
         if (isLoginPage) {
-            await Logger.info('Login page initialization');
+            await Logger.info('Login page detected, clearing auth data');
+            await User.clearAllStorage();
+        }
+        
+        // If on index or login page, just initialize theme and font
+        if (isIndexPage || isLoginPage) {
+            await Logger.info('Basic page initialization');
             ThemeManager.setTheme(config.ui.defaultTheme);
             FontManager.setFont('Arial');
-            await Logger.info('Login page initialized successfully');
+
+            // Set logo source
+            const logo = document.getElementById('logoImg');
+            if (logo) {
+                logo.src = paths.getAssetPath('logo');
+                await Logger.info('Logo source set');
+            }
+
+            await Logger.info('Basic page initialized successfully');
+            
+            // Dispatch initialization complete event
+            document.documentElement.setAttribute('data-app-initialized', 'true');
+            document.dispatchEvent(new CustomEvent('appInitialized'));
             return;
         }
 
-        // Check authentication for non-login pages
+        // Check authentication for other pages
         await Logger.info('Checking authentication status');
         const isAuthenticated = User.isAuthenticated();
         const username = localStorage.getItem(config.storage.keys.username);
@@ -70,7 +80,7 @@ export async function initializeApp() {
 
         if (!isAuthenticated) {
             await Logger.warn('Not authenticated, redirecting to login');
-            navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
+            navigation.navigateToPage('login');
             return;
         }
 
@@ -89,7 +99,7 @@ export async function initializeApp() {
 
             if (!user) {
                 await Logger.warn('User data not found, redirecting to login');
-                navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
+                navigation.navigateToPage('login');
                 return;
             }
 
@@ -118,37 +128,30 @@ export async function initializeApp() {
                     FontManager.setFont(userPreferences.fontFamily);
                 }
             }
-            
-            // Listen for preference changes
-            await Logger.info('Setting up preference change listener');
-            window.addEventListener('storage', async (event) => {
-                if (event.key === 'userPreferences') {
-                    await Logger.info('Preference change detected');
-                    const preferences = JSON.parse(event.newValue || '{}');
-                    await Logger.info('New preferences:', preferences);
-                    
-                    if (preferences.theme) {
-                        await Logger.info('Updating theme:', preferences.theme);
-                        ThemeManager.setTheme(preferences.theme);
-                    }
-                    if (preferences.fontFamily) {
-                        await Logger.info('Updating font:', preferences.fontFamily);
-                        FontManager.setFont(preferences.fontFamily);
-                    }
-                }
-            });
+
+            // Load shared layout for authenticated pages
+            await Logger.info('Loading shared layout');
+            const layoutResponse = await fetch(paths.resolve('src/views/components/shared/layout.html'));
+            const layoutHtml = await layoutResponse.text();
+            document.getElementById('layout-container').innerHTML = layoutHtml;
+            await Logger.info('Shared layout loaded');
+
+            // Set logo source
+            const logo = document.getElementById('logo');
+            if (logo) {
+                logo.src = paths.getAssetPath('logo');
+                await Logger.info('Logo source set');
+            }
 
             // Dispatch event when user data is ready
             await Logger.info('Dispatching userDataReady event');
-            const userDataEvent = new CustomEvent('userDataReady', {
+            document.dispatchEvent(new CustomEvent('userDataReady', {
                 detail: {
                     user,
                     role: user.role,
                     preferences: userPreferences
                 }
-            });
-            document.dispatchEvent(userDataEvent);
-            await Logger.info('User data ready event dispatched');
+            }));
         }
         
         // Mark initialization as complete

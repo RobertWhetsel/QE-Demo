@@ -9,7 +9,7 @@ if (SITE_STATE === 'dev') {
     BASE_URL = 'http://127.0.0.1:5500';
     ASSET_PATH = '/assets';
     VIEW_PATH = '/src/views';
-    STYLE_PATH = '/src/views/styles';
+    STYLE_PATH = '/src/styles';  // Updated to new styles location
     MODULE_PATH = '/src';
 } else {
     // Production paths (AWS server)
@@ -29,32 +29,22 @@ const CORE_PATHS = {
     
     // CSS files in load order
     styles: {
-        core: [
-            `${STYLE_PATH}/core/variables.css`,
-            `${STYLE_PATH}/core/base.css`,
-            `${STYLE_PATH}/core/typography.css`
-        ],
-        themes: [
-            `${STYLE_PATH}/themes/light.css`,
-            `${STYLE_PATH}/themes/dark.css`
+        base: [
+            `${STYLE_PATH}/base/_variables.css`,
+            `${STYLE_PATH}/base/_reset.css`,
+            `${STYLE_PATH}/base/_typography.css`
         ],
         layouts: [
-            `${STYLE_PATH}/layouts/container.css`,
-            `${STYLE_PATH}/layouts/grid.css`
+            `${STYLE_PATH}/layouts/_containers.css`,
+            `${STYLE_PATH}/layouts/_grid.css`
         ],
         components: [
-            `${STYLE_PATH}/components/button.css`,
-            `${STYLE_PATH}/components/form.css`,
-            `${STYLE_PATH}/components/message.css`,
-            `${STYLE_PATH}/components/navigation.css`,
-            `${STYLE_PATH}/components/admin-control-panel.css`
+            `${STYLE_PATH}/components/_buttons.css`,
+            `${STYLE_PATH}/components/_forms.css`,
+            `${STYLE_PATH}/components/_navigation.css`
         ],
         utilities: [
-            `${STYLE_PATH}/utilities/helpers.css`,
-            `${STYLE_PATH}/utilities/typography.css`
-        ],
-        pages: [
-            `${STYLE_PATH}/admin-dashboard.css`
+            `${STYLE_PATH}/utilities/_helpers.css`
         ]
     },
     
@@ -63,7 +53,8 @@ const CORE_PATHS = {
         head: `${VIEW_PATH}/components/head.html`,
         nav: `${VIEW_PATH}/components/nav.html`,
         sidebar: `${VIEW_PATH}/components/sidebar.html`,
-        header: `${VIEW_PATH}/components/header.html`
+        header: `${VIEW_PATH}/components/header.html`,
+        'shared/layout': `${VIEW_PATH}/components/shared/layout.html`
     },
     
     // Pages
@@ -72,6 +63,7 @@ const CORE_PATHS = {
         login: `${VIEW_PATH}/pages/login.html`,
         genesisAdmin: `${VIEW_PATH}/pages/genesisAdmin.html`,
         adminControlPanel: `${VIEW_PATH}/pages/adminControlPanel.html`,
+        platformAdmin: `${VIEW_PATH}/pages/platformAdmin.html`,
         settings: `${VIEW_PATH}/pages/settings.html`,
         userProfile: `${VIEW_PATH}/pages/userProfile.html`
     },
@@ -146,12 +138,10 @@ const paths = {
     // Get all CSS paths in correct order
     getCssPaths: () => {
         const allStyles = [
-            ...CORE_PATHS.styles.core,
-            ...CORE_PATHS.styles.themes,
+            ...CORE_PATHS.styles.base,
             ...CORE_PATHS.styles.layouts,
             ...CORE_PATHS.styles.components,
-            ...CORE_PATHS.styles.utilities,
-            ...CORE_PATHS.styles.pages
+            ...CORE_PATHS.styles.utilities
         ];
         
         return allStyles.map(path => paths.resolve(path));
@@ -172,7 +162,7 @@ const paths = {
     // Get page path
     getPagePath: (name) => {
         const pagePath = CORE_PATHS.pages[name];
-        return paths.resolve(pagePath);
+        return SITE_STATE === 'dev' ? `${BASE_URL}${pagePath}` : paths.resolve(pagePath);
     },
 
     // Get utility path

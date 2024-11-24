@@ -1,12 +1,13 @@
-import navigation from '../../services/navigation/navigation.js';
-import { User } from '../../models/user.js';
-import { ROLES } from '../../models/index.js';
-import DataService from '../../services/data/dataservice.js';
-import paths from '../../../config/paths.js';
-import Logger from '../../utils/logging/logger.js';
+import paths from '/config/paths.js';
+import { User } from '/src/models/user.js';
+import { ROLES } from '/src/models/index.js';
+import DataService from '/src/models/dataservice.js';
+import Logger from '/src/utils/logging/logger.js';
+import navigation from '/src/services/navigation/navigation.js';
 
-class AdminControlPanel {
+export class AdminControlPanel {
     constructor() {
+        Logger.info('AdminControlPanel constructor called');
         this.initialize();
     }
 
@@ -21,10 +22,12 @@ class AdminControlPanel {
                 return;
             }
 
-            this.setupErrorHandler();
-            this.setupNavigation();
+            // Initialize form handler
             this.setupFormHandler();
+
+            // Load initial data
             await this.displayData();
+            
             Logger.info('Admin Control Panel initialized successfully');
         } catch (error) {
             Logger.error('Initialization error:', error);
@@ -35,107 +38,8 @@ class AdminControlPanel {
     checkAuth() {
         const isAuthenticated = User.isAuthenticated();
         const userRole = User.getCurrentUserRole();
+        Logger.info('Checking auth:', { isAuthenticated, userRole });
         return isAuthenticated && userRole === ROLES.GENESIS_ADMIN;
-    }
-
-    setupNavigation() {
-        // Set up hamburger menu toggle
-        const hamburger = document.getElementById('hamburger');
-        const sidebar = document.getElementById('sidebar');
-        const content = document.querySelector('.dashboard__content');
-
-        if (hamburger && sidebar) {
-            hamburger.addEventListener('click', () => {
-                sidebar.classList.toggle('is-open');
-                if (content) {
-                    content.classList.toggle('dashboard__content--shifted');
-                }
-            });
-        }
-
-        // Set up close button
-        const closeBtn = document.getElementById('close-sidebar');
-        if (closeBtn && sidebar) {
-            closeBtn.addEventListener('click', () => {
-                sidebar.classList.remove('is-open');
-                if (content) {
-                    content.classList.remove('dashboard__content--shifted');
-                }
-            });
-        }
-
-        // Set up user name and menu
-        const currentUser = User.getCurrentUser();
-        const userNameEl = document.getElementById('userName');
-        if (userNameEl && currentUser) {
-            userNameEl.textContent = currentUser.username || 'Genesis';
-        }
-
-        // Set up user menu toggle
-        const navMenu = document.getElementById('navMenu');
-        if (userNameEl && navMenu) {
-            userNameEl.addEventListener('click', () => {
-                navMenu.toggleAttribute('hidden');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.nav__menu')) {
-                    navMenu.setAttribute('hidden', '');
-                }
-            });
-        }
-
-        // Set up logout functionality
-        const logoutBtn = document.getElementById('logoutBtn');
-        const logoutLink = document.querySelector('.logout-link');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.handleLogout());
-        }
-        if (logoutLink) {
-            logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleLogout();
-            });
-        }
-
-        // Set up exit functionality
-        const exitButton = document.querySelector('.exit-button');
-        if (exitButton) {
-            exitButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.close();
-            });
-        }
-
-        // Set up navigation links
-        const menuLinks = document.querySelectorAll('.sidebar__link[data-path]');
-        menuLinks.forEach(link => {
-            const pageName = link.getAttribute('data-path');
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                navigation.navigateToPage(pageName);
-            });
-        });
-
-        // Show/hide admin-only elements based on role
-        const userRole = User.getCurrentUserRole();
-        const adminElements = document.querySelectorAll('.admin-only');
-        adminElements.forEach(el => {
-            el.style.display = userRole === ROLES.GENESIS_ADMIN ? 'block' : 'none';
-        });
-    }
-
-    handleLogout() {
-        User.logout();
-        navigation.navigateToPage('login');
-    }
-
-    setupErrorHandler() {
-        window.onerror = (msg, url, line, col, error) => {
-            Logger.error('Global error:', { msg, url, line, col, error });
-            return false;
-        };
     }
 
     setupFormHandler() {
@@ -143,7 +47,7 @@ class AdminControlPanel {
         Logger.debug('Setting up form handler:', { formFound: !!form });
         
         if (form) {
-            form.onsubmit = (e) => this.handleFormSubmit(e);
+            form.addEventListener('submit', (e) => this.handleFormSubmit(e));
         }
     }
 
@@ -151,18 +55,17 @@ class AdminControlPanel {
         try {
             const dataService = DataService.getInstance();
             const data = await dataService.getData();
-            Logger.info('Displaying admin data', { recordCount: data.length });
+            Logger.info('Displaying admin data', { recordCount: data?.length });
             
             const container = document.getElementById('admin-list-container');
+            if (!container) return;
             
             if (!data || data.length === 0) {
                 container.innerHTML = '<p class="no-data-message">No data available.</p>';
                 return;
             }
             
-            const table = this.createDataTable(data);
-            container.innerHTML = '';
-            container.appendChild(table);
+            container.innerHTML = this.createTableHTML(data);
 
             // Update system status
             const statusSection = document.getElementById('system-status');
@@ -173,51 +76,41 @@ class AdminControlPanel {
                 `;
             }
         } catch (error) {
-            Logger.error('Error displaying data:', error);
-            this.showMessage('Failed to load admin data', 'error');
+            Logger.error('Error loading data:', error);
+            this.showError('Failed to load admin data');
         }
     }
 
-    createDataTable(data) {
-        const table = document.createElement('table');
-        table.className = 'data-list';
-        
-        // Create table header
-        const thead = document.createElement('thead');
-        const headers = ['ID', 'Username', 'Email', 'Type', 'Created'];
-        thead.innerHTML = `
-            <tr>
-                ${headers.map(header => `<th>${header}</th>`).join('')}
-            </tr>
+    createTableHTML(data) {
+        return `
+            <table class="data-list">
+                <thead>
+                    <tr>
+                        ${['ID', 'Username', 'Email', 'Type', 'Created']
+                            .map(header => `<th>${header}</th>`)
+                            .join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.map(row => `
+                        <tr>
+                            <td>${row.id}</td>
+                            <td>${row.name}</td>
+                            <td>${row.email}</td>
+                            <td>${row.type}</td>
+                            <td>${new Date(row.created).toLocaleString()}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         `;
-        table.appendChild(thead);
-        
-        // Create table body
-        const tbody = document.createElement('tbody');
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${row.id}</td>
-                <td>${row.name}</td>
-                <td>${row.email}</td>
-                <td>${row.type}</td>
-                <td>${new Date(row.created).toLocaleString()}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-        
-        return table;
     }
 
     async handleFormSubmit(event) {
+        event.preventDefault();
+        Logger.info('Processing admin creation form submission');
+        
         try {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            Logger.info('Processing admin creation form submission');
-            
             const formData = this.getFormData();
             this.validateFormData(formData);
             
@@ -230,36 +123,27 @@ class AdminControlPanel {
             }
             
             // Add new record
-            Logger.info('Adding new admin record');
             if (await dataService.addRecord(formData)) {
                 Logger.info('Admin user created successfully');
-                this.showMessage('Admin user created successfully!', 'success');
-                document.getElementById('admin-creation-form').reset();
+                this.showSuccess('Admin user created successfully!');
+                event.target.reset();
                 await this.displayData();
             } else {
                 throw new Error('Failed to save record');
             }
-            
         } catch (error) {
             Logger.error('Error creating admin record:', error);
-            this.showMessage(error.message, 'error');
+            this.showError(error.message);
         }
-        
-        return false;
     }
 
     getFormData() {
-        const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        const role = document.getElementById('role').value;
-        
         return {
             id: Date.now().toString(),
-            name: username,
-            email: email,
-            password: password,
-            type: role,
+            name: document.getElementById('username').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            type: document.getElementById('role').value,
             created: new Date().toISOString()
         };
     }
@@ -274,9 +158,17 @@ class AdminControlPanel {
         }
     }
 
-    showMessage(message, type = 'info') {
-        Logger.info('Showing message:', { message, type });
-        
+    showError(message) {
+        Logger.warn('Showing error:', message);
+        this.showMessage(message, 'error');
+    }
+
+    showSuccess(message) {
+        Logger.info('Showing success:', message);
+        this.showMessage(message, 'success');
+    }
+
+    showMessage(message, type) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message message--${type}`;
         messageDiv.textContent = message;
@@ -300,5 +192,3 @@ class AdminControlPanel {
         }, 3000);
     }
 }
-
-export { AdminControlPanel };

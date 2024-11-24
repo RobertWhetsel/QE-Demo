@@ -17,14 +17,21 @@ export class Auth {
         // Add event listener to the login form
         if (this.form) {
             Logger.debug('Setting up login form event listener');
-            this.form.addEventListener('submit', (e) => this.handleLogin(e));
+            this.form.addEventListener('submit', async (e) => {
+                // Prevent form submission
+                e.preventDefault();
+                e.stopPropagation();
+                // Handle login
+                await this.handleLogin();
+                // Return false to prevent default form action
+                return false;
+            });
         } else {
             Logger.warn('Login form not found during initialization');
         }
     }
 
-    async handleLogin(event) {
-        event.preventDefault();
+    async handleLogin() {
         Logger.info('Login form submitted');
 
         const username = document.getElementById('username').value.trim();
@@ -78,16 +85,15 @@ export class Auth {
 
                 // Redirect based on role with strict role-based access
                 Logger.info('Determining redirect path for role:', user.role);
-                let pageName;
                 switch (user.role) {
                     case 'Genesis Admin':
                         Logger.info('Redirecting Genesis Admin to admin control panel');
-                        pageName = 'adminControlPanel';
+                        navigation.navigateToPage('adminControlPanel');
                         break;
                     case 'Platform Admin':
                     case 'User Admin':
                         Logger.info('Redirecting Admin to platform admin dashboard');
-                        pageName = 'platformAdmin';
+                        navigation.navigateToPage('platformAdmin');
                         break;
                     default:
                         Logger.error('Invalid user role detected', { role: user.role });
@@ -97,9 +103,6 @@ export class Auth {
                         return;
                 }
 
-                // Use navigation service for redirection
-                Logger.info('Navigating to page:', pageName);
-                navigation.navigateToPage(pageName);
             } else {
                 Logger.warn('Login failed: Invalid credentials', { username });
                 await User.clearAllStorage();

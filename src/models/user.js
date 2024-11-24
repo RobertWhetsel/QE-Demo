@@ -7,6 +7,7 @@ export class User {
         this.username = data.username;
         this.role = data.role;
         this.status = data.status;
+        this.email = data.email;
     }
 
     static isAuthenticated() {
@@ -14,13 +15,25 @@ export class User {
     }
 
     static getCurrentUser() {
-        const userData = localStorage.getItem(config.storage.keys.userData);
-        return userData ? new User(JSON.parse(userData)) : null;
+        try {
+            const userData = localStorage.getItem(config.storage.keys.userData);
+            Logger.info('Getting current user:', { userData });
+            return userData ? new User(JSON.parse(userData)) : null;
+        } catch (error) {
+            Logger.error('Error getting current user:', error);
+            return null;
+        }
     }
 
     static getCurrentUserRole() {
-        const userRole = localStorage.getItem(config.storage.keys.userRole);
-        return userRole || null;
+        try {
+            const userRole = localStorage.getItem(config.storage.keys.userRole);
+            Logger.info('Getting current user role:', { userRole });
+            return userRole || null;
+        } catch (error) {
+            Logger.error('Error getting user role:', error);
+            return null;
+        }
     }
 
     static async login(username, password) {
@@ -57,7 +70,12 @@ export class User {
                 localStorage.setItem(config.storage.keys.auth, 'true');
                 localStorage.setItem(config.storage.keys.username, user.username);
                 localStorage.setItem(config.storage.keys.userRole, user.role);
-                localStorage.setItem(config.storage.keys.userData, JSON.stringify(user));
+                localStorage.setItem(config.storage.keys.userData, JSON.stringify({
+                    username: user.username,
+                    role: user.role,
+                    status: user.status,
+                    email: user.email
+                }));
 
                 // Verify storage was set correctly
                 const authSet = localStorage.getItem(config.storage.keys.auth) === 'true';
@@ -88,6 +106,7 @@ export class User {
     }
 
     static async logout() {
+        Logger.info('Logging out user');
         await this.clearAllStorage();
     }
 

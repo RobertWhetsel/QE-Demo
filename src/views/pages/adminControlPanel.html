@@ -5,58 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genesis Admin Control Panel - Quantum Eye</title>
     
-    <!-- Import paths and load CSS -->
+    <!-- Import paths -->
     <script type="module">
         import paths from '/config/paths.js';
-        window.paths = paths;
-
-        // Load CSS files in correct order
-        const cssPaths = paths.getCssPaths();
-        cssPaths.forEach(href => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-        });
-
-        // Set logo source immediately after paths is loaded
-        window.addEventListener('DOMContentLoaded', () => {
-            const logoPath = paths.getAssetPath('logo');
-            document.getElementById('logo').src = logoPath;
-        });
+        window.paths = paths; // Make paths available globally
+    </script>
+    
+    <!-- Initialize application state -->
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
     </script>
 </head>
-<body>
-    <nav class="nav">
-        <div class="nav__container">
-            <div class="nav__left">
-                <button id="hamburger" class="nav__toggle">&#9776;</button>
-            </div>
-            <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">Genesis</span>
-                <div id="navMenu" class="nav__dropdown" hidden>
-                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+<body class="dashboard">
+    <!-- Include shared layout -->
+    <div id="layout-container"></div>
 
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
-        <div class="sidebar__brand">
-            <img id="logo" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
-        </div>
-        <div id="menu-items">
-            <a href="#" class="sidebar__link admin-only active" data-path="adminControlPanel">Genesis Admin Control Panel</a>
-            <a href="#" class="sidebar__link" data-path="settings">Settings</a>
-            <a href="#" class="sidebar__link" data-path="userProfile">User Profile</a>
-        </div>
-        <div class="sidebar__footer">
-            <a href="#" class="sidebar__link logout-link">Logout</a>
-            <a href="#" class="sidebar__link exit-button">Exit</a>
-        </div>
-    </div>
-
+    <!-- Main Content -->
     <div class="dashboard__content">
         <div class="admin-panel">
             <div class="admin-panel__header">
@@ -68,7 +33,28 @@
                 <h2>System Configuration</h2>
                 <div class="admin-panel__form">
                     <form id="admin-creation-form" class="admin-panel__form-group">
-                        <!-- Form fields will be populated by controller -->
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select id="role" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="Platform Admin">Platform Admin</option>
+                                <option value="User Admin">User Admin</option>
+                                <option value="User">User</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="admin-panel__button admin-panel__button--primary">Create User</button>
                     </form>
                 </div>
             </div>
@@ -90,22 +76,15 @@
     </div>
 
     <script type="module">
-        import paths from '/config/paths.js';
         import { AdminControlPanel } from '/src/controllers/admin/admincontrolpanel.js';
-        import navigation from '/src/services/navigation/navigation.js';
         
-        // Initialize page
+        // Initialize page after app is initialized
         function initPage() {
-            // Initialize AdminControlPanel
             new AdminControlPanel();
         }
 
-        // Start initialization when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPage);
-        } else {
-            initPage();
-        }
+        // Wait for app initialization before starting
+        document.addEventListener('appInitialized', initPage);
     </script>
 </body>
 </html>
