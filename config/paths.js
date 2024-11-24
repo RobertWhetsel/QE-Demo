@@ -48,7 +48,8 @@ const CORE_PATHS = {
             `${STYLE_PATH}/components/_welcome.css`,
             `${STYLE_PATH}/components/_login.css`,
             `${STYLE_PATH}/components/_navigation.css`,
-            `${STYLE_PATH}/components/_admin-panel.css`
+            `${STYLE_PATH}/components/_admin-panel.css`,
+            `${STYLE_PATH}/components/_admin-form.css`  // Added for admin form
         ],
         // Utility styles loaded last
         utilities: [
@@ -62,7 +63,8 @@ const CORE_PATHS = {
         nav: `${VIEW_PATH}/components/nav.html`,
         sidebar: `${VIEW_PATH}/components/sidebar.html`,
         header: `${VIEW_PATH}/components/header.html`,
-        'shared/layout': `${VIEW_PATH}/components/shared/layout.html`
+        'shared/layout': `${VIEW_PATH}/components/shared/layout.html`,
+        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.html`  // Added admin form component
     },
     
     // Pages
@@ -106,7 +108,7 @@ const CORE_PATHS = {
         login: `${MODULE_PATH}/controllers/auth/login.js`,
         settings: `${MODULE_PATH}/controllers/user/settings.js`,
         userprofile: `${MODULE_PATH}/controllers/user/userprofile.js`,
-        test: `${MODULE_PATH}/controllers/test/testController.js`  // Added test controller path
+        test: `${MODULE_PATH}/controllers/test/testController.js`
     }
 };
 

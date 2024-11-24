@@ -1,0 +1,70 @@
+<!-- Admin User Creation Form Component -->
+<div class="sidebar__form admin-only">
+    <h3 class="sidebar__form-title">Create User</h3>
+    <form id="admin-creation-form" autocomplete="off">
+        <div class="sidebar__form-group">
+            <label class="sidebar__label" for="username">Username</label>
+            <input 
+                class="sidebar__input" 
+                type="text" 
+                id="username" 
+                name="username" 
+                required 
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+            >
+        </div>
+        <div class="sidebar__form-group">
+            <label class="sidebar__label" for="email">Email</label>
+            <input 
+                class="sidebar__input" 
+                type="email" 
+                id="email" 
+                name="email" 
+                required 
+                autocomplete="off"
+                spellcheck="false"
+            >
+        </div>
+        <div class="sidebar__form-group">
+            <label class="sidebar__label" for="password">Password</label>
+            <input 
+                class="sidebar__input" 
+                type="password" 
+                id="password" 
+                name="password" 
+                required 
+                autocomplete="new-password"
+            >
+        </div>
+        <div class="sidebar__form-group">
+            <label class="sidebar__label" for="role">Role</label>
+            <select 
+                class="sidebar__input" 
+                id="role" 
+                name="role" 
+                required
+            >
+                <option value="">Select Role</option>
+                <option value="Platform Admin">Platform Admin</option>
+                <option value="User Admin">User Admin</option>
+            </select>
+        </div>
+        <div class="sidebar__form-group">
+            <button type="submit" class="button button--primary button--full">Create User</button>
+        </div>
+    </form>
+    <div id="error-message" class="sidebar__message sidebar__message--error"></div>
+</div>
+
+<script type="module">
+    import paths from '../../../../config/paths.js';
+    import { UserCreationController } from '../../../controllers/admin/UserCreationController.js';
+
+    // Initialize form controller once DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new UserCreationController();
+    });
+</script>

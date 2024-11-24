@@ -1,7 +1,8 @@
+<!-- Navigation -->
 <nav class="nav">
     <div class="nav__container">
         <div class="nav__left">
-            <button id="hamburger" class="nav__toggle">&#9776;</button>
+            <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
         </div>
         <div class="nav__menu">
             <span id="userName" class="nav__link user-name">User</span>
@@ -13,36 +14,11 @@
 </nav>
 
 <script type="module">
-    import paths from '/config/paths.js';
-    import navigation from '/src/services/navigation/navigation.js';
+    import paths from '../../../config/paths.js';
+    import { NavigationController } from '../../controllers/navigation/NavigationController.js';
 
-    // Setup navigation components
-    const hamburger = document.getElementById('hamburger');
-    const sidebar = document.getElementById('sidebar');
-    const userNameEl = document.getElementById('userName');
-    const navMenu = document.getElementById('navMenu');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    // Setup hamburger menu
-    if (hamburger && sidebar) {
-        hamburger.addEventListener('click', () => {
-            sidebar.classList.toggle('is-open');
-            console.log('Toggled sidebar');
-        });
-    }
-
-    // Setup username display and dropdown
-    if (userNameEl) {
-        userNameEl.addEventListener('click', () => {
-            navMenu.toggleAttribute('hidden');
-            console.log('Toggled nav menu');
-        });
-    }
-
-    // Setup logout functionality
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            navigation.navigateToPage('login');
-        });
-    }
+    // Initialize navigation controller once DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new NavigationController();
+    });
 </script>

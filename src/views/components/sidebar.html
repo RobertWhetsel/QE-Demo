@@ -1,10 +1,13 @@
+<!-- Sidebar -->
 <div id="sidebar" class="sidebar">
-    <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
+    <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu">&times;</a>
     <div class="sidebar__brand">
         <img id="logo" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
     </div>
     <div id="menu-items">
         <a href="#" class="sidebar__link admin-only" data-path="adminControlPanel">Genesis Admin Control Panel</a>
+        <!-- Form will be loaded here for Genesis Admin -->
+        <div id="admin-form-container"></div>
         <a href="#" class="sidebar__link" data-path="settings">Settings</a>
         <a href="#" class="sidebar__link" data-path="userProfile">User Profile</a>
     </div>
@@ -15,50 +18,11 @@
 </div>
 
 <script type="module">
-    import paths from '/config/paths.js';
-    import navigation from '/src/services/navigation/navigation.js';
+    import paths from '../../../config/paths.js';
+    import { SidebarController } from '../../controllers/navigation/SidebarController.js';
 
-    // Setup logo path
-    const logo = document.getElementById('logo');
-    if (logo) {
-        logo.src = paths.getAssetPath('logo');
-    }
-
-    // Setup navigation paths
-    const menuLinks = document.querySelectorAll('.sidebar__link[data-path]');
-    menuLinks.forEach(link => {
-        const pageName = link.getAttribute('data-path');
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigation.navigateToPage(pageName);
-        });
+    // Initialize sidebar controller once DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new SidebarController();
     });
-
-    // Setup close button
-    const closeBtn = document.getElementById('close-sidebar');
-    const sidebar = document.getElementById('sidebar');
-    
-    if (closeBtn && sidebar) {
-        closeBtn.addEventListener('click', () => {
-            sidebar.classList.remove('is-open');
-        });
-    }
-
-    // Setup logout and exit functionality
-    const logoutLink = document.querySelector('.logout-link');
-    const exitButton = document.querySelector('.exit-button');
-
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigation.navigateToPage('login');
-        });
-    }
-
-    if (exitButton) {
-        exitButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.close();
-        });
-    }
 </script>
