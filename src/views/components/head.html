@@ -1,20 +1,26 @@
-<!-- Font styles (load first to prevent FOUC) -->
-<link rel="stylesheet" href="/src/views/styles/fonts.css">
-
-<!-- Main stylesheet that includes all component styles, themes, and layouts -->
-<link rel="stylesheet" href="/src/views/styles/styles.css">
+<!-- Load CSS files -->
+<script>
+    // Get CSS paths from paths.js and load them
+    const cssPaths = paths.getCssPaths();
+    cssPaths.forEach(href => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    });
+</script>
 
 <!-- Initialize User Model -->
 <script type="module">
-    import { User } from '/src/models/user.js';
-    import ThemeManager from '/src/services/state/thememanager.js';
-    import FontManager from '/src/services/state/fontmanager.js';
+    const { User } = await import(paths.resolve('src/models/user.js'));
+    const { default: ThemeManager } = await import(paths.resolve('src/services/state/thememanager.js'));
+    const { default: FontManager } = await import(paths.resolve('src/services/state/fontmanager.js'));
 
     // Make User model available globally
     window.QE = window.QE || {};
     window.QE.User = User;
 
-    // Initialize managers first
+    // Initialize managers
     try {
         console.log('Initializing ThemeManager');
         ThemeManager.initialize();

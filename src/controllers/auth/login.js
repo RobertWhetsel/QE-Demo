@@ -1,8 +1,10 @@
-import navigation from '../../services/navigation/navigation.js';
-import { User } from '../../models/user.js';
-import ThemeManager from '../../services/state/thememanager.js';
-import FontManager from '../../services/state/fontmanager.js';
-import Logger from '../../utils/logging/logger.js';
+import navigation from '/src/services/navigation/navigation.js';
+import { User } from '/src/models/user.js';
+import ThemeManager from '/src/services/state/thememanager.js';
+import FontManager from '/src/services/state/fontmanager.js';
+import Logger from '/src/utils/logging/logger.js';
+import config from '/config/client.js';
+import paths from '/config/paths.js';
 
 export class Auth {
     constructor() {
@@ -23,6 +25,7 @@ export class Auth {
 
     async handleLogin(event) {
         event.preventDefault();
+        Logger.info('Login form submitted');
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
@@ -42,6 +45,7 @@ export class Auth {
             
             // Attempt login through User model
             const user = await User.login(username, password);
+            Logger.info('Login result:', user);
 
             if (user) {
                 Logger.info('Login successful', { 
@@ -50,7 +54,7 @@ export class Auth {
                 });
                 
                 // Verify storage consistency
-                const isConsistent = await User.verifyStorageConsistency();
+                const isConsistent = User.verifyStorageConsistency();
                 if (!isConsistent) {
                     Logger.error('Storage consistency check failed after login');
                     await User.clearAllStorage();
@@ -60,35 +64,42 @@ export class Auth {
 
                 // Initialize user preferences if they don't exist
                 const userPreferences = User.getUserPreferences() || {
-                    theme: 'light',
+                    theme: config.ui.defaultTheme,
                     fontFamily: 'Arial',
-                    notifications: false
+                    notifications: config.features.enableNotifications
                 };
                 User.updateUserPreferences(userPreferences);
                 Logger.debug('User preferences updated', userPreferences);
 
                 // Apply user preferences
-                ThemeManager.applyTheme(userPreferences.theme || 'light');
+                ThemeManager.applyTheme(userPreferences.theme || config.ui.defaultTheme);
                 FontManager.applyFont(userPreferences.fontFamily || 'Arial');
                 Logger.debug('Applied user preferences');
 
                 // Redirect based on role with strict role-based access
+                Logger.info('Determining redirect path for role:', user.role);
+                let pageName;
                 switch (user.role) {
                     case 'Genesis Admin':
                         Logger.info('Redirecting Genesis Admin to admin control panel');
-                        navigation.navigateTo('/src/views/pages/adminControlPanel.html');
+                        pageName = 'adminControlPanel';
                         break;
                     case 'Platform Admin':
                     case 'User Admin':
                         Logger.info('Redirecting Admin to platform admin dashboard');
-                        navigation.navigateTo('/src/views/pages/platformAdmin.html');
+                        pageName = 'platformAdmin';
                         break;
                     default:
                         Logger.error('Invalid user role detected', { role: user.role });
                         this.showError('Invalid user role');
                         await User.clearAllStorage();
                         await User.logout();
+                        return;
                 }
+
+                // Use navigation service for redirection
+                Logger.info('Navigating to page:', pageName);
+                navigation.navigateToPage(pageName);
             } else {
                 Logger.warn('Login failed: Invalid credentials', { username });
                 await User.clearAllStorage();
@@ -109,22 +120,17 @@ export class Auth {
 
     showError(message) {
         Logger.warn('Displaying error message', { message });
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
+        const errorDiv = document.getElementById('error-message');
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
 
-        const existingError = document.querySelector('.error-message');
-        if (existingError) {
-            existingError.remove();
-        }
-
-        this.form.insertBefore(errorDiv, this.form.firstChild);
-
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.remove();
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
                 Logger.debug('Error message removed from display');
-            }
-        }, 3000);
+            }, config.ui.toastDuration);
+        } else {
+            Logger.error('Error message element not found');
+        }
     }
 }

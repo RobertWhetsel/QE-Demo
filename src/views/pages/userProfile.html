@@ -5,25 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Quantum Eye</title>
     
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+    
     <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
     
     <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    <link rel="stylesheet" href="/src/views/styles/shared/form-layouts.css">
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/core/base.css'),
+            paths.resolve('src/views/styles/themes/light.css'),
+            paths.resolve('src/views/styles/themes/dark.css'),
+            paths.resolve('src/views/styles/fonts.css'),
+            paths.resolve('src/views/styles/components/navigation.css'),
+            paths.resolve('src/views/styles/components/button.css'),
+            paths.resolve('src/views/styles/components/message.css'),
+            paths.resolve('src/views/styles/user-profile.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
 </head>
 <body class="page">
     <!-- Include shared layout -->
@@ -34,45 +45,41 @@
             <div class="profile-container">
                 <h1 class="page-title">User Profile</h1>
                 
-                <div class="content-section">
-                    <h2 class="section-title">Personal Information</h2>
-                    <form id="personal-info-form">
+                <div class="profile-section">
+                    <h2>Personal Information</h2>
+                    <form id="profile-form">
                         <div class="form-group">
                             <label for="username">Username</label>
                             <input type="text" id="username" name="username" readonly>
                         </div>
                         <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" required>
-                        </div>
-                        <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
+                            <input type="email" id="email" name="email">
                         </div>
                         <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" name="phone">
+                            <label for="role">Role</label>
+                            <input type="text" id="role" name="role" readonly>
                         </div>
-                        <button type="submit" class="button button--primary">Save Personal Information</button>
+                        <button type="submit" class="button button--primary">Save Changes</button>
                     </form>
                 </div>
-                
-                <div class="content-section">
-                    <h2 class="section-title">Account Settings</h2>
-                    <form id="account-settings-form">
+
+                <div class="profile-section">
+                    <h2>Change Password</h2>
+                    <form id="password-form">
                         <div class="form-group">
-                            <label for="currentPassword">Current Password</label>
-                            <input type="password" id="currentPassword" name="currentPassword" required>
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password" name="current-password" required>
                         </div>
                         <div class="form-group">
-                            <label for="newPassword">New Password</label>
-                            <input type="password" id="newPassword" name="newPassword" required>
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" name="new-password" required>
                         </div>
                         <div class="form-group">
-                            <label for="confirmPassword">Confirm New Password</label>
-                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            <label for="confirm-password">Confirm New Password</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required>
                         </div>
-                        <button type="submit" class="button button--primary">Update Password</button>
+                        <button type="submit" class="button button--primary">Change Password</button>
                     </form>
                 </div>
             </div>
@@ -80,24 +87,16 @@
     </div>
 
     <script type="module">
+        import paths from '/config/paths.js';
         import navigation from '/src/services/navigation/navigation.js';
         import { User } from '/src/models/user.js';
-
-        // Load shared layout
-        fetch('/src/views/components/shared/layout.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('layout-container').innerHTML = html;
-                initPage();
-            })
-            .catch(error => console.error('Error loading layout:', error));
 
         // Initialize page
         async function initPage() {
             try {
                 // Check authentication
                 if (!User.isAuthenticated()) {
-                    window.location.href = '/src/views/pages/login.html';
+                    window.location.href = paths.resolve('src/views/pages/login.html');
                     throw new Error('User not logged in');
                 }
 
@@ -114,14 +113,14 @@
                 // Setup hamburger menu
                 if (hamburger && sidebar) {
                     hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('sidebar--open');
+                        sidebar.classList.toggle('is-open');
                     });
                 }
 
                 // Setup close button
                 if (closeBtn && sidebar) {
                     closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('sidebar--open');
+                        sidebar.classList.remove('is-open');
                     });
                 }
 
@@ -167,7 +166,7 @@
                     if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
                         link.addEventListener('click', (e) => {
                             e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
+                            navigation.navigateTo(paths.resolve(link.getAttribute('href')));
                         });
                     }
                 });
@@ -180,55 +179,67 @@
                 });
 
                 // Load user data
-                const currentUser = User.getCurrentUser();
-                if (currentUser) {
-                    document.getElementById('username').value = currentUser.username;
-                    document.getElementById('fullName').value = currentUser.fullName;
-                    document.getElementById('email').value = currentUser.email;
-                    document.getElementById('phone').value = currentUser.phoneNumber;
+                const userData = User.getCurrentUser();
+                if (userData) {
+                    document.getElementById('username').value = userData.username || '';
+                    document.getElementById('email').value = userData.email || '';
+                    document.getElementById('role').value = userData.role || '';
                 }
 
-                // Handle form submissions
-                document.getElementById('personal-info-form').addEventListener('submit', async (e) => {
+                // Handle profile form submission
+                document.getElementById('profile-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const updates = {
-                        fullName: document.getElementById('fullName').value,
-                        email: document.getElementById('email').value,
-                        phoneNumber: document.getElementById('phone').value
+                    
+                    const updatedData = {
+                        email: document.getElementById('email').value
                     };
 
-                    if (User.updateUser(currentUser.username, updates)) {
-                        alert('Personal information updated successfully');
+                    if (User.updateProfile(updatedData)) {
+                        alert('Profile updated successfully');
                     } else {
-                        alert('Failed to update personal information');
+                        alert('Failed to update profile');
                     }
                 });
 
-                document.getElementById('account-settings-form').addEventListener('submit', async (e) => {
+                // Handle password form submission
+                document.getElementById('password-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const currentPassword = document.getElementById('currentPassword').value;
-                    const newPassword = document.getElementById('newPassword').value;
-                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    const currentPassword = document.getElementById('current-password').value;
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
 
                     if (newPassword !== confirmPassword) {
                         alert('New passwords do not match');
                         return;
                     }
 
-                    const updates = {
-                        password: newPassword
-                    };
-
-                    if (User.updateUser(currentUser.username, updates)) {
-                        alert('Password updated successfully');
-                        document.getElementById('account-settings-form').reset();
+                    if (User.changePassword(currentPassword, newPassword)) {
+                        alert('Password changed successfully');
+                        document.getElementById('password-form').reset();
                     } else {
-                        alert('Failed to update password');
+                        alert('Failed to change password');
                     }
                 });
+
+                // Load shared layout
+                fetch(paths.resolve('src/views/components/shared/layout.html'))
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('layout-container').innerHTML = html;
+                        initPage();
+                    })
+                    .catch(error => console.error('Error loading layout:', error));
             } catch (error) {
                 console.error('Error initializing page:', error);
             }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
         }
     </script>
 </body>

@@ -1,4 +1,7 @@
 import config from '../../config/client.js';
+import paths from '../../config/paths.js';
+import Logger from '../utils/logging/logger.js';
+import { User } from './user.js';
 
 // Consolidated Data Service implementation
 export class DataService {
@@ -7,23 +10,22 @@ export class DataService {
             return DataService.instance;
         }
         this.debug = config.features.debugMode;
-        this.log('Creating new DataService instance');
+        Logger.info('Creating new DataService instance');
         this.data = null;
-        this.storageKey = 'appData';
-        this.storage = config.cache.enableLocalStorage ? localStorage : sessionStorage;
+        this.storageKey = config.storage.keys.userData;
+        this.storage = localStorage;
         this.cacheMaxAge = config.cache.maxAge * 1000; // Convert to milliseconds
-        this.init();
         DataService.instance = this;
     }
 
     log(...args) {
         if (this.debug) {
-            console.log('[DataService]', ...args);
+            Logger.info('[DataService]', ...args);
         }
     }
 
     error(...args) {
-        console.error('[DataService]', ...args);
+        Logger.error('[DataService]', ...args);
     }
 
     static getInstance() {
@@ -42,43 +44,29 @@ export class DataService {
             if (storedData) {
                 this.log('Found stored data');
                 this.data = storedData;
-                return;
+                return this.data;
             }
 
-            // Try JSON first
-            try {
-                const response = await fetch('/src/models/data/users.json');
-                if (response.ok) {
-                    const jsonData = await response.json();
-                    this.log('Loading data from JSON');
-                    this.data = jsonData;
-                    this.saveToStorage(this.data);
-                    return;
-                }
-            } catch (error) {
-                this.error('JSON read failed:', error);
-            }
-
-            // If JSON fails, try CSV
-            try {
-                const response = await fetch('/src/models/data/users.csv');
-                if (!response.ok) {
-                    throw new Error('CSV file not found');
-                }
-                const csvText = await response.text();
-                this.log('Loading data from CSV');
-                this.data = this.parseCSV(csvText);
-            } catch (error) {
-                this.error('CSV read failed:', error);
-                this.data = { users: [], pendingUsers: [] };
-            }
+            // If no stored data, use default users
+            this.log('No stored data, using default users');
+            const defaultUsers = User.getDefaultUsers();
+            this.data = {
+                users: defaultUsers,
+                pendingUsers: []
+            };
             
-            // Store in storage with expiration
-            this.saveToStorage(this.data);
+            // Store in storage
+            await this.saveToStorage(this.data);
+            
+            // Also save to users data file
+            await User.saveUsers(defaultUsers);
+            
+            return this.data;
         } catch (error) {
             this.error('Error initializing data:', error);
             this.data = { users: [], pendingUsers: [] };
-            this.saveToStorage(this.data);
+            await this.saveToStorage(this.data);
+            return this.data;
         }
     }
 
@@ -113,62 +101,6 @@ export class DataService {
         }
     }
 
-    // Parse CSV to array of objects
-    parseCSV(csv) {
-        if (!csv || csv.trim() === '') {
-            return { users: [], pendingUsers: [] };
-        }
-
-        const lines = csv.split('\n').filter(line => line.trim() !== '');
-        if (lines.length === 0) {
-            return { users: [], pendingUsers: [] };
-        }
-
-        try {
-            const headers = lines[0].split(',').map(h => h.trim());
-            if (lines.length === 1) {
-                return { users: [], pendingUsers: [] };
-            }
-            
-            const users = lines.slice(1)
-                .filter(line => line.trim() !== '')
-                .map(line => {
-                    const values = line.split(',').map(v => v.trim());
-                    const obj = {};
-                    headers.forEach((header, i) => {
-                        obj[header] = values[i] || '';
-                    });
-                    return obj;
-                });
-
-            return { users, pendingUsers: [] };
-        } catch (error) {
-            this.error('Error parsing CSV:', error);
-            return { users: [], pendingUsers: [] };
-        }
-    }
-
-    // Convert data to CSV
-    toCSV() {
-        if (!this.data?.users || this.data.users.length === 0) {
-            return 'username,email,password,role,created';
-        }
-        
-        const headers = ['username', 'email', 'password', 'role', 'created'];
-        const csvLines = [
-            headers.join(','),
-            ...this.data.users.map(row => 
-                headers.map(field => {
-                    const value = row[field] || '';
-                    // Escape commas and quotes in values
-                    return value.includes(',') ? `"${value}"` : value;
-                }).join(',')
-            )
-        ];
-        
-        return csvLines.join('\n');
-    }
-
     // Get all data
     getData() {
         this.log('Getting data:', this.data);
@@ -182,44 +114,14 @@ export class DataService {
             this.data = newData;
             
             // Save to storage
-            this.saveToStorage(this.data);
-
-            // Save to JSON
-            try {
-                const response = await fetch('/src/models/data/users.json', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(this.data)
-                });
-                
-                if (!response.ok) {
-                    this.error('Failed to save to JSON:', response.statusText);
-                }
-            } catch (error) {
-                this.error('Error saving to JSON:', error);
+            const success = await this.saveToStorage(this.data);
+            
+            // Also update users data file
+            if (success && this.data.users) {
+                await User.saveUsers(this.data.users);
             }
-
-            // Save to CSV
-            try {
-                const csvContent = this.toCSV();
-                const response = await fetch('/src/models/data/users.csv', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/csv',
-                    },
-                    body: csvContent
-                });
-                
-                if (!response.ok) {
-                    this.error('Failed to save to CSV:', response.statusText);
-                }
-            } catch (error) {
-                this.error('Error saving to CSV:', error);
-            }
-
-            return true;
+            
+            return success;
         } catch (error) {
             this.error('Error saving data:', error);
             return false;

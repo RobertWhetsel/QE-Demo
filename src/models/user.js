@@ -1,3 +1,7 @@
+import config from '../../config/client.js';
+import paths from '../../config/paths.js';
+import Logger from '../utils/logging/logger.js';
+
 export class User {
     constructor(data) {
         this.username = data.username;
@@ -6,108 +10,80 @@ export class User {
     }
 
     static isAuthenticated() {
-        return sessionStorage.getItem('isAuthenticated') === 'true';
+        return localStorage.getItem(config.storage.keys.auth) === 'true';
     }
 
     static getCurrentUser() {
-        const userData = sessionStorage.getItem('currentUser');
+        const userData = localStorage.getItem(config.storage.keys.userData);
         return userData ? new User(JSON.parse(userData)) : null;
     }
 
     static getCurrentUserRole() {
-        const userRole = sessionStorage.getItem('userRole');
+        const userRole = localStorage.getItem(config.storage.keys.userRole);
         return userRole || null;
     }
 
     static async login(username, password) {
         try {
-            // Try to fetch users data from CSV first
-            try {
-                const response = await fetch('/src/models/data/users.csv');
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch users.csv: ${response.status} ${response.statusText}`);
-                }
-                
-                const csvText = await response.text();
-                if (!csvText.trim()) {
-                    throw new Error('users.csv is empty');
-                }
-                
-                // Parse CSV manually since we're in browser
-                const users = this.parseCSV(csvText);
-                if (!users || users.length === 0) {
-                    throw new Error('No users found in CSV');
-                }
-                
-                // Find matching user
-                const user = users.find(u => 
-                    u.username === username && 
-                    u.password === password && 
-                    u.status === 'active'
-                );
-
-                if (user) {
-                    // Store user info in session
-                    sessionStorage.setItem('isAuthenticated', 'true');
-                    sessionStorage.setItem('username', user.username);
-                    sessionStorage.setItem('userRole', user.role);
-                    sessionStorage.setItem('currentUser', JSON.stringify(user));
-                    
-                    return new User(user);
-                }
-            } catch (csvError) {
-                console.warn('Failed to load CSV, falling back to default users:', csvError);
+            Logger.info('Starting login process for:', { username });
+            
+            // Try to get users from localStorage first
+            const storedUsers = localStorage.getItem(config.storage.keys.users);
+            let users = [];
+            
+            if (storedUsers) {
+                Logger.info('Found stored users in localStorage');
+                users = JSON.parse(storedUsers);
+            } else {
+                // If no stored users, use default users
+                Logger.info('No stored users found, using default users');
+                users = this.getDefaultUsers();
+                localStorage.setItem(config.storage.keys.users, JSON.stringify(users));
             }
 
-            // Fall back to default users if CSV fails
-            const defaultUsers = this.getDefaultUsers();
-            const user = defaultUsers.find(u => 
+            Logger.info('Available users:', users);
+
+            // Find matching user
+            const user = users.find(u => 
                 u.username === username && 
-                u.password === password
+                u.password === password && 
+                (!u.status || u.status === 'active')
             );
 
             if (user) {
-                // Store user info in session
-                sessionStorage.setItem('isAuthenticated', 'true');
-                sessionStorage.setItem('username', user.username);
-                sessionStorage.setItem('userRole', user.role);
-                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                Logger.info('User found, storing session data:', { username: user.username, role: user.role });
+                
+                // Store user info in localStorage
+                localStorage.setItem(config.storage.keys.auth, 'true');
+                localStorage.setItem(config.storage.keys.username, user.username);
+                localStorage.setItem(config.storage.keys.userRole, user.role);
+                localStorage.setItem(config.storage.keys.userData, JSON.stringify(user));
+
+                // Verify storage was set correctly
+                const authSet = localStorage.getItem(config.storage.keys.auth) === 'true';
+                const usernameSet = localStorage.getItem(config.storage.keys.username) === user.username;
+                const roleSet = localStorage.getItem(config.storage.keys.userRole) === user.role;
+                const userDataSet = localStorage.getItem(config.storage.keys.userData) !== null;
+
+                Logger.info('Storage verification:', {
+                    authSet,
+                    usernameSet,
+                    roleSet,
+                    userDataSet
+                });
+
+                if (!authSet || !usernameSet || !roleSet || !userDataSet) {
+                    throw new Error('Failed to set user data in storage');
+                }
                 
                 return new User(user);
             }
             
+            Logger.warn('No matching user found');
             return null;
         } catch (error) {
-            console.error('Login error:', error);
+            Logger.error('Login error:', error);
             throw new Error('Login failed: ' + (error.message || 'Unknown error'));
-        }
-    }
-
-    static parseCSV(csvText) {
-        try {
-            const lines = csvText.split('\n');
-            if (lines.length < 2) {
-                throw new Error('CSV must have headers and at least one user');
-            }
-
-            const headers = lines[0].split(',').map(h => h.trim());
-            if (!headers.includes('username') || !headers.includes('password') || !headers.includes('role')) {
-                throw new Error('CSV missing required headers');
-            }
-            
-            return lines.slice(1)
-                .filter(line => line.trim())
-                .map(line => {
-                    const values = line.split(',').map(v => v.trim());
-                    const user = {};
-                    headers.forEach((header, i) => {
-                        user[header] = values[i] || '';
-                    });
-                    return user;
-                });
-        } catch (error) {
-            console.error('CSV parsing error:', error);
-            throw new Error('Failed to parse users.csv: ' + error.message);
         }
     }
 
@@ -116,16 +92,29 @@ export class User {
     }
 
     static async clearAllStorage() {
-        sessionStorage.clear();
-        localStorage.removeItem('userPreferences');
-        localStorage.removeItem('users_json');
+        Logger.info('Clearing storage');
+        const keysToKeep = ['theme', 'language'];
+        const keysToRemove = Object.values(config.storage.keys);
+        
+        keysToRemove.forEach(key => {
+            if (!keysToKeep.includes(key)) {
+                localStorage.removeItem(key);
+            }
+        });
     }
 
     static verifyStorageConsistency() {
-        const isAuthenticated = sessionStorage.getItem('isAuthenticated') === 'true';
-        const username = sessionStorage.getItem('username');
-        const userRole = sessionStorage.getItem('userRole');
-        const currentUser = sessionStorage.getItem('currentUser');
+        const isAuthenticated = localStorage.getItem(config.storage.keys.auth) === 'true';
+        const username = localStorage.getItem(config.storage.keys.username);
+        const userRole = localStorage.getItem(config.storage.keys.userRole);
+        const currentUser = localStorage.getItem(config.storage.keys.userData);
+
+        Logger.info('Storage consistency check:', {
+            isAuthenticated,
+            username,
+            userRole,
+            hasUserData: !!currentUser
+        });
 
         return isAuthenticated && username && userRole && currentUser;
     }
@@ -135,7 +124,7 @@ export class User {
             const prefs = localStorage.getItem('userPreferences');
             return prefs ? JSON.parse(prefs) : null;
         } catch (error) {
-            console.error('Error reading user preferences:', error);
+            Logger.error('Error reading user preferences:', error);
             return null;
         }
     }
@@ -144,13 +133,13 @@ export class User {
         try {
             localStorage.setItem('userPreferences', JSON.stringify(preferences));
         } catch (error) {
-            console.error('Error saving user preferences:', error);
+            Logger.error('Error saving user preferences:', error);
             throw new Error('Failed to save user preferences');
         }
     }
 
     static getDefaultUsers() {
-        return [
+        const defaultUsers = [
             {
                 username: 'genesis',
                 password: 'admin123',
@@ -168,6 +157,8 @@ export class User {
                 created: new Date().toISOString()
             }
         ];
+        Logger.info('Generated default users:', defaultUsers);
+        return defaultUsers;
     }
 
     static saveUsers(users) {
@@ -175,20 +166,10 @@ export class User {
             if (!Array.isArray(users)) {
                 throw new Error('Users must be an array');
             }
-            localStorage.setItem('users_json', JSON.stringify(users));
-            
-            // Also update CSV format for consistency
-            const headers = ['username', 'fullName', 'email', 'phoneNumber', 'role', 'status', 'created', 'password'];
-            const csvContent = [
-                headers.join(','),
-                ...users.map(user => 
-                    headers.map(header => user[header] || '').join(',')
-                )
-            ].join('\n');
-            
-            localStorage.setItem('users_csv', csvContent);
+            localStorage.setItem(config.storage.keys.users, JSON.stringify(users));
+            Logger.info('Users saved successfully:', users);
         } catch (error) {
-            console.error('Error saving users:', error);
+            Logger.error('Error saving users:', error);
             throw new Error('Failed to save users');
         }
     }

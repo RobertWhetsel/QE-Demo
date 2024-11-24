@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{pageTitle}} - Quantum Eye</title>
 
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+    
     <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
     
     <!-- Load common head content and components -->
     <script type="module">
-        import { loadCommonHead, loadCommonComponents } from '/src/utils/loadCommonHead.js';
+        const commonHead = paths.resolve('src/utils/loadCommonHead.js');
+        import { loadCommonHead, loadCommonComponents } from commonHead;
         loadCommonHead();
         loadCommonComponents();
     </script>

@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Quantum Eye</title>
 
-    <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
-    
-    <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
+    <!-- Import paths and load CSS -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths;
+
+        // Load CSS files in correct order
+        const cssPaths = paths.getCssPaths();
+        cssPaths.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        });
+
+        // Set logo source immediately after paths is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            const logoPath = paths.getAssetPath('logo');
+            document.getElementById('logoImg').src = logoPath;
+        });
+    </script>
 
     <style>
         .login-container {
@@ -162,34 +167,13 @@
                 transform: rotate(360deg);
             }
         }
-
-        .logs-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--color-surface-secondary);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            padding: 8px 12px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            opacity: 0.6;
-        }
-
-        .logs-button:hover {
-            opacity: 1;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <form id="login-form" class="login-form" autocomplete="off">
             <div class="login-header">
-                <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" class="login-logo">
+                <img id="logoImg" alt="Quantum Eye Logo" class="login-logo">
                 <h1>Login</h1>
             </div>
 
@@ -228,18 +212,22 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <button onclick="window.open('/src/utils/logging/test-logger.html', '_blank')" class="logs-button">
-        View Logs
-    </button>
-
     <script type="module">
+        import paths from '/config/paths.js';
         import { Auth } from '/src/controllers/auth/login.js';
+        import config from '/config/client.js';
         
-        // Initialize the Auth service when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => new Auth());
-        } else {
+        // Initialize page
+        function initPage() {
+            // Initialize Auth
             new Auth();
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
         }
     </script>
 </body>

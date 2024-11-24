@@ -3,13 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Eye - Redirecting...</title>
-    <meta http-equiv="refresh" content="0;url=login.html">
-    <script>
-        window.location.href = "login.html";
+    <title>Create Genesis Admin - Quantum Eye</title>
+
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
     </script>
+
+    <!-- Core styles -->
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/themes/light.css'),
+            paths.resolve('src/views/styles/themes/dark.css'),
+            paths.resolve('src/views/styles/fonts.css'),
+            paths.resolve('src/views/styles/core/base.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
+
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--color-surface-primary);
+        }
+
+        .form-container {
+            background-color: var(--color-surface-secondary);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            background-color: var(--color-surface-primary);
+            color: var(--color-text-primary);
+            transition: border-color var(--transition-speed),
+                        box-shadow var(--transition-speed);
+        }
+
+        .form-group input:focus {
+            border-color: var(--color-brand-primary);
+            box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
+            outline: none;
+        }
+
+        .button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--color-brand-primary);
+            color: var(--color-text-on-brand);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color var(--transition-speed),
+                        transform var(--transition-speed);
+        }
+
+        .button:hover {
+            background-color: var(--color-brand-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background-color: var(--color-error-bg);
+            color: var(--color-error);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to login page... If you are not redirected automatically, <a href="login.html">click here</a>.</p>
+    <div class="container">
+        <form id="genesis-form" class="form-container" autocomplete="off">
+            <div class="header">
+                <img id="logoImg" alt="Quantum Eye Logo" class="logo">
+                <h1>Create Genesis Admin</h1>
+                <p>Set up the initial administrator account</p>
+            </div>
+
+            <div id="error-message" class="error-message"></div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    required 
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input 
+                    type="password" 
+                    id="confirm-password" 
+                    name="confirm-password" 
+                    required 
+                    autocomplete="off"
+                >
+            </div>
+
+            <button type="submit" class="button">Create Account</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import paths from '/config/paths.js';
+        import { User } from '/src/models/user.js';
+        import { DataService } from '/src/models/dataservice.js';
+        import navigation from '/src/services/navigation/navigation.js';
+        import config from '/config/client.js';
+
+        // Initialize page
+        function initPage() {
+            // Set logo source
+            document.getElementById('logoImg').src = paths.resolve('assets/qeLogoBW.png');
+
+            const form = document.getElementById('genesis-form');
+            const errorDiv = document.getElementById('error-message');
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.classList.add('show');
+                setTimeout(() => {
+                    errorDiv.classList.remove('show');
+                }, config.ui.toastDuration);
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const confirmPassword = document.getElementById('confirm-password').value.trim();
+
+                if (password !== confirmPassword) {
+                    showError('Passwords do not match');
+                    return;
+                }
+
+                try {
+                    const dataService = new DataService();
+                    await dataService.init();
+
+                    // Check if any users exist
+                    const data = dataService.getData();
+                    if (data.users && data.users.length > 0) {
+                        showError('Genesis Admin already exists');
+                        setTimeout(() => {
+                            navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
+                        }, 2000);
+                        return;
+                    }
+
+                    // Create Genesis Admin user
+                    const user = {
+                        username,
+                        email,
+                        password,
+                        role: 'Genesis Admin',
+                        status: 'active',
+                        created: new Date().toISOString()
+                    };
+
+                    await dataService.addUser(user);
+
+                    // Redirect to login
+                    navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
+                } catch (error) {
+                    console.error('Error creating Genesis Admin:', error);
+                    showError('Error creating account. Please try again.');
+                }
+            });
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
 </body>
 </html>

@@ -5,218 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spreadsheet - Quantum Eye</title>
     
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+    
     <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
     
     <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    
-    <style>
-        :root {
-            --nav-height: 60px;
-            --sidebar-width: 250px;
-            --toolbar-height: 40px;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            font-family: var(--font-family-custom);
-        }
-
-        .page {
-            padding-top: var(--nav-height);
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            transition: background-color var(--transition-speed);
-        }
-
-        .page__container {
-            padding-left: var(--sidebar-width);
-            transition: padding-left var(--transition-speed);
-            min-height: calc(100vh - var(--nav-height));
-        }
-
-        .content-area {
-            padding: var(--spacing-lg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .spreadsheet-container {
-            padding: var(--spacing-lg);
-            height: calc(100vh - var(--nav-height) - var(--toolbar-height) - var(--spacing-lg) * 2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .spreadsheet-toolbar {
-            height: var(--toolbar-height);
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-bottom: none;
-            border-radius: 8px 8px 0 0;
-            padding: 0 var(--spacing-md);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-md);
-        }
-
-        .toolbar-button {
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border: 1px solid var(--color-border);
-            border-radius: 4px;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            cursor: pointer;
-            transition: background-color var(--transition-speed),
-                        border-color var(--transition-speed);
-        }
-
-        .toolbar-button:hover {
-            background-color: var(--color-surface-secondary);
-            border-color: var(--color-border-hover);
-        }
-
-        .spreadsheet-grid {
-            flex: 1;
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 0 0 8px 8px;
-            overflow: auto;
-        }
-
-        .grid-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .grid-cell {
-            border: 1px solid var(--color-border);
-            padding: var(--spacing-xs);
-            min-width: 100px;
-            height: 24px;
-            background-color: var(--color-surface-primary);
-        }
-
-        .grid-cell:focus {
-            outline: 2px solid var(--color-brand-primary);
-            outline-offset: -2px;
-        }
-
-        .grid-header {
-            position: sticky;
-            top: 0;
-            background-color: var(--color-surface-secondary);
-            font-weight: 500;
-            text-align: center;
-            z-index: 1;
-        }
-
-        .grid-row-header {
-            position: sticky;
-            left: 0;
-            background-color: var(--color-surface-secondary);
-            font-weight: 500;
-            text-align: center;
-            z-index: 1;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .page__container {
-                padding-left: 0;
-            }
-
-            .content-area {
-                padding: var(--spacing-md);
-            }
-
-            .spreadsheet-container {
-                padding: var(--spacing-md);
-                height: calc(100vh - var(--nav-height) - var(--toolbar-height) - var(--spacing-md) * 2);
-            }
-
-            .spreadsheet-toolbar {
-                padding: 0 var(--spacing-sm);
-                gap: var(--spacing-sm);
-                overflow-x: auto;
-            }
-        }
-    </style>
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/core/base.css'),
+            paths.resolve('src/views/styles/themes/light.css'),
+            paths.resolve('src/views/styles/themes/dark.css'),
+            paths.resolve('src/views/styles/fonts.css'),
+            paths.resolve('src/views/styles/components/navigation.css'),
+            paths.resolve('src/views/styles/components/button.css'),
+            paths.resolve('src/views/styles/components/message.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
 </head>
 <body class="page">
-    <!-- Include navigation -->
-    <nav class="nav">
-        <div class="nav__container">
-            <div class="nav__left">
-                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
-            </div>
-            <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">User</span>
-                <div id="navMenu" class="nav__dropdown" hidden>
-                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Include sidebar -->
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
-        <div class="sidebar__brand">
-            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
-        </div>
-        <div id="menu-items">
-            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
-            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
-            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
-        </div>
-        <div class="sidebar__footer">
-            <a href="#" class="sidebar__link logout-link">Logout</a>
-            <a href="#" class="sidebar__link exit-button">Exit</a>
-        </div>
-    </div>
+    <!-- Include shared layout -->
+    <div id="layout-container"></div>
 
     <div class="page__container">
         <div class="content-area">
-            <div class="spreadsheet-container">
-                <div class="spreadsheet-toolbar">
-                    <button class="toolbar-button" id="new-sheet">New Sheet</button>
-                    <button class="toolbar-button" id="import-data">Import Data</button>
-                    <button class="toolbar-button" id="export-data">Export Data</button>
-                    <button class="toolbar-button" id="save-sheet">Save</button>
-                </div>
-
-                <div class="spreadsheet-grid" id="spreadsheet-grid">
-                    <!-- Grid will be populated here -->
-                </div>
+            <h1>Spreadsheet</h1>
+            <div id="spreadsheet-container">
+                <!-- Spreadsheet content will be loaded here -->
             </div>
         </div>
     </div>
 
     <script type="module">
+        import paths from '/config/paths.js';
         import navigation from '/src/services/navigation/navigation.js';
         import { User } from '/src/models/user.js';
 
@@ -225,7 +58,7 @@
             try {
                 // Check authentication
                 if (!User.isAuthenticated()) {
-                    window.location.href = '/src/views/pages/login.html';
+                    window.location.href = paths.resolve('src/views/pages/login.html');
                     throw new Error('User not logged in');
                 }
 
@@ -242,14 +75,14 @@
                 // Setup hamburger menu
                 if (hamburger && sidebar) {
                     hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('sidebar--open');
+                        sidebar.classList.toggle('is-open');
                     });
                 }
 
                 // Setup close button
                 if (closeBtn && sidebar) {
                     closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('sidebar--open');
+                        sidebar.classList.remove('is-open');
                     });
                 }
 
@@ -295,7 +128,7 @@
                     if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
                         link.addEventListener('click', (e) => {
                             e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
+                            navigation.navigateTo(paths.resolve(link.getAttribute('href')));
                         });
                     }
                 });
@@ -307,29 +140,14 @@
                     el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
                 });
 
-                // Setup toolbar buttons
-                document.getElementById('new-sheet').addEventListener('click', () => {
-                    // TODO: Implement new sheet functionality
-                    alert('New sheet functionality coming soon');
-                });
-
-                document.getElementById('import-data').addEventListener('click', () => {
-                    // TODO: Implement import data functionality
-                    alert('Import data functionality coming soon');
-                });
-
-                document.getElementById('export-data').addEventListener('click', () => {
-                    // TODO: Implement export data functionality
-                    alert('Export data functionality coming soon');
-                });
-
-                document.getElementById('save-sheet').addEventListener('click', () => {
-                    // TODO: Implement save functionality
-                    alert('Save functionality coming soon');
-                });
-
-                // TODO: Initialize spreadsheet grid
-                // This will be implemented when the spreadsheet functionality is ready
+                // Load shared layout
+                fetch(paths.resolve('src/views/components/shared/layout.html'))
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('layout-container').innerHTML = html;
+                        initPage();
+                    })
+                    .catch(error => console.error('Error loading layout:', error));
             } catch (error) {
                 console.error('Error initializing page:', error);
             }

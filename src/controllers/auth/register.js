@@ -1,36 +1,45 @@
-import { NavigationService } from '../../services/navigation/navigation.js';
+import navigation from '../../services/navigation/navigation.js';
+import { User } from '../../models/user.js';
+import { ROLES } from '../../models/index.js';
+import paths from '../../../config/paths.js';
+import Logger from '../../utils/logging/logger.js';
 
 export class Registration {
     constructor() {
         this.form = document.getElementById('registration-form');
-        this.navigation = new NavigationService();
         this.init();
     }
 
     init() {
         if (this.form) {
+            Logger.info('Initializing registration form');
             this.form.addEventListener('submit', (e) => this.handleRegistration(e));
+        } else {
+            Logger.warn('Registration form not found');
         }
     }
 
     async handleRegistration(event) {
         event.preventDefault();
+        Logger.info('Processing registration submission');
 
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
         const role = document.getElementById('role').value;
 
         if (!username || !password) {
+            Logger.warn('Registration validation failed: missing fields');
             this.showError('Please fill in all required fields');
             return;
         }
 
         try {
-            // Get existing users
-            const appData = JSON.parse(sessionStorage.getItem('appData') || '{"users":[],"pendingUsers":[]}');
+            // Get existing users from User model
+            const users = User.getDefaultUsers();
             
             // Check if username already exists
-            if (appData.users.some(user => user.username === username)) {
+            if (users.some(user => user.username === username)) {
+                Logger.warn('Registration failed: username exists', { username });
                 this.showError('Username already exists');
                 return;
             }
@@ -40,19 +49,15 @@ export class Registration {
                 username,
                 password,
                 role,
+                status: 'active',
+                email: `${username}@system.local`,
                 created: new Date().toISOString()
             };
 
-            // Add to users array
-            appData.users.push(newUser);
-            
-            // Save updated data
-            sessionStorage.setItem('appData', JSON.stringify(appData));
-
-            // Set session data
-            sessionStorage.setItem('isAuthenticated', 'true');
-            sessionStorage.setItem('userRole', role);
-            sessionStorage.setItem('username', username);
+            // Add user using User model
+            users.push(newUser);
+            User.saveUsers(users);
+            Logger.info('New user created:', { username, role });
 
             // Initialize preferences
             const userPreferences = {
@@ -60,22 +65,39 @@ export class Registration {
                 fontFamily: 'Arial',
                 notifications: false
             };
-            localStorage.setItem(`user_preferences_${username}`, JSON.stringify(userPreferences));
+            User.updateUserPreferences(userPreferences);
+            Logger.info('User preferences initialized');
+
+            // Log in the new user
+            const loggedInUser = await User.login(username, password);
+            if (!loggedInUser) {
+                throw new Error('Failed to log in after registration');
+            }
 
             // Navigate based on role
-            if (role === 'Genesis Admin') {
+            if (role === ROLES.GENESIS_ADMIN) {
+                Logger.info('Genesis Admin registered successfully');
                 alert('Welcome! Thank you for Registering! You are the Genesis Admin.');
-                this.navigation.navigateTo('/src/views/pages/platformAdmin.html');
+                const adminPath = paths.join(paths.pages, 'platformAdmin.html');
+                navigation.navigateTo(adminPath);
             } else {
-                this.navigation.navigateTo('/src/views/pages/platformAdmin.html');
+                Logger.info('User registered successfully');
+                const platformPath = paths.join(paths.pages, 'platformAdmin.html');
+                navigation.navigateTo(platformPath);
             }
         } catch (error) {
-            console.error('Registration error:', error);
+            Logger.error('Registration error:', {
+                error: error.message,
+                stack: error.stack,
+                username
+            });
             this.showError('An error occurred during registration');
         }
     }
 
     showError(message) {
+        Logger.warn('Showing registration error:', message);
+        
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;

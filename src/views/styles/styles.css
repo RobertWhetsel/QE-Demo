@@ -1,35 +1,170 @@
-/* Reset - Must come first */
-@import './core/reset.css';
+/* Core styles */
+:root {
+    /* Base font size */
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 
-/* Core */
-@import './core/variables.css';
-@import './core/base.css';
-@import './core/typography.css';
+/* Global styles */
+body {
+    font-family: var(--font-family-custom);
+    background-color: var(--color-background);
+    color: var(--color-text);
+    margin: 0;
+    padding: 0;
+}
 
-/* Layouts */
-@import './layouts/container.css';
-@import './layouts/grid.css';
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+    font-weight: var(--font-weight-bold);
+}
 
-/* Components */
-@import './components/button.css';
-@import './components/forms.css';
-@import './components/message.css';
-@import './components/navigation.css';
-@import './components/profile.css';
-@import './components/admin-control-panel.css';
+h1 { font-size: var(--font-size-3xl); }
+h2 { font-size: var(--font-size-2xl); }
+h3 { font-size: var(--font-size-xl); }
+h4 { font-size: var(--font-size-lg); }
+h5 { font-size: var(--font-size-base); }
+h6 { font-size: var(--font-size-sm); }
 
-/* Pages */
-@import './login.css';
-@import './user-profile.css';
-@import './research.css';
-@import './survey.css';
-@import './admin-dashboard.css';
+/* Links */
+a {
+    color: var(--color-brand-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed);
+}
+
+a:hover {
+    color: var(--color-brand-primary-hover);
+    text-decoration: underline;
+}
+
+/* Layout */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.container--fluid {
+    max-width: none;
+}
+
+.container--narrow {
+    max-width: 800px;
+}
+
+/* Forms */
+input, textarea, select {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background-color: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    transition: border-color var(--transition-speed),
+                box-shadow var(--transition-speed);
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--color-brand-primary);
+    box-shadow: 0 0 0 2px var(--color-brand-primary-hover);
+    outline: none;
+}
+
+/* Buttons */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-brand);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: background-color var(--transition-speed),
+                transform var(--transition-speed),
+                box-shadow var(--transition-speed);
+}
+
+.button:hover {
+    background-color: var(--color-brand-primary-hover);
+    transform: translateY(-1px);
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+/* Messages */
+.message {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.message--error {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.message--success {
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.message--warning {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.message--info {
+    background-color: var(--color-info-bg);
+    color: var(--color-info);
+}
 
 /* Utilities */
-@import './utilities/typography.css';
-@import './utilities/helpers.css';
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
-/* Themes - Must come last for proper cascade */
-@import './themes/light.css';
-@import './themes/dark.css';
-@import './themes/print.css';
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }
+
+.hidden { display: none !important; }
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .hidden-mobile { display: none !important; }
+    
+    h1 { font-size: var(--font-size-2xl); }
+    h2 { font-size: var(--font-size-xl); }
+    h3 { font-size: var(--font-size-lg); }
+    
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}

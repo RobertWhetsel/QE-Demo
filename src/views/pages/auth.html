@@ -1,8 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+
     <div id="header-component"></div>
-    <link rel="stylesheet" href="/css/components/auth.css">
+    
+    <!-- Core styles -->
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/core/base.css'),
+            paths.resolve('src/views/styles/components/form.css'),
+            paths.resolve('src/views/styles/components/button.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
 </head>
 <body class="auth-page {{pageClass}}">
     <main class="auth-container">
@@ -15,18 +34,20 @@
     </main>
 
     <script type="module">
-        import ComponentLoader from '/js/components/componentLoader.js';
+        import paths from '/config/paths.js';
         
         // Load header component
-        ComponentLoader.insertComponent('#header-component', '/components/header.html', {
-            pageTitle: '{{pageTitle}}',
-            additionalStyles: '{{additionalStyles}}'
-        });
-
-        // Initialize any page-specific scripts
-        if (typeof initPage === 'function') {
-            initPage();
-        }
+        fetch(paths.resolve('src/views/components/head.html'))
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('header-component').innerHTML = html;
+                
+                // Initialize any page-specific scripts
+                if (typeof initPage === 'function') {
+                    initPage();
+                }
+            })
+            .catch(error => console.error('Error loading header component:', error));
     </script>
     {{additionalScripts}}
 </body>

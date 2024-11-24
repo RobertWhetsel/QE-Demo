@@ -1,8 +1,12 @@
 <div id="sidebar" class="sidebar">
-    
-    <div class="sidebar__brand"><img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;"></div>
+    <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
+    <div class="sidebar__brand">
+        <img id="logo" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+    </div>
     <div id="menu-items">
-        <!-- Menu items will be loaded here based on role -->
+        <a href="#" class="sidebar__link admin-only" data-path="adminControlPanel">Genesis Admin Control Panel</a>
+        <a href="#" class="sidebar__link" data-path="settings">Settings</a>
+        <a href="#" class="sidebar__link" data-path="userProfile">User Profile</a>
     </div>
     <div class="sidebar__footer">
         <a href="#" class="sidebar__link logout-link">Logout</a>
@@ -11,113 +15,50 @@
 </div>
 
 <script type="module">
-import navigation from '/src/services/navigation/navigation.js';
+    import paths from '/config/paths.js';
+    import navigation from '/src/services/navigation/navigation.js';
 
-// Initialize sidebar when user data is ready
-Promise.resolve().then(() => {
-    if (!window.QE?.currentUser) {
-        return new Promise(resolve => {
-            document.addEventListener('userDataReady', resolve, { once: true });
-        });
+    // Setup logo path
+    const logo = document.getElementById('logo');
+    if (logo) {
+        logo.src = paths.getAssetPath('logo');
     }
-}).then(() => {
-    console.log('Initializing sidebar with user:', window.QE?.currentUser);
-    const sidebar = document.getElementById('sidebar');
-    const closeBtn = document.getElementById('close-sidebar');
-    const menuContainer = document.getElementById('menu-items');
-    const logoutLink = document.querySelector('.logout-link');
-    const exitButton = document.querySelector('.exit-button');
-    
+
+    // Setup navigation paths
+    const menuLinks = document.querySelectorAll('.sidebar__link[data-path]');
+    menuLinks.forEach(link => {
+        const pageName = link.getAttribute('data-path');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigation.navigateToPage(pageName);
+        });
+    });
+
     // Setup close button
+    const closeBtn = document.getElementById('close-sidebar');
+    const sidebar = document.getElementById('sidebar');
+    
     if (closeBtn && sidebar) {
         closeBtn.addEventListener('click', () => {
-            sidebar.classList.remove('sidebar--open');
+            sidebar.classList.remove('is-open');
         });
     }
 
-    // Load menu items if user data is available
-    if (window.QE?.currentUser && menuContainer) {
-        const userRole = window.QE.currentUser.role;
-        console.log('Loading menu for role:', userRole);
+    // Setup logout and exit functionality
+    const logoutLink = document.querySelector('.logout-link');
+    const exitButton = document.querySelector('.exit-button');
 
-        // Define menu items based on role
-        const menuItems = {
-            'Genesis Admin': [
-                { href: '/src/views/pages/adminControlPanel.html', text: 'Genesis Admin Control Panel' },
-                { href: '/src/views/pages/settings.html', text: 'Settings' },
-                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
-            ],
-            'Platform Admin': [
-                { href: '/src/views/pages/platformAdmin.html', text: 'Dashboard' },
-                { href: '/src/views/pages/settings.html', text: 'Settings' },
-                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
-            ],
-            'User Admin': [
-                { href: '/src/views/pages/platformAdmin.html', text: 'Dashboard' },
-                { href: '/src/views/pages/settings.html', text: 'Settings' },
-                { href: '/src/views/pages/userProfile.html', text: 'User Profile' }
-            ]
-        };
-
-        // Get menu items for current role
-        const roleMenu = menuItems[userRole];
-        console.log('Menu items for role:', userRole, roleMenu);
-
-        if (roleMenu) {
-            // Clear existing menu items
-            menuContainer.innerHTML = '';
-            
-            // Add menu items
-            roleMenu.forEach(item => {
-                const link = document.createElement('a');
-                link.href = item.href;
-                link.className = 'sidebar__link';
-                link.textContent = item.text;
-                
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigation.navigateTo(item.href);
-                });
-                
-                menuContainer.appendChild(link);
-            });
-            console.log('Menu items added:', menuContainer.children.length);
-        } else {
-            console.error('No menu items found for role:', userRole);
-        }
-    } else {
-        console.error('User data not found in global scope or menu container missing');
-    }
-
-    // Setup logout functionality
     if (logoutLink) {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
-            navigation.logout();
+            navigation.navigateToPage('login');
         });
     }
 
-    // Setup exit functionality
     if (exitButton) {
         exitButton.addEventListener('click', (e) => {
             e.preventDefault();
-            navigation.exitApplication();
+            window.close();
         });
     }
-
-    // Dispatch event when sidebar is ready
-    const event = new CustomEvent('sidebarReady', { 
-        detail: { 
-            userRole: window.QE?.currentUser?.role,
-            menuItems: Array.from(menuContainer?.children || []).map(link => ({
-                href: link.getAttribute('href'),
-                text: link.textContent
-            }))
-        }
-    });
-    document.dispatchEvent(event);
-    console.log('Sidebar component ready');
-}).catch(error => {
-    console.error('Error initializing sidebar:', error);
-});
 </script>

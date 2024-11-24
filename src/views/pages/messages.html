@@ -5,221 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Quantum Eye</title>
     
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+    
     <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
     
     <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    
-    <style>
-        :root {
-            --nav-height: 60px;
-            --sidebar-width: 250px;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            font-family: var(--font-family-custom);
-        }
-
-        .page {
-            padding-top: var(--nav-height);
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            transition: background-color var(--transition-speed);
-        }
-
-        .page__container {
-            padding-left: var(--sidebar-width);
-            transition: padding-left var(--transition-speed);
-            min-height: calc(100vh - var(--nav-height));
-        }
-
-        .content-area {
-            padding: var(--spacing-lg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .messages-container {
-            padding: var(--spacing-lg);
-        }
-
-        .messages-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .message-list {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .message-item {
-            display: flex;
-            gap: var(--spacing-md);
-            padding: var(--spacing-md);
-            border-bottom: 1px solid var(--color-border);
-            transition: background-color var(--transition-speed);
-        }
-
-        .message-item:last-child {
-            border-bottom: none;
-        }
-
-        .message-item:hover {
-            background-color: var(--color-surface-primary);
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--color-brand-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--color-text-on-brand);
-            font-weight: 500;
-        }
-
-        .message-content {
-            flex: 1;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .message-sender {
-            font-weight: 500;
-        }
-
-        .message-time {
-            color: var(--color-text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .message-text {
-            color: var(--color-text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.4;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .page__container {
-                padding-left: 0;
-            }
-
-            .content-area {
-                padding: var(--spacing-md);
-            }
-
-            .messages-container {
-                padding: var(--spacing-md);
-            }
-
-            .messages-header {
-                flex-direction: column;
-                gap: var(--spacing-md);
-                align-items: stretch;
-            }
-
-            .message-list {
-                padding: var(--spacing-md);
-            }
-
-            .message-item {
-                flex-direction: column;
-                gap: var(--spacing-sm);
-            }
-
-            .message-header {
-                flex-direction: column;
-                gap: var(--spacing-xs);
-            }
-        }
-    </style>
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/core/base.css'),
+            paths.resolve('src/views/styles/themes/light.css'),
+            paths.resolve('src/views/styles/themes/dark.css'),
+            paths.resolve('src/views/styles/fonts.css'),
+            paths.resolve('src/views/styles/components/navigation.css'),
+            paths.resolve('src/views/styles/components/button.css'),
+            paths.resolve('src/views/styles/components/message.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
 </head>
 <body class="page">
-    <!-- Include navigation -->
-    <nav class="nav">
-        <div class="nav__container">
-            <div class="nav__left">
-                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
-            </div>
-            <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">User</span>
-                <div id="navMenu" class="nav__dropdown" hidden>
-                    <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Include sidebar -->
-    <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
-        <div class="sidebar__brand">
-            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
-        </div>
-        <div id="menu-items">
-            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only">Genesis Admin Control Panel</a>
-            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
-            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
-        </div>
-        <div class="sidebar__footer">
-            <a href="#" class="sidebar__link logout-link">Logout</a>
-            <a href="#" class="sidebar__link exit-button">Exit</a>
-        </div>
-    </div>
+    <!-- Include shared layout -->
+    <div id="layout-container"></div>
 
     <div class="page__container">
         <div class="content-area">
-            <div class="messages-container">
-                <div class="messages-header">
-                    <h1 class="page-title">Messages</h1>
-                    <button id="compose-message" class="button button--primary">Compose Message</button>
-                </div>
-
-                <div class="message-list" id="message-list">
-                    <!-- Messages will be populated here -->
-                </div>
+            <h1>Messages</h1>
+            <div id="messages-container">
+                <!-- Messages will be loaded here -->
             </div>
         </div>
     </div>
 
     <script type="module">
+        import paths from '/config/paths.js';
         import navigation from '/src/services/navigation/navigation.js';
         import { User } from '/src/models/user.js';
 
@@ -228,7 +58,7 @@
             try {
                 // Check authentication
                 if (!User.isAuthenticated()) {
-                    window.location.href = '/src/views/pages/login.html';
+                    window.location.href = paths.resolve('src/views/pages/login.html');
                     throw new Error('User not logged in');
                 }
 
@@ -245,14 +75,14 @@
                 // Setup hamburger menu
                 if (hamburger && sidebar) {
                     hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('sidebar--open');
+                        sidebar.classList.toggle('is-open');
                     });
                 }
 
                 // Setup close button
                 if (closeBtn && sidebar) {
                     closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('sidebar--open');
+                        sidebar.classList.remove('is-open');
                     });
                 }
 
@@ -298,7 +128,7 @@
                     if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
                         link.addEventListener('click', (e) => {
                             e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
+                            navigation.navigateTo(paths.resolve(link.getAttribute('href')));
                         });
                     }
                 });
@@ -310,14 +140,14 @@
                     el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
                 });
 
-                // Setup compose message button
-                document.getElementById('compose-message').addEventListener('click', () => {
-                    // TODO: Implement compose message functionality
-                    alert('Compose message functionality coming soon');
-                });
-
-                // TODO: Load and display messages
-                // This will be implemented when the messaging functionality is ready
+                // Load shared layout
+                fetch(paths.resolve('src/views/components/shared/layout.html'))
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('layout-container').innerHTML = html;
+                        initPage();
+                    })
+                    .catch(error => console.error('Error loading layout:', error));
             } catch (error) {
                 console.error('Error initializing page:', error);
             }

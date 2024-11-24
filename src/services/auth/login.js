@@ -1,8 +1,10 @@
 import navigation from '../navigation/navigation.js';
 import { User } from '../../models/user.js';
+import { ROLES } from '../../models/index.js';
 import themeManager from '../state/thememanager.js';
 import fontManager from '../state/fontmanager.js';
 import Logger from '../../utils/logging/logger.js';
+import paths from '../../../config/paths.js';
 
 export class Auth {
     constructor() {
@@ -39,9 +41,9 @@ export class Auth {
 
         Logger.info('Login attempt for username:', username);
         Logger.debug('Verifying clean session state:', {
-            isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-            currentUser: sessionStorage.getItem('currentUser'),
-            userRole: sessionStorage.getItem('userRole')
+            isAuthenticated: localStorage.getItem('isAuthenticated'),
+            currentUser: localStorage.getItem('currentUser'),
+            userRole: localStorage.getItem('userRole')
         });
 
         if (!username || !password) {
@@ -81,10 +83,10 @@ export class Auth {
 
                 // Verify session storage after login
                 Logger.debug('Verifying session storage:', {
-                    isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-                    username: sessionStorage.getItem('username'),
-                    userRole: sessionStorage.getItem('userRole'),
-                    hasCurrentUser: !!sessionStorage.getItem('currentUser')
+                    isAuthenticated: localStorage.getItem('isAuthenticated'),
+                    username: localStorage.getItem('username'),
+                    userRole: localStorage.getItem('userRole'),
+                    hasCurrentUser: !!localStorage.getItem('currentUser')
                 });
 
                 // Verify storage consistency before proceeding
@@ -99,14 +101,21 @@ export class Auth {
                 // Redirect based on role with strict role-based access
                 Logger.info('Determining redirect based on role:', user.role);
                 switch (user.role) {
-                    case 'Genesis Admin':
+                    case ROLES.GENESIS_ADMIN:
                         Logger.info('Redirecting Genesis Admin to admin control panel');
-                        navigation.navigateTo('/src/views/pages/adminControlPanel.html');
+                        const adminPath = paths.join(paths.pages, 'adminControlPanel.html');
+                        navigation.navigateTo(adminPath);
                         break;
-                    case 'Platform Admin':
-                    case 'User Admin':
+                    case ROLES.PLATFORM_ADMIN:
+                    case ROLES.USER_ADMIN:
                         Logger.info('Redirecting Admin to platform admin dashboard');
-                        navigation.navigateTo('/src/views/pages/platformAdmin.html');
+                        const platformPath = paths.join(paths.pages, 'platformAdmin.html');
+                        navigation.navigateTo(platformPath);
+                        break;
+                    case ROLES.USER:
+                        Logger.info('Redirecting User to dashboard');
+                        const dashboardPath = paths.join(paths.pages, 'dashboard.html');
+                        navigation.navigateTo(dashboardPath);
                         break;
                     default:
                         Logger.error('Invalid user role detected:', user.role);
@@ -123,10 +132,10 @@ export class Auth {
             Logger.error('Login error:', error, {
                 message: error.message,
                 stack: error.stack,
-                sessionStorage: {
-                    isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-                    username: sessionStorage.getItem('username'),
-                    userRole: sessionStorage.getItem('userRole')
+                localStorage: {
+                    isAuthenticated: localStorage.getItem('isAuthenticated'),
+                    username: localStorage.getItem('username'),
+                    userRole: localStorage.getItem('userRole')
                 }
             });
             await User.clearAllStorage();

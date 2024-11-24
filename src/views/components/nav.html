@@ -13,76 +13,36 @@
 </nav>
 
 <script type="module">
-import navigation from '/src/services/navigation/navigation.js';
+    import paths from '/config/paths.js';
+    import navigation from '/src/services/navigation/navigation.js';
 
-// Initialize nav when user data is ready
-Promise.resolve().then(() => {
-    if (!window.QE?.currentUser) {
-        return new Promise(resolve => {
-            document.addEventListener('userDataReady', resolve, { once: true });
-        });
-    }
-}).then(() => {
-    console.log('Initializing nav with user:', window.QE?.currentUser);
+    // Setup navigation components
     const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
     const userNameEl = document.getElementById('userName');
     const navMenu = document.getElementById('navMenu');
     const logoutBtn = document.getElementById('logoutBtn');
-    
-    // Set username from global user data
-    if (userNameEl && window.QE?.currentUser) {
-        userNameEl.textContent = window.QE.currentUser.fullName || window.QE.currentUser.username;
-        userNameEl.dataset.role = window.QE.currentUser.role;
-        console.log('Username set:', userNameEl.textContent);
-    }
 
     // Setup hamburger menu
-    if (hamburger) {
+    if (hamburger && sidebar) {
         hamburger.addEventListener('click', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('sidebar--open');
-                console.log('Toggled sidebar');
-            } else {
-                console.error('Sidebar element not found');
-            }
+            sidebar.classList.toggle('is-open');
+            console.log('Toggled sidebar');
         });
     }
 
-    // Setup username dropdown
-    if (userNameEl && navMenu) {
+    // Setup username display and dropdown
+    if (userNameEl) {
         userNameEl.addEventListener('click', () => {
             navMenu.toggleAttribute('hidden');
             console.log('Toggled nav menu');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.nav__menu')) {
-                navMenu.setAttribute('hidden', '');
-            }
         });
     }
 
     // Setup logout functionality
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            console.log('Logging out...');
-            navigation.logout();
+            navigation.navigateToPage('login');
         });
     }
-
-    // Dispatch event when nav is ready
-    const event = new CustomEvent('navReady', { 
-        detail: { 
-            username: window.QE?.currentUser?.username,
-            fullName: window.QE?.currentUser?.fullName,
-            role: window.QE?.currentUser?.role 
-        }
-    });
-    document.dispatchEvent(event);
-    console.log('Nav component ready');
-}).catch(error => {
-    console.error('Error initializing nav:', error);
-});
 </script>

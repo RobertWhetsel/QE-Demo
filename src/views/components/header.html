@@ -2,6 +2,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{pageTitle}} - Quantum Eye</title>
 
+<!-- Import paths -->
+<script type="module">
+    import paths from '/config/paths.js';
+    window.paths = paths; // Make paths available globally
+</script>
+
 <!-- Theme initialization - Must be first -->
 <script type="module">
     import ThemeManager from '/src/services/state/thememanager.js';
@@ -9,23 +15,23 @@
     ThemeManager.initialize();
 </script>
 
-<!-- Core variables -->
-<link rel="stylesheet" href="/src/views/styles/core/variables.css">
-
-<!-- Theme styles - Must be after variables -->
-<link rel="stylesheet" href="/src/views/styles/themes/light.css">
-<link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-
-<!-- Base styles -->
-<link rel="stylesheet" href="/src/views/styles/core/base.css">
-
-<!-- Layout styles -->
-<link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-
-<!-- Component styles -->
-<link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-<link rel="stylesheet" href="/src/views/styles/components/button.css">
-<link rel="stylesheet" href="/src/views/styles/components/message.css">
+<!-- Core styles -->
+<script>
+    const styleLinks = [
+        paths.resolve('src/views/styles/core/variables.css'),
+        paths.resolve('src/views/styles/themes/light.css'),
+        paths.resolve('src/views/styles/themes/dark.css'),
+        paths.resolve('src/views/styles/core/base.css'),
+        paths.resolve('src/views/styles/layouts/container.css'),
+        paths.resolve('src/views/styles/components/navigation.css'),
+        paths.resolve('src/views/styles/components/button.css'),
+        paths.resolve('src/views/styles/components/message.css')
+    ];
+    
+    styleLinks.forEach(href => {
+        document.write(`<link rel="stylesheet" href="${href}">`);
+    });
+</script>
 
 <style>
     /* Ensure smooth theme transitions */

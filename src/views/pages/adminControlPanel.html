@@ -4,169 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genesis Admin Control Panel - Quantum Eye</title>
-
-    <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
     
-    <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Base styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Layout styles -->
-    <link rel="stylesheet" href="/src/views/styles/layouts/container.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    <link rel="stylesheet" href="/src/views/styles/components/admin-control-panel.css">
+    <!-- Import paths and load CSS -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths;
 
-    <style>
-        :root {
-            --nav-height: 60px;
-            --sidebar-width: 250px;
-        }
+        // Load CSS files in correct order
+        const cssPaths = paths.getCssPaths();
+        cssPaths.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        });
 
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            color: var(--color-text-primary);
-            font-family: var(--font-family-custom);
-        }
-
-        .page {
-            padding-top: var(--nav-height);
-            min-height: 100vh;
-            background-color: var(--color-surface-primary);
-            transition: background-color var(--transition-speed);
-        }
-
-        .page__container {
-            padding-left: var(--sidebar-width);
-            transition: padding-left var(--transition-speed);
-            min-height: calc(100vh - var(--nav-height));
-        }
-
-        .content-area {
-            padding: var(--spacing-lg);
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section {
-            background-color: var(--color-surface-secondary);
-            border: 1px solid var(--color-border-default);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* Additional nav styles */
-        .nav {
-            box-shadow: var(--shadow-sm);
-        }
-
-        .nav__toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            transition: background-color var(--transition-speed);
-        }
-
-        .nav__toggle:hover {
-            background-color: var(--color-surface-primary);
-        }
-
-        /* Additional sidebar styles */
-        .sidebar {
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--color-border) transparent;
-        }
-
-        .sidebar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .sidebar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background-color: var(--color-border);
-            border-radius: 3px;
-        }
-
-        .sidebar__link {
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding: var(--spacing-md) var(--spacing-lg);
-            color: var(--color-text-primary);
-            text-decoration: none;
-            transition: all var(--transition-speed);
-        }
-
-        .sidebar__link:hover {
-            background-color: var(--color-surface-primary);
-            padding-left: calc(var(--spacing-lg) + 4px);
-        }
-
-        .sidebar__link.active {
-            background-color: var(--color-surface-primary);
-            font-weight: 600;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .page__container {
-                padding-left: 0;
-            }
-
-            .content-area {
-                padding: var(--spacing-md);
-            }
-
-            .section {
-                padding: var(--spacing-md);
-                margin-bottom: var(--spacing-md);
-            }
-
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar--open {
-                transform: translateX(0);
-                box-shadow: var(--shadow-lg);
-            }
-        }
-    </style>
+        // Set logo source immediately after paths is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            const logoPath = paths.getAssetPath('logo');
+            document.getElementById('logo').src = logoPath;
+        });
+    </script>
 </head>
-<body class="page">
-    <!-- Include navigation -->
+<body>
     <nav class="nav">
         <div class="nav__container">
             <div class="nav__left">
-                <button id="hamburger" class="nav__toggle" aria-label="Toggle Menu">&#9776;</button>
+                <button id="hamburger" class="nav__toggle">&#9776;</button>
             </div>
             <div class="nav__menu">
-                <span id="userName" class="nav__link user-name">User</span>
+                <span id="userName" class="nav__link user-name">Genesis</span>
                 <div id="navMenu" class="nav__dropdown" hidden>
                     <button class="nav__dropdown-item" id="logoutBtn">Logout</button>
                 </div>
@@ -174,16 +41,15 @@
         </div>
     </nav>
 
-    <!-- Include sidebar -->
     <div id="sidebar" class="sidebar">
         <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
         <div class="sidebar__brand">
-            <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+            <img id="logo" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
         </div>
         <div id="menu-items">
-            <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only active">Genesis Admin Control Panel</a>
-            <a href="/src/views/pages/settings.html" class="sidebar__link">Settings</a>
-            <a href="/src/views/pages/userProfile.html" class="sidebar__link">User Profile</a>
+            <a href="#" class="sidebar__link admin-only active" data-path="adminControlPanel">Genesis Admin Control Panel</a>
+            <a href="#" class="sidebar__link" data-path="settings">Settings</a>
+            <a href="#" class="sidebar__link" data-path="userProfile">User Profile</a>
         </div>
         <div class="sidebar__footer">
             <a href="#" class="sidebar__link logout-link">Logout</a>
@@ -191,342 +57,48 @@
         </div>
     </div>
 
-    <div class="page__container">
-        <div class="content-area">
-            <div class="admin-control-panel">
-                <h1 class="page-title">Genesis Admin Control Panel</h1>
-
-                <div class="section">
-                    <h2 class="section-title">Create New Admin User</h2>
-                    <p class="form-description">
-                        Use this form to create new Platform Admins or User Admins.
-                        Each admin will need to change their password upon first login.
-                    </p>
-
-                    <form id="admin-creation-form" class="user-form" method="post" onsubmit="return false;">
-                        <div class="form-group">
-                            <label for="username" class="required-field">Username</label>
-                            <input type="text" id="username" name="username" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="fullName" class="required-field">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="required-field">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="phoneNumber">Phone Number</label>
-                            <input type="tel" id="phoneNumber" name="phoneNumber">
-                        </div>
-                        <div class="form-group">
-                            <label for="password" class="required-field">Initial Password</label>
-                            <input type="password" id="password" name="password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="role" class="required-field">Admin Type</label>
-                            <select id="role" name="role" required>
-                                <option value="">Select admin type</option>
-                                <option value="Platform Admin">Platform Admin</option>
-                                <option value="User Admin">User Admin</option>
-                            </select>
-                        </div>
-                        <button type="submit" id="submitBtn" class="button button--primary">Create Admin User</button>
+    <div class="dashboard__content">
+        <div class="admin-panel">
+            <div class="admin-panel__header">
+                <h1 class="admin-panel__title">Genesis Admin Control Panel</h1>
+                <p class="admin-panel__description">Manage system configuration, users, and monitor system status.</p>
+            </div>
+            
+            <div class="admin-panel__section">
+                <h2>System Configuration</h2>
+                <div class="admin-panel__form">
+                    <form id="admin-creation-form" class="admin-panel__form-group">
+                        <!-- Form fields will be populated by controller -->
                     </form>
                 </div>
-
-                <div class="section">
-                    <h2 class="section-title">Existing Admin Users</h2>
-                    <div id="admin-list-container">
-                        <table class="admin-list">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Role</th>
-                                    <th>Created</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-list-body">
-                                <!-- Admin list will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            
+            <div class="admin-panel__section">
+                <h2>User Management</h2>
+                <div id="admin-list-container" class="admin-panel__table">
+                    <!-- Table will be populated by controller -->
+                </div>
+            </div>
+            
+            <div class="admin-panel__section">
+                <h2>System Status</h2>
+                <div id="system-status" class="admin-panel__table">
+                    <!-- Status info will be populated by controller -->
                 </div>
             </div>
         </div>
     </div>
 
     <script type="module">
+        import paths from '/config/paths.js';
+        import { AdminControlPanel } from '/src/controllers/admin/admincontrolpanel.js';
         import navigation from '/src/services/navigation/navigation.js';
-        import { User } from '/src/models/user.js';
-
+        
         // Initialize page
-        async function initPage() {
-            try {
-                // Check authentication
-                if (!User.isAuthenticated() || User.getCurrentUserRole() !== 'Genesis Admin') {
-                    window.location.href = '/src/views/pages/login.html';
-                    throw new Error('Unauthorized access');
-                }
-
-                // Setup navigation components
-                const hamburger = document.getElementById('hamburger');
-                const sidebar = document.getElementById('sidebar');
-                const closeBtn = document.getElementById('close-sidebar');
-                const logoutBtn = document.getElementById('logoutBtn');
-                const logoutLink = document.querySelector('.logout-link');
-                const exitButton = document.querySelector('.exit-button');
-                const userNameEl = document.getElementById('userName');
-                const navMenu = document.getElementById('navMenu');
-
-                // Setup hamburger menu
-                if (hamburger && sidebar) {
-                    hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('sidebar--open');
-                    });
-                }
-
-                // Setup close button
-                if (closeBtn && sidebar) {
-                    closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('sidebar--open');
-                    });
-                }
-
-                // Setup logout functionality
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', () => navigation.logout());
-                }
-                if (logoutLink) {
-                    logoutLink.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.logout();
-                    });
-                }
-
-                // Setup exit functionality
-                if (exitButton) {
-                    exitButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        navigation.exitApplication();
-                    });
-                }
-
-                // Setup username display and dropdown
-                if (userNameEl) {
-                    const userName = sessionStorage.getItem('username') || "User";
-                    userNameEl.textContent = userName;
-
-                    userNameEl.addEventListener('click', () => {
-                        navMenu.toggleAttribute('hidden');
-                    });
-
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', (e) => {
-                        if (!e.target.closest('.nav__menu')) {
-                            navMenu.setAttribute('hidden', '');
-                        }
-                    });
-                }
-
-                // Setup navigation links
-                const links = document.querySelectorAll('.sidebar__link[href]');
-                links.forEach(link => {
-                    if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
-                        link.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
-                        });
-                    }
-                });
-
-                // Show/hide admin-only elements
-                const userRole = sessionStorage.getItem('userRole');
-                const adminElements = document.querySelectorAll('.admin-only');
-                adminElements.forEach(el => {
-                    el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
-                });
-
-                // Initialize admin list
-                await window.loadAdmins();
-
-                // Listen for user data updates
-                document.addEventListener('userDataUpdated', () => {
-                    console.log('User data updated, refreshing admin list');
-                    window.loadAdmins();
-                });
-            } catch (error) {
-                console.error('Error initializing page:', error);
-            }
+        function initPage() {
+            // Initialize AdminControlPanel
+            new AdminControlPanel();
         }
-
-        // Format date to local string
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Handle user disable
-        window.handleDisableUser = function(username) {
-            try {
-                const users = User.loadUsersFromCSV();
-                const userIndex = users.findIndex(user => user.username === username);
-                
-                if (userIndex !== -1) {
-                    // Toggle user status
-                    const newStatus = users[userIndex].status === 'disabled' ? 'active' : 'disabled';
-                    users[userIndex].status = newStatus;
-                    User.saveUsers(users);
-                    window.loadAdmins();
-                }
-            } catch (error) {
-                console.error("Error disabling user:", error);
-                alert('Failed to disable user');
-            }
-        };
-
-        // Handle user delete
-        window.handleDeleteUser = function(username) {
-            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
-                try {
-                    const users = User.loadUsersFromCSV();
-                    const filteredUsers = users.filter(user => user.username !== username);
-                    User.saveUsers(filteredUsers);
-                    window.loadAdmins();
-                } catch (error) {
-                    console.error("Error deleting user:", error);
-                    alert('Failed to delete user');
-                }
-            }
-        };
-
-        // Load admins from CSV
-        window.loadAdmins = async function() {
-            try {
-                console.log('Loading admin users...');
-                
-                // Ensure CSV data exists in localStorage
-                if (!localStorage.getItem('users_csv')) {
-                    console.log('No CSV data in localStorage, fetching from file...');
-                    try {
-                        const response = await fetch('/src/models/data/users.csv');
-                        const csvData = await response.text();
-                        localStorage.setItem('users_csv', csvData);
-                        console.log('CSV data loaded into localStorage');
-                    } catch (error) {
-                        console.error('Error loading CSV file:', error);
-                        // Use default Genesis Admin if file load fails
-                        const defaultUser = User.getDefaultGenesisAdmin();
-                        User.saveUsers([defaultUser]);
-                    }
-                }
-
-                const users = User.loadUsersFromCSV();
-                console.log('All users loaded:', users);
-                const adminListBody = document.getElementById('admin-list-body');
-                
-                if (!users || users.length === 0) {
-                    adminListBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="no-admins-message">No admin users found</td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                // Filter to show only admin users
-                const adminUsers = users.filter(user => 
-                    user.role === 'Platform Admin' || 
-                    user.role === 'User Admin' || 
-                    user.role === 'Genesis Admin'
-                );
-
-                console.log('Filtered admin users:', adminUsers);
-
-                if (adminUsers.length === 0) {
-                    adminListBody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="no-admins-message">No admin users found</td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                adminListBody.innerHTML = adminUsers.map(admin => `
-                    <tr>
-                        <td>${admin.username}</td>
-                        <td>${admin.fullName || ''}</td>
-                        <td>${admin.email}</td>
-                        <td>${admin.phoneNumber || ''}</td>
-                        <td>${admin.role}</td>
-                        <td>${formatDate(admin.created)}</td>
-                        <td>
-                            <div class="status-indicator ${admin.status === 'disabled' ? 'status-indicator--inactive' : 'status-indicator--active'}" 
-                                 title="${admin.status === 'disabled' ? 'Disabled' : 'Active'}">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                ${admin.role !== 'Genesis Admin' ? `
-                                    <button onclick="handleDisableUser('${admin.username}')" 
-                                            class="button button--primary button--small">
-                                        ${admin.status === 'disabled' ? 'Enable' : 'Disable'}
-                                    </button>
-                                    <button onclick="handleDeleteUser('${admin.username}')" 
-                                            class="button button--danger button--small">
-                                        Delete
-                                    </button>
-                                ` : '<em>Protected</em>'}
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-
-                console.log('Admin list updated');
-            } catch (error) {
-                console.error("Error loading admins:", error);
-                adminListBody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="no-admins-message">Error loading admin list</td>
-                    </tr>
-                `;
-            }
-        };
-
-        // Form submission
-        const adminForm = document.getElementById('admin-creation-form');
-        adminForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            try {
-                const newAdmin = {
-                    username: document.getElementById("username").value.trim(),
-                    fullName: document.getElementById("fullName").value.trim(),
-                    email: document.getElementById("email").value.trim(),
-                    phoneNumber: document.getElementById("phoneNumber").value.trim(),
-                    password: document.getElementById("password").value.trim(),
-                    role: document.getElementById("role").value
-                };
-
-                User.createUser(newAdmin);
-                alert('Admin created successfully');
-                adminForm.reset();
-                window.loadAdmins();
-            } catch (error) {
-                console.error("Error creating admin:", error);
-                alert(error.message || 'Failed to create admin account');
-            }
-        });
 
         // Start initialization when DOM is ready
         if (document.readyState === 'loading') {

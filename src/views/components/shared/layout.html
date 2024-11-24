@@ -17,12 +17,12 @@
 <div id="sidebar" class="sidebar">
     <a href="javascript:void(0)" class="sidebar__close" id="close-sidebar" aria-label="Close Menu"></a>
     <div class="sidebar__brand">
-        <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
+        <img id="logo" alt="Quantum Eye Logo" style="max-width: 100%; height: auto;">
     </div>
     <div id="menu-items">
-        <a href="/src/views/pages/adminControlPanel.html" class="sidebar__link admin-only" data-page="adminControlPanel">Genesis Admin Control Panel</a>
-        <a href="/src/views/pages/settings.html" class="sidebar__link" data-page="settings">Settings</a>
-        <a href="/src/views/pages/userProfile.html" class="sidebar__link" data-page="userProfile">User Profile</a>
+        <a href="#" class="sidebar__link admin-only" data-path="adminControlPanel">Genesis Admin Control Panel</a>
+        <a href="#" class="sidebar__link" data-path="settings">Settings</a>
+        <a href="#" class="sidebar__link" data-path="userProfile">User Profile</a>
     </div>
     <div class="sidebar__footer">
         <a href="#" class="sidebar__link logout-link">Logout</a>
@@ -30,15 +30,104 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import paths from '/config/paths.js';
+    import navigation from '/src/services/navigation/navigation.js';
+    import { User } from '/src/models/user.js';
+
+    // Setup logo path
+    const logo = document.getElementById('logo');
+    if (logo) {
+        logo.src = paths.getAssetPath('logo');
+    }
+
+    // Setup navigation paths
+    const menuLinks = document.querySelectorAll('.sidebar__link[data-path]');
+    menuLinks.forEach(link => {
+        const pageName = link.getAttribute('data-path');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigation.navigateToPage(pageName);
+        });
+    });
+
+    // Setup hamburger menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    if (hamburger && sidebar) {
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('is-open');
+            // Toggle shifted class on content
+            const content = document.querySelector('.dashboard__content');
+            if (content) {
+                content.classList.toggle('dashboard__content--shifted');
+            }
+        });
+    }
+
+    // Setup close button
+    const closeBtn = document.getElementById('close-sidebar');
+    if (closeBtn && sidebar) {
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('is-open');
+            // Remove shifted class from content
+            const content = document.querySelector('.dashboard__content');
+            if (content) {
+                content.classList.remove('dashboard__content--shifted');
+            }
+        });
+    }
+
+    // Setup logout functionality
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutLink = document.querySelector('.logout-link');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            User.logout();
+            navigation.navigateToPage('login');
+        });
+    }
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            User.logout();
+            navigation.navigateToPage('login');
+        });
+    }
+
+    // Setup exit functionality
+    const exitButton = document.querySelector('.exit-button');
+    if (exitButton) {
+        exitButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.close();
+        });
+    }
+
     // Set active link based on current page
     const currentPath = window.location.pathname;
-    const menuLinks = document.querySelectorAll('.sidebar__link[data-page]');
     menuLinks.forEach(link => {
-        if (currentPath.includes(link.dataset.page)) {
+        const pagePath = link.getAttribute('data-path');
+        if (currentPath.includes(pagePath)) {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
         }
+    });
+
+    // Set username if available
+    const userNameEl = document.getElementById('userName');
+    if (userNameEl) {
+        const currentUser = User.getCurrentUser();
+        if (currentUser) {
+            userNameEl.textContent = currentUser.username;
+        }
+    }
+
+    // Show/hide admin-only elements
+    const userRole = User.getCurrentUserRole();
+    const adminElements = document.querySelectorAll('.admin-only');
+    adminElements.forEach(el => {
+        el.style.display = userRole === 'Genesis Admin' ? 'block' : 'none';
     });
 </script>

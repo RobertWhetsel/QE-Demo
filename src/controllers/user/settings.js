@@ -1,11 +1,14 @@
 import { User } from '../../models/user.js';
 import ThemeManager from '../../services/state/thememanager.js';
 import FontManager from '../../services/state/fontmanager.js';
+import navigation from '../../services/navigation/navigation.js';
+import paths from '../../../config/paths.js';
 
 export class SettingsController {
     constructor() {
         if (!User.isAuthenticated()) {
-            window.location.href = '/src/views/pages/login.html';
+            const loginPath = paths.join(paths.pages, 'login.html');
+            navigation.navigateTo(loginPath);
             return;
         }
 

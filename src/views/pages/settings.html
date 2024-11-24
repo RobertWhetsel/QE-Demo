@@ -5,25 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Quantum Eye</title>
     
+    <!-- Import paths -->
+    <script type="module">
+        import paths from '/config/paths.js';
+        window.paths = paths; // Make paths available globally
+    </script>
+    
     <!-- Initialize application state -->
-    <script type="module" src="/src/services/init.js"></script>
+    <script type="module">
+        const init = paths.resolve('src/services/init.js');
+        document.write(`<script type="module" src="${init}"><\/script>`);
+    </script>
     
     <!-- Core styles -->
-    <link rel="stylesheet" href="/src/views/styles/core/variables.css">
-    <link rel="stylesheet" href="/src/views/styles/core/base.css">
-    
-    <!-- Theme styles -->
-    <link rel="stylesheet" href="/src/views/styles/themes/light.css">
-    <link rel="stylesheet" href="/src/views/styles/themes/dark.css">
-    
-    <!-- Font styles -->
-    <link rel="stylesheet" href="/src/views/styles/fonts.css">
-    
-    <!-- Component styles -->
-    <link rel="stylesheet" href="/src/views/styles/components/navigation.css">
-    <link rel="stylesheet" href="/src/views/styles/components/button.css">
-    <link rel="stylesheet" href="/src/views/styles/components/message.css">
-    <link rel="stylesheet" href="/src/views/styles/shared/form-layouts.css">
+    <script>
+        const styleLinks = [
+            paths.resolve('src/views/styles/core/variables.css'),
+            paths.resolve('src/views/styles/core/base.css'),
+            paths.resolve('src/views/styles/themes/light.css'),
+            paths.resolve('src/views/styles/themes/dark.css'),
+            paths.resolve('src/views/styles/fonts.css'),
+            paths.resolve('src/views/styles/components/navigation.css'),
+            paths.resolve('src/views/styles/components/button.css'),
+            paths.resolve('src/views/styles/components/message.css'),
+            paths.resolve('src/views/styles/shared/form-layouts.css')
+        ];
+        
+        styleLinks.forEach(href => {
+            document.write(`<link rel="stylesheet" href="${href}">`);
+        });
+    </script>
 </head>
 <body class="page">
     <!-- Include shared layout -->
@@ -104,26 +115,18 @@
     </div>
 
     <script type="module">
+        import paths from '/config/paths.js';
         import navigation from '/src/services/navigation/navigation.js';
         import { User } from '/src/models/user.js';
         import ThemeManager from '/src/services/state/thememanager.js';
         import FontManager from '/src/services/state/fontmanager.js';
-
-        // Load shared layout
-        fetch('/src/views/components/shared/layout.html')
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('layout-container').innerHTML = html;
-                initPage();
-            })
-            .catch(error => console.error('Error loading layout:', error));
 
         // Initialize page
         async function initPage() {
             try {
                 // Check authentication
                 if (!User.isAuthenticated()) {
-                    window.location.href = '/src/views/pages/login.html';
+                    window.location.href = paths.resolve('src/views/pages/login.html');
                     throw new Error('User not logged in');
                 }
 
@@ -140,14 +143,14 @@
                 // Setup hamburger menu
                 if (hamburger && sidebar) {
                     hamburger.addEventListener('click', () => {
-                        sidebar.classList.toggle('sidebar--open');
+                        sidebar.classList.toggle('is-open');
                     });
                 }
 
                 // Setup close button
                 if (closeBtn && sidebar) {
                     closeBtn.addEventListener('click', () => {
-                        sidebar.classList.remove('sidebar--open');
+                        sidebar.classList.remove('is-open');
                     });
                 }
 
@@ -193,7 +196,7 @@
                     if (!link.classList.contains('logout-link') && !link.classList.contains('exit-button')) {
                         link.addEventListener('click', (e) => {
                             e.preventDefault();
-                            navigation.navigateTo(link.getAttribute('href'));
+                            navigation.navigateTo(paths.resolve(link.getAttribute('href')));
                         });
                     }
                 });
@@ -298,9 +301,25 @@
                         alert('Failed to save settings');
                     }
                 });
+
+                // Load shared layout
+                fetch(paths.resolve('src/views/components/shared/layout.html'))
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('layout-container').innerHTML = html;
+                        initPage();
+                    })
+                    .catch(error => console.error('Error loading layout:', error));
             } catch (error) {
                 console.error('Error initializing page:', error);
             }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
         }
     </script>
 </body>

@@ -1,33 +1,41 @@
-import ThemeManager from './state/thememanager.js';
-import FontManager from './state/fontmanager.js';
-import { User } from '../models/user.js';
-import Logger from '../utils/logging/logger.js';
+// Import dependencies using paths.resolve after paths is available
+let ThemeManager, FontManager, User, DataService, Logger, config, navigation;
 
 // Initialize state managers
 export async function initializeApp() {
-    await Logger.info('Application Initialization Started');
-    await Logger.info('Current location:', window.location.pathname);
-
-    // Log initial storage state
-    await Logger.info('Initial storage state:', {
-        sessionStorage: {
-            keys: Object.keys(sessionStorage),
-            isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-            username: sessionStorage.getItem('username'),
-            userRole: sessionStorage.getItem('userRole')
-        },
-        localStorage: {
-            keys: Object.keys(localStorage),
-            hasUsersCsv: !!localStorage.getItem('users_csv'),
-            hasUsersJson: !!localStorage.getItem('users_json')
-        }
-    });
-
-    // Check if we're on the login page
-    const isLoginPage = window.location.pathname.includes('login.html');
-    await Logger.info('Is login page:', isLoginPage);
-
     try {
+        // Import modules using paths.resolve
+        ThemeManager = (await import(paths.resolve('src/services/state/thememanager.js'))).default;
+        FontManager = (await import(paths.resolve('src/services/state/fontmanager.js'))).default;
+        User = (await import(paths.resolve('src/models/user.js'))).User;
+        DataService = (await import(paths.resolve('src/models/dataservice.js'))).DataService;
+        Logger = (await import(paths.resolve('src/utils/logging/logger.js'))).default;
+        config = (await import(paths.resolve('config/client.js'))).default;
+        navigation = (await import(paths.resolve('src/services/navigation/navigation.js'))).default;
+
+        await Logger.info('Application Initialization Started');
+        await Logger.info('Current location:', window.location.pathname);
+
+        // Log initial storage state
+        await Logger.info('Initial storage state:', {
+            localStorage: {
+                keys: Object.keys(localStorage)
+            }
+        });
+
+        // Check if we're on the login page
+        const isLoginPage = window.location.pathname.includes('login.html');
+        await Logger.info('Is login page:', isLoginPage);
+
+        // Wait for CSS files to load
+        await new Promise(resolve => {
+            if (document.readyState === 'complete') {
+                resolve();
+            } else {
+                window.addEventListener('load', resolve);
+            }
+        });
+
         // Initialize managers
         await Logger.info('Initializing theme manager');
         ThemeManager.initialize();
@@ -38,11 +46,17 @@ export async function initializeApp() {
         await Logger.info('Setting up global QE object');
         window.QE = window.QE || {};
         window.QE.User = User;
+        window.QE.config = config;
+        
+        // Initialize DataService
+        const dataService = new DataService();
+        await dataService.init();
+        window.QE.DataService = dataService;
         
         // If on login page, just initialize theme and font
         if (isLoginPage) {
             await Logger.info('Login page initialization');
-            ThemeManager.setTheme('light');
+            ThemeManager.setTheme(config.ui.defaultTheme);
             FontManager.setFont('Arial');
             await Logger.info('Login page initialized successfully');
             return;
@@ -51,12 +65,12 @@ export async function initializeApp() {
         // Check authentication for non-login pages
         await Logger.info('Checking authentication status');
         const isAuthenticated = User.isAuthenticated();
-        const username = sessionStorage.getItem('username');
+        const username = localStorage.getItem(config.storage.keys.username);
         await Logger.info('Authentication check:', { isAuthenticated, username });
 
         if (!isAuthenticated) {
             await Logger.warn('Not authenticated, redirecting to login');
-            window.location.href = '/src/views/pages/login.html';
+            navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
             return;
         }
 
@@ -64,23 +78,6 @@ export async function initializeApp() {
         if (username) {
             await Logger.info('Loading user data for:', username);
             
-            // Ensure CSV data exists
-            if (!localStorage.getItem('users_csv')) {
-                await Logger.info('No CSV data found, loading from file');
-                try {
-                    const response = await fetch('/src/models/data/users.csv');
-                    const csvData = await response.text();
-                    localStorage.setItem('users_csv', csvData);
-                    await Logger.info('CSV data loaded from file');
-                } catch (error) {
-                    await Logger.error('Error loading CSV file:', error);
-                    // Load default users if file load fails
-                    const defaultUsers = User.getDefaultUsers();
-                    User.saveUsers(defaultUsers);
-                    await Logger.info('Default users loaded as fallback');
-                }
-            }
-
             // Get current user
             await Logger.info('Retrieving current user data');
             const user = User.getCurrentUser();
@@ -92,7 +89,7 @@ export async function initializeApp() {
 
             if (!user) {
                 await Logger.warn('User data not found, redirecting to login');
-                window.location.href = '/src/views/pages/login.html';
+                navigation.navigateTo(paths.resolve('src/views/pages/login.html'));
                 return;
             }
 
@@ -103,7 +100,11 @@ export async function initializeApp() {
 
             // Load user preferences
             await Logger.info('Loading user preferences');
-            const userPreferences = User.getUserPreferences();
+            const userPreferences = User.getUserPreferences() || {
+                theme: config.ui.defaultTheme,
+                fontFamily: 'Arial',
+                notifications: config.features.enableNotifications
+            };
             await Logger.info('User preferences loaded:', userPreferences);
             
             // Apply theme and font from preferences
@@ -121,7 +122,7 @@ export async function initializeApp() {
             // Listen for preference changes
             await Logger.info('Setting up preference change listener');
             window.addEventListener('storage', async (event) => {
-                if (event.key === `user_preferences_${username}`) {
+                if (event.key === 'userPreferences') {
                     await Logger.info('Preference change detected');
                     const preferences = JSON.parse(event.newValue || '{}');
                     await Logger.info('New preferences:', preferences);
@@ -170,37 +171,32 @@ export async function initializeApp() {
         await Logger.error('Error details:', {
             message: error.message,
             stack: error.stack,
-            sessionStorage: {
-                username: sessionStorage.getItem('username'),
-                isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-                userRole: sessionStorage.getItem('userRole')
-            },
-            localStorage: {
-                hasUsersCsv: !!localStorage.getItem('users_csv'),
-                hasUsersJson: !!localStorage.getItem('users_json')
+            storage: {
+                username: localStorage.getItem(config?.storage?.keys?.username),
+                isAuthenticated: localStorage.getItem(config?.storage?.keys?.auth),
+                userRole: localStorage.getItem(config?.storage?.keys?.userRole)
             }
         });
     } finally {
-        await Logger.flush();
+        await Logger?.flush();
     }
 }
 
 // Initialize immediately when script is loaded
 initializeApp().catch(async error => {
-    await Logger.error('Error initializing application:', error);
-    // Log additional details about the error
-    await Logger.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        sessionStorage: {
-            username: sessionStorage.getItem('username'),
-            isAuthenticated: sessionStorage.getItem('isAuthenticated'),
-            userRole: sessionStorage.getItem('userRole')
-        },
-        localStorage: {
-            hasUsersCsv: !!localStorage.getItem('users_csv'),
-            hasUsersJson: !!localStorage.getItem('users_json')
-        }
-    });
-    await Logger.flush();
+    console.error('Error initializing application:', error);
+    // Attempt to log error if Logger is available
+    if (Logger) {
+        await Logger.error('Error initializing application:', error);
+        await Logger.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            storage: {
+                username: localStorage.getItem(config?.storage?.keys?.username),
+                isAuthenticated: localStorage.getItem(config?.storage?.keys?.auth),
+                userRole: localStorage.getItem(config?.storage?.keys?.userRole)
+            }
+        });
+        await Logger.flush();
+    }
 });

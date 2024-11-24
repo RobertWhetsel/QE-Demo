@@ -1,6 +1,11 @@
+import navigation from '../../services/navigation/navigation.js';
+import paths from '../../../config/paths.js';
+import Logger from '../../utils/logging/logger.js';
+
 // Survey Management
 class SurveyManager {
     constructor() {
+        Logger.info('Initializing Survey Manager');
         this.initializeElements();
         this.attachEventListeners();
         this.loadSurveys();
@@ -12,20 +17,37 @@ class SurveyManager {
         this.refreshButton = document.getElementById('refreshSurveys');
         this.noSurveysMessage = document.getElementById('noSurveys');
         this.surveyTemplate = document.getElementById('surveyTemplate');
+
+        Logger.debug('Elements initialized:', {
+            hasSurveyList: !!this.surveyList,
+            hasSurveyFilter: !!this.surveyFilter,
+            hasRefreshButton: !!this.refreshButton,
+            hasNoSurveysMessage: !!this.noSurveysMessage,
+            hasSurveyTemplate: !!this.surveyTemplate
+        });
     }
 
     attachEventListeners() {
-        this.surveyFilter?.addEventListener('change', () => this.filterSurveys());
-        this.refreshButton?.addEventListener('click', () => this.loadSurveys());
+        if (this.surveyFilter) {
+            Logger.debug('Attaching survey filter event listener');
+            this.surveyFilter.addEventListener('change', () => this.filterSurveys());
+        }
+        
+        if (this.refreshButton) {
+            Logger.debug('Attaching refresh button event listener');
+            this.refreshButton.addEventListener('click', () => this.loadSurveys());
+        }
     }
 
     async loadSurveys() {
         try {
+            Logger.info('Loading surveys');
             // In a real app, this would be an API call
             const surveys = this.getSampleSurveys();
             this.renderSurveys(surveys);
+            Logger.info('Surveys loaded successfully');
         } catch (error) {
-            console.error('Error loading surveys:', error);
+            Logger.error('Error loading surveys:', error);
             this.showError('Failed to load surveys');
         }
     }
@@ -60,8 +82,12 @@ class SurveyManager {
     }
 
     renderSurveys(surveys) {
-        if (!this.surveyList || !this.surveyTemplate) return;
+        if (!this.surveyList || !this.surveyTemplate) {
+            Logger.warn('Required elements not found for rendering surveys');
+            return;
+        }
 
+        Logger.info('Rendering surveys');
         // Clear existing surveys
         this.surveyList.innerHTML = '';
 
@@ -70,6 +96,12 @@ class SurveyManager {
         const filteredSurveys = filterValue === 'all' 
             ? surveys 
             : surveys.filter(survey => survey.status === filterValue);
+
+        Logger.debug('Filtered surveys:', {
+            filterValue,
+            totalSurveys: surveys.length,
+            filteredCount: filteredSurveys.length
+        });
 
         if (filteredSurveys.length === 0) {
             this.showNoSurveys();
@@ -84,6 +116,7 @@ class SurveyManager {
             const surveyCard = this.createSurveyCard(survey);
             this.surveyList.appendChild(surveyCard);
         });
+        Logger.info('Surveys rendered successfully');
     }
 
     createSurveyCard(survey) {
@@ -126,37 +159,45 @@ class SurveyManager {
     }
 
     filterSurveys() {
+        Logger.info('Filtering surveys');
         this.loadSurveys();
     }
 
     startSurvey(surveyId) {
-        // In a real app, this would navigate to the survey page or open a modal
-        console.log('Starting survey:', surveyId);
-        window.location.href = `survey-form.html?id=${surveyId}`;
+        Logger.info('Starting survey:', { surveyId });
+        const formPath = paths.join(paths.pages, `survey-form.html?id=${surveyId}`);
+        navigation.navigateTo(formPath);
     }
 
     viewResults(surveyId) {
-        // In a real app, this would show the survey results
-        console.log('Viewing results for survey:', surveyId);
-        window.location.href = `survey-results.html?id=${surveyId}`;
+        Logger.info('Viewing survey results:', { surveyId });
+        const resultsPath = paths.join(paths.pages, `survey-results.html?id=${surveyId}`);
+        navigation.navigateTo(resultsPath);
     }
 
     showNoSurveys() {
+        Logger.info('Showing no surveys message');
         if (this.noSurveysMessage) {
             this.noSurveysMessage.classList.remove('hidden');
         }
     }
 
     hideNoSurveys() {
+        Logger.debug('Hiding no surveys message');
         if (this.noSurveysMessage) {
             this.noSurveysMessage.classList.add('hidden');
         }
     }
 
     showError(message) {
-        // In a real app, this would show a proper error message UI
-        console.error(message);
-        alert(message);
+        Logger.error('Survey error:', message);
+        const errorEvent = new CustomEvent('showNotification', {
+            detail: {
+                type: 'error',
+                message: message
+            }
+        });
+        document.dispatchEvent(errorEvent);
     }
 }
 

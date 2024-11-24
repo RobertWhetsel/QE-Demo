@@ -1,9 +1,12 @@
 import { User } from '../../models/user.js';
+import navigation from '../../services/navigation/navigation.js';
+import paths from '../../../config/paths.js';
 
 export class UserProfileController {
     constructor() {
         if (!User.isAuthenticated()) {
-            window.location.href = '/src/views/pages/login.html';
+            const loginPath = paths.join(paths.pages, 'login.html');
+            navigation.navigateTo(loginPath);
             return;
         }
 
