@@ -1,8 +1,8 @@
 import paths from '../../../config/paths.js';
 import { User } from '../../models/user.js';
 import { DataService } from '../../models/dataservice.js';
-import Logger from '../../utils/logging/logger.js';
-import navigation from '../../services/navigation/navigation.js';
+import Logger from '../../utils/logging/LoggerService.js';
+import navigation from '../../services/navigation/NavigationService.js';
 
 export class AdminController {
     #dataService;

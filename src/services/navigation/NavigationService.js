@@ -1,5 +1,5 @@
 import paths, { SITE_STATE } from '../../../config/paths.js';
-import Logger from '../../utils/logging/logger.js';
+import Logger from '../../utils/logging/LoggerService.js';
 import { checkPageAccess } from '../../models/database.js';
 import { User } from '../../models/user.js';
 

@@ -1,5 +1,5 @@
 import paths from '../../../config/paths.js';
-import Logger from '../../utils/logging/logger.js';
+import Logger from '../../utils/logging/LoggerService.js';
 import { User } from '../../models/user.js';
 import navigation from '../../services/navigation/navigation.js';
 import config from '../../../config/client.js';

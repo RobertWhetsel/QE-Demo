@@ -1,6 +1,6 @@
 import paths from '../../config/paths.js';
 import config from '../../config/client.js';
-import Logger from '../utils/logging/logger.js';
+import Logger from '../utils/logging/LoggerService.js';
 
 export class User {
     constructor(data) {
