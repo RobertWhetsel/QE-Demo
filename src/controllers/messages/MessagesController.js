@@ -1,29 +1,32 @@
-import { DataService } from '../../models/dataservice.js';
 import { User } from '../../models/user.js';
+import { DataService } from '../../models/dataservice.js';
 import Logger from '../../utils/logging/logger.js';
 import navigation from '../../services/navigation/navigation.js';
+import websocketService from '../../services/websocket/WebSocketService.js';
 import config from '../../../config/client.js';
 import paths from '../../../config/paths.js';
 
-export class MessagesController {
+export class MessageController {
     #logger;
     #view;
     #dataService;
-    #currentUser;
+    #currentConversation = null;
     #isInitialized = false;
-    #messagePollingInterval = 30000; // 30 seconds
+    #messagePollingInterval = 10000; // 10 seconds
     #pollingTimer = null;
+    #unreadCount = 0;
+    #messageCache = new Map();
 
     constructor() {
         this.#logger = Logger;
-        this.#logger.info('MessagesController initializing');
+        this.#logger.info('MessageController initializing');
         this.#initialize();
     }
 
     async #initialize() {
         try {
-            // Check authorization
-            if (!this.#checkAuth()) {
+            // Check authentication
+            if (!User.isAuthenticated()) {
                 this.#logger.warn('Unauthorized access attempt to messages');
                 navigation.navigateToPage('login');
                 return;
@@ -33,61 +36,58 @@ export class MessagesController {
             this.#dataService = DataService.getInstance();
             await this.#dataService.init();
 
-            // Get current user
-            this.#currentUser = User.getCurrentUser();
-
             // Initialize view elements
             this.#initializeView();
             
             // Setup event listeners
             this.#setupEventListeners();
 
+            // Setup WebSocket connection
+            this.#setupWebSocket();
+
             // Load initial messages
             await this.#loadMessages();
 
-            // Start message polling
+            // Start polling for new messages (fallback for WebSocket)
             this.#startMessagePolling();
 
             this.#isInitialized = true;
-            this.#logger.info('MessagesController initialized successfully');
+            this.#logger.info('MessageController initialized successfully');
         } catch (error) {
-            this.#logger.error('MessagesController initialization error:', error);
+            this.#logger.error('MessageController initialization error:', error);
             this.#handleError('Failed to initialize messages');
         }
-    }
-
-    #checkAuth() {
-        const isAuthenticated = User.isAuthenticated();
-        this.#logger.info('Authorization check:', { isAuthenticated });
-        return isAuthenticated;
     }
 
     #initializeView() {
         this.#view = {
             // Message containers
-            messagesContainer: document.getElementById('messages-container'),
-            messagesList: document.getElementById('messages-list'),
+            messageList: document.getElementById('message-list'),
             conversationList: document.getElementById('conversation-list'),
+            messageContainer: document.getElementById('message-container'),
             
-            // Message form elements
+            // Message form
             messageForm: document.getElementById('message-form'),
             messageInput: document.getElementById('message-input'),
             recipientSelect: document.getElementById('recipient-select'),
             
-            // Filter elements
+            // Controls
             searchInput: document.getElementById('message-search'),
             filterSelect: document.getElementById('message-filter'),
-
+            refreshButton: document.getElementById('refresh-messages'),
+            
+            // Unread badge
+            unreadBadge: document.getElementById('unread-badge'),
+            
             // Loading and messages
             loadingSpinner: document.getElementById('loading'),
-            errorMessage: document.getElementById('error-message'),
-            unreadBadge: document.getElementById('unread-badge')
+            messageContainer: document.getElementById('message-container')
         };
 
         this.#logger.debug('View elements initialized:', {
-            hasMessagesContainer: !!this.#view.messagesContainer,
+            hasMessageList: !!this.#view.messageList,
             hasMessageForm: !!this.#view.messageForm,
-            hasFilters: !!(this.#view.searchInput && this.#view.filterSelect)
+            hasControls: !!this.#view.searchInput
         });
     }
 
@@ -99,7 +99,7 @@ export class MessagesController {
 
         // Search input
         if (this.#view.searchInput) {
-            this.#view.searchInput.addEventListener('input',
+            this.#view.searchInput.addEventListener('input', 
                 this.#debounce(() => this.#handleSearch(), 300)
             );
         }
@@ -109,34 +109,48 @@ export class MessagesController {
             this.#view.filterSelect.addEventListener('change', () => this.#handleFilterChange());
         }
 
-        // Conversation selection
-        if (this.#view.conversationList) {
-            this.#view.conversationList.addEventListener('click', (e) => this.#handleConversationSelect(e));
+        // Refresh button
+        if (this.#view.refreshButton) {
+            this.#view.refreshButton.addEventListener('click', () => this.#loadMessages());
         }
 
-        // Handle visibility change to manage polling
+        // Handle visibility changes
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.#stopMessagePolling();
             } else {
                 this.#startMessagePolling();
+                this.#loadMessages();
             }
         });
 
-        this.#logger.debug('Event listeners setup complete');
+        // Handle conversation selection
+        if (this.#view.conversationList) {
+            this.#view.conversationList.addEventListener('click', (e) => {
+                const conversationEl = e.target.closest('.conversation');
+                if (conversationEl) {
+                    this.#loadConversation(conversationEl.dataset.id);
+                }
+            });
+        }
+    }
+
+    #setupWebSocket() {
+        websocketService.subscribe('message', (message) => {
+            this.#handleNewMessage(message);
+        });
+
+        websocketService.subscribe('status', (status) => {
+            this.#updateUserStatus(status);
+        });
     }
 
     async #loadMessages() {
         try {
             this.#showLoading(true);
-            const messages = await this.#dataService.getData();
-            
-            const userMessages = this.#filterMessagesByUser(messages);
-            await this.#renderMessages(userMessages);
-            
-            this.#updateUnreadCount(userMessages);
-
-            this.#logger.info('Messages loaded successfully');
+            const messages = await this.#dataService.getMessages();
+            this.#renderMessages(messages);
+            this.#updateUnreadCount();
         } catch (error) {
             this.#logger.error('Error loading messages:', error);
             this.#handleError('Failed to load messages');
@@ -145,30 +159,25 @@ export class MessagesController {
         }
     }
 
-    #filterMessagesByUser(messages) {
-        return messages.filter(message => 
-            message.senderId === this.#currentUser.id ||
-            message.recipientId === this.#currentUser.id
-        );
-    }
+    #renderMessages(messages) {
+        if (!this.#view.messageList) return;
 
-    async #renderMessages(messages) {
-        if (!this.#view.messagesList) return;
-
-        this.#view.messagesList.innerHTML = messages.length ? 
+        this.#view.messageList.innerHTML = messages.length ? 
             messages.map(message => this.#createMessageElement(message)).join('') :
-            '<div class="no-messages">No messages found</div>';
+            '<div class="no-messages">No messages</div>';
     }
 
     #createMessageElement(message) {
-        const isOwn = message.senderId === this.#currentUser.id;
+        const currentUser = User.getCurrentUser();
+        const isOwn = message.senderId === currentUser.id;
+        
         return `
-            <div class="message ${isOwn ? 'message--own' : ''}" data-message-id="${message.id}">
+            <div class="message ${isOwn ? 'message--own' : ''}" data-id="${message.id}">
                 <div class="message__header">
                     <span class="message__sender">${message.senderName}</span>
                     <span class="message__time">${this.#formatDate(message.timestamp)}</span>
                 </div>
-                <div class="message__content">${this.#escapeHtml(message.content)}</div>
+                <div class="message__content">${this.#formatMessageContent(message.content)}</div>
                 ${!message.read && !isOwn ? '<span class="message__unread">New</span>' : ''}
             </div>
         `;
@@ -176,23 +185,24 @@ export class MessagesController {
 
     async #handleMessageSubmit(event) {
         event.preventDefault();
-        this.#logger.info('Processing message submission');
 
         try {
-            this.#showLoading(true);
+            const messageData = {
+                content: this.#view.messageInput.value.trim(),
+                recipientId: this.#view.recipientSelect.value,
+                timestamp: new Date().toISOString()
+            };
 
-            const messageData = this.#getMessageFormData();
-            
-            if (!this.#validateMessageData(messageData)) {
+            if (!this.#validateMessage(messageData)) {
                 return;
             }
 
+            this.#showLoading(true);
             await this.#sendMessage(messageData);
             
+            this.#view.messageForm.reset();
             this.#showSuccess('Message sent successfully');
-            event.target.reset();
-            await this.#loadMessages();
-
+            
         } catch (error) {
             this.#logger.error('Error sending message:', error);
             this.#handleError('Failed to send message');
@@ -201,100 +211,92 @@ export class MessagesController {
         }
     }
 
-    #getMessageFormData() {
-        return {
-            content: this.#view.messageInput.value.trim(),
-            recipientId: this.#view.recipientSelect.value,
-            senderId: this.#currentUser.id,
-            timestamp: new Date().toISOString(),
-            read: false
-        };
-    }
-
-    #validateMessageData(message) {
+    #validateMessage(message) {
         if (!message.content) {
-            this.#handleError('Message content is required');
+            this.#handleError('Message cannot be empty');
             return false;
         }
-
         if (!message.recipientId) {
-            this.#handleError('Recipient is required');
+            this.#handleError('Please select a recipient');
             return false;
         }
-
         return true;
     }
 
     async #sendMessage(messageData) {
         try {
-            await this.#dataService.addMessage(messageData);
-            this.#logger.info('Message sent successfully');
+            // Try WebSocket first
+            if (websocketService.isConnected()) {
+                websocketService.send('message', messageData);
+                return;
+            }
+
+            // Fallback to HTTP
+            await this.#dataService.sendMessage(messageData);
+            
         } catch (error) {
             throw new Error('Failed to send message');
         }
     }
 
-    #handleConversationSelect(event) {
-        const conversationEl = event.target.closest('.conversation');
-        if (!conversationEl) return;
-
-        const conversationId = conversationEl.dataset.conversationId;
-        this.#loadConversation(conversationId);
-    }
-
-    async #loadConversation(conversationId) {
-        try {
-            this.#showLoading(true);
-            const messages = await this.#dataService.getConversationMessages(conversationId);
-            await this.#renderMessages(messages);
-            await this.#markConversationAsRead(conversationId);
-        } catch (error) {
-            this.#logger.error('Error loading conversation:', error);
-            this.#handleError('Failed to load conversation');
-        } finally {
-            this.#showLoading(false);
+    #handleNewMessage(message) {
+        this.#messageCache.set(message.id, message);
+        this.#updateUnreadCount();
+        this.#renderMessages([...this.#messageCache.values()]);
+        
+        if (document.hidden) {
+            this.#showNotification(message);
         }
     }
 
-    async #markConversationAsRead(conversationId) {
-        try {
-            await this.#dataService.markConversationAsRead(conversationId);
-            this.#updateUnreadCount();
-        } catch (error) {
-            this.#logger.error('Error marking conversation as read:', error);
+    #showNotification(message) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('New Message', {
+                body: message.content,
+                icon: '/assets/notification-icon.png'
+            });
         }
     }
 
-    #updateUnreadCount(messages) {
-        if (!this.#view.unreadBadge) return;
-
-        const unreadCount = messages?.filter(m => 
-            !m.read && m.recipientId === this.#currentUser.id
-        ).length || 0;
-
-        this.#view.unreadBadge.textContent = unreadCount;
-        this.#view.unreadBadge.style.display = unreadCount > 0 ? 'block' : 'none';
+    #updateUnreadCount() {
+        const unreadMessages = [...this.#messageCache.values()]
+            .filter(m => !m.read && m.recipientId === User.getCurrentUser().id);
+        
+        this.#unreadCount = unreadMessages.length;
+        
+        if (this.#view.unreadBadge) {
+            this.#view.unreadBadge.textContent = this.#unreadCount;
+            this.#view.unreadBadge.style.display = this.#unreadCount > 0 ? 'block' : 'none';
+        }
     }
 
     #startMessagePolling() {
-        this.#pollingTimer = setInterval(() => this.#loadMessages(), this.#messagePollingInterval);
-        this.#logger.debug('Message polling started');
+        if (!this.#pollingTimer) {
+            this.#pollingTimer = setInterval(() => {
+                this.#loadMessages();
+            }, this.#messagePollingInterval);
+        }
     }
 
     #stopMessagePolling() {
         if (this.#pollingTimer) {
             clearInterval(this.#pollingTimer);
             this.#pollingTimer = null;
-            this.#logger.debug('Message polling stopped');
         }
     }
 
-    #handleSearch() {
-        this.#loadMessages();
+    #formatDate(date) {
+        return new Date(date).toLocaleString();
     }
 
-    #handleFilterChange() {
-        this.#loadMessages();
+    #formatMessageContent(content) {
+        return content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/\n/g, '<br>');
     }
 
     #debounce(func, wait) {
@@ -303,19 +305,6 @@ export class MessagesController {
             clearTimeout(timeout);
             timeout = setTimeout(() => func.apply(this, args), wait);
         };
-    }
-
-    #formatDate(date) {
-        return new Date(date).toLocaleString();
-    }
-
-    #escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
     }
 
     #showLoading(show) {
@@ -347,15 +336,18 @@ export class MessagesController {
 
     // Public methods for external access
     getUnreadCount() {
-        return parseInt(this.#view.unreadBadge?.textContent || '0');
+        return this.#unreadCount;
     }
 
+    // Cleanup method
     cleanup() {
         this.#stopMessagePolling();
+        websocketService.unsubscribe('message');
+        websocketService.unsubscribe('status');
     }
 }
 
 // Initialize controller when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new MessagesController();
+    new MessageController();
 });
