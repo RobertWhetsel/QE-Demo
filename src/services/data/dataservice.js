@@ -1,71 +1,146 @@
+import config from '../../../config/client.js';
 import paths from '../../../config/paths.js';
-import Logger from '../../utils/logging/logger.js';
+import logger from '../logger/LoggerService.js';
 
-// Consolidated Data Service implementation
-class DataServiceClass {
+class DataService {
+    static instance = null;
+    #logger;
+    #data = null;
+    #storageKey = config.storage.keys.userData;
+    #cacheMaxAge = config.cache.maxAge * 1000; // Convert to milliseconds
+    #subscribers = new Map();
+    #isInitialized = false;
+    #pendingUpdates = new Map();
+    #updateDebounceTime = 300;
+    #storage = localStorage;
+
     constructor() {
-        if (DataServiceClass.instance) {
-            return DataServiceClass.instance;
+        if (DataService.instance) {
+            return DataService.instance;
         }
-        Logger.info('Creating new DataService instance');
-        this.data = null;
-        this.init();
-        DataServiceClass.instance = this;
+        this.#logger = logger;
+        this.#logger.info('DataService creating new instance');
+        this.#initialize();
+        DataService.instance = this;
     }
 
-    // Initialize data from localStorage or create new
-    async init() {
+    async #initialize() {
         try {
-            Logger.info('Initializing DataService');
-            // Try to get data from localStorage first
-            const storedData = localStorage.getItem('appData');
+            // Initialize storage
+            await this.#initializeStorage();
+            
+            // Setup event listeners
+            this.#setupEventListeners();
+
+            // Setup cleanup interval
+            this.#setupCleanupInterval();
+
+            this.#isInitialized = true;
+            this.#logger.info('DataService initialized successfully');
+        } catch (error) {
+            this.#logger.error('DataService initialization error:', error);
+            throw error;
+        }
+    }
+
+    async #initializeStorage() {
+        try {
+            // Try to get data from storage first
+            const storedData = this.#getFromStorage();
             if (storedData) {
-                Logger.info('Found stored data in localStorage');
-                this.data = JSON.parse(storedData);
+                this.#logger.info('Found stored data');
+                this.#data = storedData;
                 return;
             }
 
-            // If no stored data, try CSV
+            // If no stored data, load from CSV/JSON
             try {
-                const csvPath = paths.join(paths.data, 'data.csv');
-                const response = await fetch(paths.resolve(csvPath));
-                if (!response.ok) {
-                    throw new Error('CSV file not found');
+                const data = await this.#loadInitialData();
+                if (data) {
+                    this.#data = data;
+                    await this.#saveToStorage(data);
+                } else {
+                    this.#data = {
+                        users: [],
+                        pendingUsers: [],
+                        tasks: [],
+                        surveys: [],
+                        teams: [],
+                        workspaces: []
+                    };
                 }
-                const csvText = await response.text();
-                Logger.info('Loading data from CSV');
-                this.data = this.parseCSV(csvText);
             } catch (error) {
-                Logger.error('CSV read failed:', error);
-                this.data = [];
+                this.#logger.error('Failed to load initial data:', error);
+                this.#data = {
+                    users: [],
+                    pendingUsers: [],
+                    tasks: [],
+                    surveys: [],
+                    teams: [],
+                    workspaces: []
+                };
             }
-            
-            // Store in localStorage
-            localStorage.setItem('appData', JSON.stringify(this.data));
+
+            await this.#saveToStorage(this.#data);
         } catch (error) {
-            Logger.error('Error initializing data:', error);
-            this.data = [];
-            localStorage.setItem('appData', JSON.stringify(this.data));
+            this.#logger.error('Error initializing storage:', error);
+            throw error;
         }
     }
 
-    // Parse CSV to array of objects
-    parseCSV(csv) {
-        if (!csv || csv.trim() === '') {
-            return [];
-        }
+    #setupEventListeners() {
+        // Listen for storage events from other tabs
+        window.addEventListener('storage', (event) => {
+            if (event.key === this.#storageKey) {
+                this.#handleStorageChange(event);
+            }
+        });
+    }
 
-        const lines = csv.split('\n').filter(line => line.trim() !== '');
-        if (lines.length === 0) {
-            return [];
+    #setupCleanupInterval() {
+        // Clean up expired cache entries every hour
+        setInterval(() => {
+            this.#cleanupStorage();
+        }, 3600000); // 1 hour
+    }
+
+    async #loadInitialData() {
+        try {
+            // Try loading JSON first
+            const jsonPath = paths.getDataPath('users');
+            const jsonResponse = await fetch(paths.resolve(jsonPath));
+            if (jsonResponse.ok) {
+                return await jsonResponse.json();
+            }
+
+            // Fall back to CSV
+            const csvPath = paths.join(paths.data, 'users.csv');
+            const csvResponse = await fetch(paths.resolve(csvPath));
+            if (csvResponse.ok) {
+                const csvText = await csvResponse.text();
+                return this.#parseCSV(csvText);
+            }
+
+            return null;
+        } catch (error) {
+            this.#logger.error('Error loading initial data:', error);
+            return null;
+        }
+    }
+
+    #parseCSV(csv) {
+        if (!csv || csv.trim() === '') {
+            return null;
         }
 
         try {
+            const lines = csv.split('\n').filter(line => line.trim() !== '');
             const headers = lines[0].split(',').map(h => h.trim());
+            
             if (lines.length === 1) {
                 return [];
             }
-            
+
             return lines.slice(1)
                 .filter(line => line.trim() !== '')
                 .map(line => {
@@ -77,126 +152,206 @@ class DataServiceClass {
                     return obj;
                 });
         } catch (error) {
-            Logger.error('Error parsing CSV:', error);
-            return [];
+            this.#logger.error('Error parsing CSV:', error);
+            return null;
         }
     }
 
-    // Convert data to CSV
-    toCSV() {
-        if (!this.data || this.data.length === 0) {
-            return 'id,name,email,password,type,created';
-        }
-        
-        const headers = ['id', 'name', 'email', 'password', 'type', 'created'];
-        const csvLines = [
-            headers.join(','),
-            ...this.data.map(row => 
-                headers.map(field => {
-                    const value = row[field] || '';
-                    // Escape commas and quotes in values
-                    return value.includes(',') ? `"${value}"` : value;
-                }).join(',')
-            )
-        ];
-        
-        return csvLines.join('\n');
-    }
-
-    // Get all data
-    getData() {
-        Logger.info('Getting data:', this.data);
-        return this.data || [];
-    }
-
-    // Save data
-    async saveData(newData) {
+    #getFromStorage() {
         try {
-            Logger.info('Saving data');
-            this.data = newData;
-            
-            // Always save to localStorage
-            localStorage.setItem('appData', JSON.stringify(this.data));
+            const item = this.#storage.getItem(this.#storageKey);
+            if (!item) return null;
 
-            // Try to save to CSV
-            const csvContent = this.toCSV();
-            const csvPath = paths.join(paths.data, 'data.csv');
-            const response = await fetch(paths.resolve(csvPath), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/csv',
-                },
-                body: csvContent
-            });
-            
-            if (!response.ok) {
-                Logger.error('Failed to save to CSV:', response.statusText);
-                return false;
+            const stored = JSON.parse(item);
+            if (stored.expires && stored.expires < Date.now()) {
+                this.#storage.removeItem(this.#storageKey);
+                return null;
             }
+            return stored.value;
+        } catch (error) {
+            this.#logger.error('Error reading from storage:', error);
+            return null;
+        }
+    }
 
+    async #saveToStorage(value) {
+        try {
+            const item = {
+                value,
+                expires: Date.now() + this.#cacheMaxAge
+            };
+            this.#storage.setItem(this.#storageKey, JSON.stringify(item));
             return true;
         } catch (error) {
-            Logger.error('Error saving data:', error);
+            this.#logger.error('Error saving to storage:', error);
             return false;
         }
     }
 
-    // Add new record
-    async addRecord(record) {
-        if (!record) {
-            throw new Error('Invalid record data');
+    #handleStorageChange(event) {
+        try {
+            if (event.newValue) {
+                const newData = JSON.parse(event.newValue).value;
+                this.#data = newData;
+                this.#notifySubscribers('all');
+            }
+        } catch (error) {
+            this.#logger.error('Error handling storage change:', error);
         }
-        
-        Logger.info('Adding record:', record);
-        this.data = this.data || [];
-        this.data.push(record);
-        
-        // Save to both localStorage and CSV
-        const saved = await this.saveData(this.data);
-        if (!saved) {
-            Logger.error('Failed to save record');
-            // Even if CSV save fails, keep in localStorage
-            localStorage.setItem('appData', JSON.stringify(this.data));
-        }
-        
-        return true;
     }
 
-    // Update record
-    async updateRecord(id, updates) {
-        const index = this.data.findIndex(record => record.id === id);
+    #cleanupStorage() {
+        try {
+            const stored = this.#getFromStorage();
+            if (!stored) {
+                this.#storage.removeItem(this.#storageKey);
+            }
+        } catch (error) {
+            this.#logger.error('Error cleaning storage:', error);
+        }
+    }
+
+    #notifySubscribers(type) {
+        if (this.#subscribers.has(type)) {
+            this.#subscribers.get(type).forEach(callback => {
+                try {
+                    callback(this.#data);
+                } catch (error) {
+                    this.#logger.error('Error notifying subscriber:', error);
+                }
+            });
+        }
+    }
+
+    // Public data access methods
+    getData() {
+        return this.#data ? JSON.parse(JSON.stringify(this.#data)) : null;
+    }
+
+    async saveData(newData) {
+        try {
+            this.#data = newData;
+            const success = await this.#saveToStorage(this.#data);
+            if (success) {
+                this.#notifySubscribers('all');
+            }
+            return success;
+        } catch (error) {
+            this.#logger.error('Error saving data:', error);
+            return false;
+        }
+    }
+
+    // User management methods
+    async addUser(user) {
+        if (!user) {
+            throw new Error('Invalid user data');
+        }
+        
+        this.#logger.info('Adding user:', user);
+        this.#data.users.push(user);
+        
+        return this.saveData(this.#data);
+    }
+
+    async updateUser(username, updates) {
+        const index = this.#data.users.findIndex(user => user.username === username);
         if (index === -1) {
-            throw new Error('Record not found');
+            throw new Error('User not found');
         }
         
-        this.data[index] = { ...this.data[index], ...updates };
-        return this.saveData(this.data);
+        this.#data.users[index] = { ...this.#data.users[index], ...updates };
+        return this.saveData(this.#data);
     }
 
-    // Delete record
-    async deleteRecord(id) {
-        this.data = this.data.filter(record => record.id !== id);
-        return this.saveData(this.data);
+    async deleteUser(username) {
+        this.#data.users = this.#data.users.filter(user => user.username !== username);
+        return this.saveData(this.#data);
     }
 
-    // Search records
-    searchRecords(criteria) {
-        return this.data.filter(record => 
-            Object.entries(criteria).every(([key, value]) => 
-                record[key] === value
-            )
-        );
-    }
-
-    // Get singleton instance
-    static getInstance() {
-        if (!DataServiceClass.instance) {
-            DataServiceClass.instance = new DataServiceClass();
+    // Task management methods
+    async addTask(task) {
+        if (!task) {
+            throw new Error('Invalid task data');
         }
-        return DataServiceClass.instance;
+
+        this.#data.tasks.push(task);
+        return this.saveData(this.#data);
+    }
+
+    async updateTask(taskId, updates) {
+        const taskIndex = this.#data.tasks.findIndex(task => task.id === taskId);
+        if (taskIndex === -1) {
+            throw new Error('Task not found');
+        }
+
+        this.#data.tasks[taskIndex] = { ...this.#data.tasks[taskIndex], ...updates };
+        return this.saveData(this.#data);
+    }
+
+    // Survey management methods
+    async addSurvey(survey) {
+        if (!survey) {
+            throw new Error('Invalid survey data');
+        }
+
+        this.#data.surveys.push(survey);
+        return this.saveData(this.#data);
+    }
+
+    async updateSurvey(surveyId, updates) {
+        const surveyIndex = this.#data.surveys.findIndex(survey => survey.id === surveyId);
+        if (surveyIndex === -1) {
+            throw new Error('Survey not found');
+        }
+
+        this.#data.surveys[surveyIndex] = { ...this.#data.surveys[surveyIndex], ...updates };
+        return this.saveData(this.#data);
+    }
+
+    // Subscription methods
+    subscribe(type, callback) {
+        if (!this.#subscribers.has(type)) {
+            this.#subscribers.set(type, new Set());
+        }
+        this.#subscribers.get(type).add(callback);
+        return () => this.#subscribers.get(type).delete(callback);
+    }
+
+    // Export/Import methods
+    async exportToCSV() {
+        const headers = Object.keys(this.#data);
+        const rows = [headers];
+
+        headers.forEach(header => {
+            const data = this.#data[header];
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    rows.push(Object.values(item));
+                });
+            }
+        });
+
+        return rows.map(row => row.join(',')).join('\n');
+    }
+
+    async importFromCSV(csv) {
+        const data = this.#parseCSV(csv);
+        if (data) {
+            return this.saveData(data);
+        }
+        return false;
+    }
+
+    // Static accessor
+    static getInstance() {
+        if (!DataService.instance) {
+            DataService.instance = new DataService();
+        }
+        return DataService.instance;
     }
 }
 
-// Create and export singleton instance
-const DataService = DataServiceClass.getInstance();
-export default DataService;
+// Export singleton instance
+const dataService = DataService.getInstance();
+export default dataService;
