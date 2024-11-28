@@ -1,6 +1,6 @@
-import { User } from '../../models/user.js';
-import Logger from '../../utils/logging/loggerService.utils.js';
-import errorHandler from '../error/ErrorHandlerService.js';
+import { User } from '../../models/user.model.js';
+import Logger from '../../utils/logging/logger.service.utils.js';
+import errorHandler from '../error/errorHandler.service.js';
 
 class ThemeManagerService {
     #logger;

@@ -2,114 +2,119 @@
 ├── LICENSE
 ├── README.md
 ├── assets
+│   ├── acme.png
 │   └── qeLogoBW.png
+├── coding-guidelines.md
 ├── config
-│   ├── client.js
+│   ├── client.config.js
 │   ├── env.json
-│   ├── paths.js
+│   ├── paths.config.js
 │   ├── users.csv
 │   └── users.json
 ├── index.html
+├── manifest.json
+├── naming-conventions.md
 ├── src
 │   ├── controllers
 │   │   ├── admin
-│   │   │   ├── AdminController.js
-│   │   │   ├── GenesisAdminController.js
-│   │   │   ├── PlatformAdminController.js
-│   │   │   └── UserCreationController.js
+│   │   │   ├── admin.controller.js
+│   │   │   ├── genesisAdmin.controller.js
+│   │   │   └── userCreation.controller.js
 │   │   ├── auth
-│   │   │   ├── LoginController.js
-│   │   │   └── RegisterController.js
+│   │   │   ├── login.controller.js
+│   │   │   └── register.controller.js
 │   │   ├── base
-│   │   │   └── BaseController.js
+│   │   │   └── base.controller.js
 │   │   ├── components
-│   │   │   ├── NavigationController.js
-│   │   │   └── SidebarController.js
+│   │   │   ├── navigation.controller.js
+│   │   │   └── sidebar.controller.js
 │   │   ├── dashboard
-│   │   │   └── DashboardController.js
-│   │   ├── index.js
+│   │   │   └── dashboard.controller.js
+│   │   ├── index.controller.js
 │   │   ├── messages
-│   │   │   └── MessagesController.js
+│   │   │   └── messages.controller.js
 │   │   ├── report
-│   │   │   └── ReportController.js
+│   │   │   └── report.controller.js
 │   │   ├── research
-│   │   │   ├── ResearchController.js
-│   │   │   └── ResearchDashboardController.js
+│   │   │   ├── research.controller.js
+│   │   │   └── researchDashboard.controller.js
 │   │   ├── search
-│   │   │   └── SearchController.js
+│   │   │   └── search.controller.js
 │   │   ├── spreadsheet
-│   │   │   └── SpreadsheetController.js
+│   │   │   └── spreadsheet.controller.js
 │   │   ├── survey
-│   │   │   ├── SurveyController.js
-│   │   │   └── SurveyManagerController.js
+│   │   │   ├── survey.controller.js
+│   │   │   └── surveyManager.controller.js
 │   │   ├── task
-│   │   │   └── TaskController.js
+│   │   │   └── task.controller.js
 │   │   ├── test
-│   │   │   └── TestController.js
-│   │   └── user
-│   │       ├── SettingsController.js
-│   │       ├── UserProfileController.js
-│   │       └── VolunteerDashboardController.js
+│   │   │   └── test.controller.js
+│   │   ├── user
+│   │   │   ├── settings.controller.js
+│   │   │   ├── userProfile.controller.js
+│   │   │   └── volunteerDashboard.controller.js
+│   │   └── welcome
+│   │       └── welcome.controller.js
 │   ├── models
 │   │   ├── data
 │   │   │   ├── users.csv
 │   │   │   └── users.json
-│   │   ├── database.js
-│   │   ├── dataservice.js
-│   │   ├── index.js
-│   │   └── user.js
+│   │   ├── data.model.js
+│   │   ├── database.model.js
+│   │   ├── index.model.js
+│   │   └── user.model.js
 │   ├── services
 │   │   ├── analytics
-│   │   │   └── AnalyticsService.js
+│   │   │   └── analytics.service.js
 │   │   ├── auth
-│   │   │   ├── AuthService.js
-│   │   │   ├── login.js
-│   │   │   └── register.js
+│   │   │   ├── auth.service.js
+│   │   │   ├── login.service.js
+│   │   │   └── register.service.js
 │   │   ├── base
-│   │   │   └── BaseService.js
+│   │   │   └── base.service.js
 │   │   ├── cache
-│   │   │   └── CacheService.js
+│   │   │   └── cache.service.js
 │   │   ├── data
-│   │   │   ├── DataService.js
-│   │   │   └── registrationservice.js
+│   │   │   ├── data.service.js
+│   │   │   └── registration.service.js
 │   │   ├── database
-│   │   │   └── DatabaseService.js
+│   │   │   └── database.service.js
 │   │   ├── encryption
-│   │   │   └── EncryptionService.js
+│   │   │   └── encryption.service.js
 │   │   ├── error
-│   │   │   └── ErrorHandlerService.js
+│   │   │   └── errorHandler.service.js
 │   │   ├── events
-│   │   │   └── EventBusService.js
+│   │   │   └── eventBus.service.js
 │   │   ├── export
-│   │   │   └── ExportService.js
+│   │   │   └── export.service.js
 │   │   ├── form
-│   │   │   └── FormHandlerService.js
-│   │   ├── index.js
+│   │   │   └── formHandler.service.js
+│   │   ├── index.service.js
 │   │   ├── init
-│   │   │   └── init.js
+│   │   │   └── init.service.js
 │   │   ├── navigation
-│   │   │   ├── NavigationGuardService.js
-│   │   │   └── NavigationService.js
+│   │   │   ├── navigation.service.js
+│   │   │   └── navigationGuard.service.js
 │   │   ├── notification
-│   │   │   └── NotificationService.js
+│   │   │   └── notification.service.js
 │   │   ├── queue
-│   │   │   └── QueueService.js
+│   │   │   └── queue.service.js
 │   │   ├── report
-│   │   │   └── ReportService.js
+│   │   │   └── report.service.js
 │   │   ├── router
-│   │   │   └── RouterService.js
+│   │   │   └── router.service.js
 │   │   ├── search
-│   │   │   └── SearchService.js
+│   │   │   └── Search.service.js
 │   │   ├── state
-│   │   │   ├── StateManagerService.js
-│   │   │   ├── ThemeManagerService.js
-│   │   │   └── fontmanager.js
+│   │   │   ├── fontManager.service.js
+│   │   │   ├── stateManager.service.js
+│   │   │   └── themeManager.service.js
 │   │   ├── storage
-│   │   │   └── StorageService.js
+│   │   │   └── storage.service.js
 │   │   ├── validation
-│   │   │   └── ValidationService.js
+│   │   │   └── validation.service.js
 │   │   └── websocket
-│   │       └── WebSocketService.js
+│   │       └── webSocket.service.js
 │   ├── styles
 │   │   ├── base
 │   │   │   ├── _reset.css
@@ -123,6 +128,7 @@
 │   │   │   ├── _loading.css
 │   │   │   ├── _login.css
 │   │   │   ├── _navigation.css
+│   │   │   ├── _test-panel.css
 │   │   │   └── _welcome.css
 │   │   ├── layouts
 │   │   │   ├── _containers.css
@@ -130,49 +136,49 @@
 │   │   └── utilities
 │   │       └── _helpers.css
 │   ├── utils
-│   │   ├── index.js
-│   │   ├── loadCommonHead.js
+│   │   ├── index.utils.js
+│   │   ├── loadCommonHead.utilis.js
 │   │   ├── logging
-│   │   │   ├── LoggerService.js
 │   │   │   ├── app.log
-│   │   │   ├── test-logger.html
-│   │   │   └── test-logger.js
-│   │   ├── standardization.js
-│   │   ├── testPage.html
-│   │   └── utils.js
+│   │   │   ├── loggerService.utils.js
+│   │   │   └── test-logger.utils.js
+│   │   ├── standardization.utils.js
+│   │   └── utilities.utils.js
 │   └── views
 │       ├── components
 │       │   ├── admin
-│       │   │   └── user-creation-form.html
-│       │   ├── head.html
-│       │   ├── header.html
-│       │   ├── nav.html
+│       │   │   └── user-creation-form.view.html
+│       │   ├── head.view.html
+│       │   ├── header.view.html
+│       │   ├── nav.view.html
 │       │   ├── shared
-│       │   │   └── layout.html
-│       │   └── sidebar.html
-│       ├── index.js
-│       └── pages
-│           ├── adminControlPanel.html
-│           ├── auth.html
-│           ├── availableSurveys.html
-│           ├── base.html
-│           ├── completedSurveys.html
-│           ├── dashboard.html
-│           ├── forgot-password.html
-│           ├── genesisAdmin.html
-│           ├── login.html
-│           ├── messages.html
-│           ├── platformAdmin.html
-│           ├── research.html
-│           ├── researchDashboard.html
-│           ├── settings.html
-│           ├── spreadsheet.html
-│           ├── survey.html
-│           ├── tasks.html
-│           ├── temp-setup.html
-│           ├── test-user.html
-│           ├── userProfile.html
-│           └── volunteerDashboard.html
+│       │   │   └── layout.view.html
+│       │   └── sidebar.view.html
+│       ├── index.view.js
+│       ├── pages
+│       │   ├── admin-control-panel.view.html
+│       │   ├── auth.view.html
+│       │   ├── available-surveys.view.html
+│       │   ├── base.view.html
+│       │   ├── completed-surveys.view.html
+│       │   ├── dashboard.view.html
+│       │   ├── forgot-password.view.html
+│       │   ├── genesis-admin.view.html
+│       │   ├── login.view.html
+│       │   ├── messages.view.html
+│       │   ├── research-dashboard.view.html
+│       │   ├── research.view.html
+│       │   ├── settings.view.html
+│       │   ├── spreadsheet.view.html
+│       │   ├── survey.view.html
+│       │   ├── tasks.view.html
+│       │   ├── user-profile.view.html
+│       │   └── volunteer-dashboard.view.html
+│       ├── templates
+│       └── tests
+│           ├── test-logger.view.html
+│           ├── testPage.view.html
+│           └── testUser.view.html
 └── tree.txt
 
-56 directories, 120 files
+59 directories, 123 files

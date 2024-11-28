@@ -1,6 +1,6 @@
 import Logger from '../../utils/logging/loggerService.utils.js';
 import config from '../../../config/client.js';
-import { User } from '../../models/user.js';
+import { User } from '../../models/user.model.js';
 import navigation from '../../services/navigation/navigation.js';
 
 export class BaseController {
