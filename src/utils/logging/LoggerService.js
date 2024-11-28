@@ -1,4 +1,3 @@
-import { SITE_STATE } from '../../../config/paths.js';
 import config from '../../../config/client.js';
 
 class LoggerService {
@@ -11,7 +10,7 @@ class LoggerService {
         INFO: 'INFO',
         DEBUG: 'DEBUG'
     };
-    #currentLevel = SITE_STATE === 'dev' ? 'DEBUG' : 'INFO';
+    #currentLevel = window.env.SITE_STATE === 'dev' ? 'DEBUG' : 'INFO';
     #levelColors = {
         ERROR: '#dc3545',
         WARN: '#ffc107',

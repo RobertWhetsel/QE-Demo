@@ -1,5 +1,8 @@
-// Import paths and SITE_STATE
-import paths, { SITE_STATE } from './paths.js';
+// Import paths configuration
+import paths from './paths.js';
+
+// Get SITE_STATE from window.env
+const SITE_STATE = window.env.SITE_STATE;
 
 // Configuration based on site state
 const config = {

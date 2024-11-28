@@ -1,205 +1,149 @@
-import paths, { SITE_STATE } from '../../../config/paths.js';
+import paths from '../../../config/paths.js';
 import Logger from '../../utils/logging/logger.js';
-import { checkPageAccess } from '../../models/database.js';
-import { User } from '../../models/user.js';
+import config from '../../../config/client.js';
 
-class NavigationService {
+class TaskController {
     #logger;
-    #sidebarState = false;
-    #history = [];
-    #maxHistoryLength = 50;
-    #isInitialized = false;
+    #tasks = [];
+    #debugMode = window.env.SITE_STATE === 'dev';
 
     constructor() {
         this.#logger = Logger;
-        this.#logger.info('NavigationService initializing');
+        if (this.#debugMode) {
+            this.#logger.info('TaskController initializing');
+        }
         this.#initialize();
     }
 
     #initialize() {
         try {
-            // Set up history tracking
-            this.#setupHistoryTracking();
-            
-            // Listen for popstate events
-            this.#setupPopStateListener();
+            // Load tasks from storage
+            this.#loadTasks();
 
-            this.#isInitialized = true;
-            this.#logger.info('NavigationService initialized successfully');
+            // Setup event listeners
+            this.#setupEventListeners();
+
+            if (this.#debugMode) {
+                this.#logger.info('TaskController initialized successfully');
+            }
         } catch (error) {
-            this.#logger.error('NavigationService initialization error:', error);
-            throw error;
+            this.#logger.error('TaskController initialization error:', error);
         }
     }
 
-    #setupHistoryTracking() {
-        // Track initial page
-        this.#addToHistory(window.location.pathname);
+    #loadTasks() {
+        const storedTasks = localStorage.getItem('tasks');
+        if (storedTasks) {
+            this.#tasks = JSON.parse(storedTasks);
+        }
+    }
 
-        // Set up navigation observer
-        const observer = new MutationObserver(() => {
-            this.#addToHistory(window.location.pathname);
+    #saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(this.#tasks));
+    }
+
+    #setupEventListeners() {
+        // Add task event
+        document.addEventListener('addTask', (event) => {
+            this.addTask(event.detail);
         });
 
-        observer.observe(document.documentElement, {
-            childList: true,
-            subtree: true
+        // Complete task event
+        document.addEventListener('completeTask', (event) => {
+            this.completeTask(event.detail.id);
+        });
+
+        // Delete task event
+        document.addEventListener('deleteTask', (event) => {
+            this.deleteTask(event.detail.id);
         });
     }
 
-    #setupPopStateListener() {
-        window.addEventListener('popstate', (event) => {
-            this.#logger.info('Handling popstate event:', event.state);
-            if (event.state?.path) {
-                this.navigateTo(event.state.path, false);
-            }
-        });
+    addTask(taskData) {
+        const task = {
+            id: Date.now(),
+            ...taskData,
+            createdAt: new Date().toISOString(),
+            completed: false
+        };
+
+        this.#tasks.push(task);
+        this.#saveTasks();
+
+        if (this.#debugMode) {
+            this.#logger.info('Task added:', task);
+        }
+
+        document.dispatchEvent(new CustomEvent('taskAdded', { detail: task }));
     }
 
-    async navigateTo(path, addToHistory = true) {
-        try {
-            const resolvedPath = paths.resolve(path);
-            this.#logger.info('Navigating to:', resolvedPath);
+    completeTask(taskId) {
+        const task = this.#tasks.find(t => t.id === taskId);
+        if (task) {
+            task.completed = true;
+            task.completedAt = new Date().toISOString();
+            this.#saveTasks();
 
-            // Check authorization for path
-            if (!this.#checkAuthorization(resolvedPath)) {
-                this.#logger.warn('Navigation denied: unauthorized');
-                this.navigateToPage('login');
-                return;
+            if (this.#debugMode) {
+                this.#logger.info('Task completed:', task);
             }
 
-            // Add to browser history if needed
-            if (addToHistory) {
-                window.history.pushState({ path: resolvedPath }, '', resolvedPath);
-                this.#addToHistory(resolvedPath);
-            }
-
-            window.location.href = resolvedPath;
-        } catch (error) {
-            this.#logger.error('Navigation error:', error);
-            throw error;
+            document.dispatchEvent(new CustomEvent('taskCompleted', { detail: task }));
         }
     }
 
-    navigateToPage(pageName) {
-        try {
-            this.#logger.info('Navigating to page:', pageName);
-            
-            // Handle root navigation specially
-            if (pageName === 'root') {
-                this.#logger.info('Navigating to root');
-                this.navigateTo('/');
-                return;
+    deleteTask(taskId) {
+        const index = this.#tasks.findIndex(t => t.id === taskId);
+        if (index !== -1) {
+            const task = this.#tasks[index];
+            this.#tasks.splice(index, 1);
+            this.#saveTasks();
+
+            if (this.#debugMode) {
+                this.#logger.info('Task deleted:', task);
             }
 
-            // Get resolved page path
-            const resolvedPath = paths.getPagePath(pageName);
-            this.#logger.info('Resolved page path:', resolvedPath);
-            
-            if (!resolvedPath) {
-                throw new Error(`Page path not found for: ${pageName}`);
+            document.dispatchEvent(new CustomEvent('taskDeleted', { detail: task }));
+        }
+    }
+
+    getTasks(filter = {}) {
+        let filteredTasks = [...this.#tasks];
+
+        if (filter.completed !== undefined) {
+            filteredTasks = filteredTasks.filter(t => t.completed === filter.completed);
+        }
+
+        if (filter.search) {
+            const searchLower = filter.search.toLowerCase();
+            filteredTasks = filteredTasks.filter(t => 
+                t.title.toLowerCase().includes(searchLower) ||
+                t.description.toLowerCase().includes(searchLower)
+            );
+        }
+
+        return filteredTasks;
+    }
+
+    getTaskById(taskId) {
+        return this.#tasks.find(t => t.id === taskId);
+    }
+
+    updateTask(taskId, updates) {
+        const task = this.#tasks.find(t => t.id === taskId);
+        if (task) {
+            Object.assign(task, updates);
+            this.#saveTasks();
+
+            if (this.#debugMode) {
+                this.#logger.info('Task updated:', task);
             }
-            
-            this.navigateTo(resolvedPath);
-        } catch (error) {
-            this.#logger.error('Page navigation error:', error);
-            throw error;
+
+            document.dispatchEvent(new CustomEvent('taskUpdated', { detail: task }));
         }
-    }
-
-    navigateToUtil(utilName) {
-        try {
-            this.#logger.info('Navigating to util:', utilName);
-            const utilPath = paths.core.utils[utilName];
-            
-            if (!utilPath) {
-                throw new Error(`Util path not found for: ${utilName}`);
-            }
-
-            const resolvedPath = paths.resolve(utilPath);
-            this.#logger.info('Resolved util path:', resolvedPath);
-            window.open(resolvedPath, '_blank');
-        } catch (error) {
-            this.#logger.error('Util navigation error:', error);
-            throw error;
-        }
-    }
-
-    #checkAuthorization(path) {
-        const userRole = User.getCurrentUserRole();
-        return checkPageAccess(userRole, path);
-    }
-
-    #addToHistory(path) {
-        this.#history.unshift(path);
-        if (this.#history.length > this.#maxHistoryLength) {
-            this.#history.pop();
-        }
-    }
-
-    toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const content = document.querySelector('.dashboard__content');
-        
-        if (sidebar) {
-            this.#sidebarState = !this.#sidebarState;
-            this.#logger.info('Toggling sidebar:', { state: this.#sidebarState });
-            
-            if (this.#sidebarState) {
-                sidebar.classList.add('sidebar--open');
-                if (content) content.classList.add('dashboard__content--shifted');
-            } else {
-                sidebar.classList.remove('sidebar--open');
-                if (content) content.classList.remove('dashboard__content--shifted');
-            }
-        }
-    }
-
-    closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const content = document.querySelector('.dashboard__content');
-        
-        if (sidebar) {
-            this.#sidebarState = false;
-            this.#logger.info('Closing sidebar');
-            
-            sidebar.classList.remove('sidebar--open');
-            if (content) content.classList.remove('dashboard__content--shifted');
-        }
-    }
-
-    goBack() {
-        window.history.back();
-    }
-
-    reload() {
-        window.location.reload();
-    }
-
-    // Public getters
-    get sidebarState() {
-        return this.#sidebarState;
-    }
-
-    get currentPath() {
-        return window.location.pathname;
-    }
-
-    get navigationHistory() {
-        return [...this.#history];
-    }
-
-    // Public utility methods
-    isCurrentPage(pageName) {
-        const pagePath = paths.getPagePath(pageName);
-        return this.currentPath === pagePath;
-    }
-
-    getBaseUrl() {
-        return SITE_STATE === 'dev' ? 'http://127.0.0.1:5500' : paths.BASE_URL;
     }
 }
 
 // Create and export singleton instance
-const navigationService = new NavigationService();
-export default navigationService;
+const taskController = new TaskController();
+export default taskController;

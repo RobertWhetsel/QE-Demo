@@ -1,324 +1,145 @@
-import logger from '../logger/LoggerService.js';
-import { SITE_STATE } from '../../../config/paths.js';
+import config from '../../../config/client.js';
 
 class StorageService {
-    #logger;
     #prefix = 'qe_';
-    #isInitialized = false;
-    #encryptionKey = SITE_STATE === 'dev' ? 'dev_key' : process.env.STORAGE_KEY;
-    #observers = new Map();
-    #maxStorageSize = 5242880; // 5MB
-    #sensitiveKeys = ['password', 'token', 'auth'];
-    #storageTypes = {
-        LOCAL: 'localStorage',
-        SESSION: 'sessionStorage'
-    };
+    #debugMode = window.env.SITE_STATE === 'dev';
+    #encryptionEnabled = window.env.SITE_STATE !== 'dev';
 
     constructor() {
-        this.#logger = logger;
-        this.#logger.info('StorageService initializing');
-        this.#initialize();
-    }
-
-    #initialize() {
-        try {
-            // Check storage availability
-            this.#checkStorageAvailability();
-            
-            // Setup storage event listeners
-            this.#setupStorageListeners();
-
-            // Clean up expired items
-            this.#cleanupExpiredItems();
-
-            this.#isInitialized = true;
-            this.#logger.info('StorageService initialized successfully');
-        } catch (error) {
-            this.#logger.error('StorageService initialization error:', error);
-            throw error;
+        if (this.#debugMode) {
+            console.log('StorageService initializing');
         }
+        this.#validateStorage();
     }
 
-    #checkStorageAvailability() {
-        const testKey = '__storage_test__';
-        
+    #validateStorage() {
         try {
-            localStorage.setItem(testKey, testKey);
+            const testKey = `${this.#prefix}test`;
+            localStorage.setItem(testKey, 'test');
             localStorage.removeItem(testKey);
-            sessionStorage.setItem(testKey, testKey);
-            sessionStorage.removeItem(testKey);
         } catch (error) {
-            this.#logger.error('Storage not available:', error);
+            console.error('Storage is not available:', error);
             throw new Error('Storage is not available');
         }
     }
 
-    #setupStorageListeners() {
-        window.addEventListener('storage', (event) => {
-            if (event.key?.startsWith(this.#prefix)) {
-                this.#handleStorageChange(event);
-            }
-        });
-    }
-
-    #handleStorageChange(event) {
-        const key = event.key.slice(this.#prefix.length);
-        if (this.#observers.has(key)) {
-            const observers = this.#observers.get(key);
-            observers.forEach(callback => {
-                try {
-                    const newValue = event.newValue ? JSON.parse(event.newValue) : null;
-                    callback(newValue);
-                } catch (error) {
-                    this.#logger.error('Error notifying storage observer:', error);
-                }
-            });
-        }
-    }
-
-    #cleanupExpiredItems() {
-        const storageTypes = [localStorage, sessionStorage];
-        
-        storageTypes.forEach(storage => {
-            Object.keys(storage).forEach(key => {
-                if (key.startsWith(this.#prefix)) {
-                    try {
-                        const value = JSON.parse(storage.getItem(key));
-                        if (value?.expires && value.expires < Date.now()) {
-                            storage.removeItem(key);
-                            this.#logger.info('Removed expired item:', key);
-                        }
-                    } catch (error) {
-                        this.#logger.error('Error cleaning up storage item:', error);
-                    }
-                }
-            });
-        });
-    }
-
     #getFullKey(key) {
-        return this.#prefix + key;
-    }
-
-    #shouldEncrypt(key) {
-        return this.#sensitiveKeys.some(sensitiveKey => 
-            key.toLowerCase().includes(sensitiveKey)
-        );
+        return `${this.#prefix}${key}`;
     }
 
     #encrypt(data) {
-        if (!this.#encryptionKey) return data;
-        
-        try {
-            const jsonStr = JSON.stringify(data);
-            return btoa(
-                encodeURIComponent(jsonStr)
-                    .split('')
-                    .map((c, i) => 
-                        String.fromCharCode(
-                            c.charCodeAt(0) ^ this.#encryptionKey.charCodeAt(i % this.#encryptionKey.length)
-                        )
-                    )
-                    .join('')
-            );
-        } catch (error) {
-            this.#logger.error('Encryption error:', error);
-            throw error;
-        }
+        if (!this.#encryptionEnabled) return data;
+        // Implement encryption here
+        return btoa(JSON.stringify(data));
     }
 
     #decrypt(data) {
-        if (!this.#encryptionKey) return data;
-        
+        if (!this.#encryptionEnabled) return data;
+        // Implement decryption here
         try {
-            const decrypted = decodeURIComponent(
-                atob(data)
-                    .split('')
-                    .map((c, i) => 
-                        String.fromCharCode(
-                            c.charCodeAt(0) ^ this.#encryptionKey.charCodeAt(i % this.#encryptionKey.length)
-                        )
-                    )
-                    .join('')
-            );
-            return JSON.parse(decrypted);
+            return JSON.parse(atob(data));
+        } catch {
+            return data;
+        }
+    }
+
+    setItem(key, value) {
+        try {
+            const fullKey = this.#getFullKey(key);
+            const serializedValue = JSON.stringify(value);
+            const encryptedValue = this.#encrypt(serializedValue);
+            localStorage.setItem(fullKey, encryptedValue);
+
+            if (this.#debugMode) {
+                console.log(`Stored value for key: ${key}`);
+            }
         } catch (error) {
-            this.#logger.error('Decryption error:', error);
+            console.error(`Error storing value for key ${key}:`, error);
             throw error;
         }
     }
 
-    #checkStorageQuota(value) {
-        const size = new Blob([value]).size;
-        return size <= this.#maxStorageSize;
-    }
-
-    #notifyObservers(key, value) {
-        if (this.#observers.has(key)) {
-            const observers = this.#observers.get(key);
-            observers.forEach(callback => {
-                try {
-                    callback(value);
-                } catch (error) {
-                    this.#logger.error('Error notifying observer:', error);
-                }
-            });
-        }
-    }
-
-    // Public storage methods
-    setItem(key, value, options = {}) {
-        const {
-            storage = this.#storageTypes.LOCAL,
-            expires = null,
-            encrypt = this.#shouldEncrypt(key)
-        } = options;
-
+    getItem(key) {
         try {
             const fullKey = this.#getFullKey(key);
-            const storageValue = {
-                value,
-                expires: expires ? Date.now() + expires : null,
-                timestamp: Date.now()
-            };
-
-            const serializedValue = encrypt 
-                ? this.#encrypt(storageValue)
-                : JSON.stringify(storageValue);
-
-            if (!this.#checkStorageQuota(serializedValue)) {
-                throw new Error('Storage quota exceeded');
-            }
-
-            window[storage].setItem(fullKey, serializedValue);
-            this.#notifyObservers(key, value);
-            return true;
-        } catch (error) {
-            this.#logger.error('Error setting storage item:', error);
-            return false;
-        }
-    }
-
-    getItem(key, options = {}) {
-        const {
-            storage = this.#storageTypes.LOCAL,
-            decrypt = this.#shouldEncrypt(key),
-            defaultValue = null
-        } = options;
-
-        try {
-            const fullKey = this.#getFullKey(key);
-            const item = window[storage].getItem(fullKey);
+            const encryptedValue = localStorage.getItem(fullKey);
             
-            if (!item) return defaultValue;
-
-            const parsed = decrypt 
-                ? this.#decrypt(item)
-                : JSON.parse(item);
-
-            if (parsed.expires && parsed.expires < Date.now()) {
-                window[storage].removeItem(fullKey);
-                return defaultValue;
+            if (encryptedValue === null) {
+                return null;
             }
 
-            return parsed.value;
+            const decryptedValue = this.#decrypt(encryptedValue);
+            return JSON.parse(decryptedValue);
         } catch (error) {
-            this.#logger.error('Error getting storage item:', error);
-            return defaultValue;
+            console.error(`Error retrieving value for key ${key}:`, error);
+            return null;
         }
     }
 
-    removeItem(key, options = {}) {
-        const { storage = this.#storageTypes.LOCAL } = options;
-
+    removeItem(key) {
         try {
             const fullKey = this.#getFullKey(key);
-            window[storage].removeItem(fullKey);
-            this.#notifyObservers(key, null);
-            return true;
-        } catch (error) {
-            this.#logger.error('Error removing storage item:', error);
-            return false;
-        }
-    }
+            localStorage.removeItem(fullKey);
 
-    clear(options = {}) {
-        const { storage = this.#storageTypes.LOCAL } = options;
-
-        try {
-            const store = window[storage];
-            Object.keys(store).forEach(key => {
-                if (key.startsWith(this.#prefix)) {
-                    store.removeItem(key);
-                }
-            });
-            return true;
-        } catch (error) {
-            this.#logger.error('Error clearing storage:', error);
-            return false;
-        }
-    }
-
-    // Public utility methods
-    subscribe(key, callback) {
-        if (!this.#observers.has(key)) {
-            this.#observers.set(key, new Set());
-        }
-        this.#observers.get(key).add(callback);
-        return () => this.#observers.get(key).delete(callback);
-    }
-
-    getStorageSize(storage = this.#storageTypes.LOCAL) {
-        let size = 0;
-        const store = window[storage];
-        
-        Object.keys(store).forEach(key => {
-            if (key.startsWith(this.#prefix)) {
-                size += new Blob([store.getItem(key)]).size;
+            if (this.#debugMode) {
+                console.log(`Removed value for key: ${key}`);
             }
-        });
-
-        return size;
-    }
-
-    getRemainingSpace(storage = this.#storageTypes.LOCAL) {
-        return this.#maxStorageSize - this.getStorageSize(storage);
-    }
-
-    isStorageAvailable(storage = this.#storageTypes.LOCAL) {
-        try {
-            const testKey = '__storage_test__';
-            window[storage].setItem(testKey, testKey);
-            window[storage].removeItem(testKey);
-            return true;
         } catch (error) {
-            return false;
+            console.error(`Error removing value for key ${key}:`, error);
+            throw error;
         }
     }
 
-    getKeys(storage = this.#storageTypes.LOCAL) {
+    clear() {
+        try {
+            // Only clear items with our prefix
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(this.#prefix)) {
+                    keysToRemove.push(key);
+                }
+            }
+
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+
+            if (this.#debugMode) {
+                console.log('Cleared all storage');
+            }
+        } catch (error) {
+            console.error('Error clearing storage:', error);
+            throw error;
+        }
+    }
+
+    getAllKeys() {
         const keys = [];
-        const store = window[storage];
-        
-        Object.keys(store).forEach(key => {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
             if (key.startsWith(this.#prefix)) {
                 keys.push(key.slice(this.#prefix.length));
             }
-        });
-
+        }
         return keys;
     }
 
-    getStorageInfo(storage = this.#storageTypes.LOCAL) {
-        return {
-            size: this.getStorageSize(storage),
-            remaining: this.getRemainingSpace(storage),
-            keys: this.getKeys(storage),
-            isAvailable: this.isStorageAvailable(storage)
-        };
+    getSize() {
+        let totalSize = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.#prefix)) {
+                totalSize += localStorage.getItem(key).length;
+            }
+        }
+        return totalSize;
+    }
+
+    hasKey(key) {
+        const fullKey = this.#getFullKey(key);
+        return localStorage.getItem(fullKey) !== null;
     }
 }
 
 // Create and export singleton instance
-const storageService = new StorageService();
-export default storageService;
+const storage = new StorageService();
+export default storage;

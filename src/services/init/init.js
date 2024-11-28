@@ -39,13 +39,13 @@ export async function initializeApp() {
         }
 
         // Import modules using paths.resolve
-        ThemeManager = (await import(paths.resolve('src/services/state/ThemeManagerService.js'))).default;
-        FontManager = (await import(paths.resolve('src/services/state/FontManagerService.js'))).default;
-        User = (await import(paths.resolve('src/models/user.js'))).User;
-        DataService = (await import(paths.resolve('src/models/dataservice.js'))).DataService;
-        Logger = (await import(paths.resolve('src/utils/logging/LoggerService.js'))).default;
-        config = (await import(paths.resolve('config/client.js'))).default;
-        navigation = (await import(paths.resolve('src/services/navigation/NavigationService.js'))).default;
+        ThemeManager = (await import(paths.getModulePath('themeManager'))).default;
+        FontManager = (await import(paths.getModulePath('fontManager'))).default;
+        User = (await import(paths.getModulePath('user'))).User;
+        DataService = (await import(paths.getModulePath('dataService'))).DataService;
+        Logger = (await import(paths.getModulePath('logger'))).default;
+        config = (await import(paths.getModulePath('config'))).default;
+        navigation = (await import(paths.getModulePath('navigation'))).default;
 
         await Logger.info('Application Initialization Started');
 

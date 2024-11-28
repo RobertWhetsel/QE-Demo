@@ -1,6 +1,5 @@
 import Logger from '../../utils/logging/LoggerService.js';
 import config from '../../../config/client.js';
-import { SITE_STATE } from '../../../config/paths.js';
 
 class ErrorHandlerService {
     #logger;
@@ -9,7 +8,7 @@ class ErrorHandlerService {
     #isInitialized = false;
     #errorStack = [];
     #maxErrorStackSize = 50;
-    #debugMode = SITE_STATE === 'dev';
+    #debugMode = window.env.SITE_STATE === 'dev';
 
     constructor() {
         this.#logger = Logger;

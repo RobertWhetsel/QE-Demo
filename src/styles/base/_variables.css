@@ -29,13 +29,13 @@
     --font-weight-medium: 500;
     --font-weight-bold: 700;
 
-    /* Button Colors */
-    --button-primary-bg: rgb(47, 102, 255);
-    --button-primary-hover: rgb(38, 82, 204);
-    --button-primary-text: #ffffff;
-    --button-secondary-bg: #6c757d;
-    --button-secondary-hover: #5a6268;
-    --button-secondary-text: #ffffff;
+    /* Button Colors - using existing color variables */
+    --button-primary-bg: var(--primary-color);
+    --button-primary-hover: var(--primary-color-hover);
+    --button-primary-text: var(--on-primary-color);
+    --button-secondary-bg: var(--secondary-color);
+    --button-secondary-hover: var(--secondary-color-hover);
+    --button-secondary-text: var(--on-secondary-color);
 
     /* Spacing */
     --spacing-xs: 0.25rem;

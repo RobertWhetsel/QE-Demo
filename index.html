@@ -5,18 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome - Quantum Eye</title>
 
-    <script type="module">
-        import { initializeApp } from '/src/services/init/init.js';
-        document.addEventListener('DOMContentLoaded', initializeApp);
+    <!-- ONE hardcoded exception to bootstrap the app -->
+    <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/config/env.json', false);  // Synchronous
+        xhr.send();
+        window.env = JSON.parse(xhr.responseText);
     </script>
+    <script type="module" src="/src/services/init/init.js"></script>
 </head>
 <body>
     <main class="welcome" role="main">
         <div class="welcome__content">
             <img id="logoImg" class="welcome__logo" alt="QE Logo">
-            <h2 class="welcome__title">Welcome to the Quantum Eye system</h2>
+            <h2 class="welcome__title">Welcome to the Quantum Eye Platform</h2>
             <div class="welcome__text">
-                <p class="font-bold">Login Instructions:</p>
+                <p class="welcome__instruction font-bold">Login Instructions:</p>
                 <ol class="welcome__list">
                     <li class="welcome__list-item">Click the Begin button below to start</li>
                     <li class="welcome__list-item">The system will check for existing users</li>

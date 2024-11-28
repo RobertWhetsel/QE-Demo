@@ -1,24 +1,10 @@
-// Site state constant to control environment
-export const SITE_STATE = 'dev'; // Change to 'prod' for production
+// Use globally available env
+const env = window.env;
 
 // Path configuration based on site state
-let BASE_URL, ASSET_PATH, VIEW_PATH, STYLE_PATH, MODULE_PATH;
-
-if (SITE_STATE === 'dev') {
-    // Development paths (Go Live server on port 5500)
-    BASE_URL = 'http://127.0.0.1:5500';
-    ASSET_PATH = '/assets';
-    VIEW_PATH = '/src/views';
-    STYLE_PATH = '/src/styles';
-    MODULE_PATH = '/src';
-} else {
-    // Production paths (AWS server)
-    BASE_URL = '${AWS_URL}';
-    ASSET_PATH = '/assets';
-    VIEW_PATH = '/views';
-    STYLE_PATH = '/styles';
-    MODULE_PATH = '/';
-}
+const BASE_URL = env.SITE_STATE === 'dev' ? env.DEV_URL : env.AWS_URL;
+const paths_config = env.SITE_STATE === 'dev' ? env.DEV_PATHS : env.PROD_PATHS;
+const { ASSET_PATH, VIEW_PATH, STYLE_PATH, MODULE_PATH, CONFIG_PATH } = paths_config;
 
 // Core paths configuration
 const CORE_PATHS = {
@@ -30,18 +16,15 @@ const CORE_PATHS = {
     
     // CSS files in load order
     styles: {
-        // Base styles must be loaded first
         base: [
             `${STYLE_PATH}/base/_variables.css`,
             `${STYLE_PATH}/base/_reset.css`,
             `${STYLE_PATH}/base/_typography.css`
         ],
-        // Layout styles
         layouts: [
             `${STYLE_PATH}/layouts/_containers.css`,
             `${STYLE_PATH}/layouts/_grid.css`
         ],
-        // Component styles - ordered by dependency
         components: [
             `${STYLE_PATH}/components/_admin-form.css`,
             `${STYLE_PATH}/components/_admin-panel.css`,
@@ -50,11 +33,9 @@ const CORE_PATHS = {
             `${STYLE_PATH}/components/_loading.css`,
             `${STYLE_PATH}/components/_login.css`,
             `${STYLE_PATH}/components/_navigation.css`,
-            `${STYLE_PATH}/components/_admin-panel.css`,
-            `${STYLE_PATH}/components/_test-panel.css`
-            `${STYLE_PATH}/components/_welcome.css`,
+            `${STYLE_PATH}/components/_test-panel.css`,
+            `${STYLE_PATH}/components/_welcome.css`
         ],
-        // Utility styles loaded last
         utilities: [
             `${STYLE_PATH}/utilities/_helpers.css`
         ]
@@ -77,7 +58,7 @@ const CORE_PATHS = {
         auth: `${VIEW_PATH}/pages/auth.html`,
         availableSurveys: `${VIEW_PATH}/pages/availableSurveys.html`,
         base: `${VIEW_PATH}/pages/base.html`,
-        CompletedSurveys: `${VIEW_PATH}/pages/CompletedSurveys.html`,
+        completedSurveys: `${VIEW_PATH}/pages/completedSurveys.html`,
         dashboard: `${VIEW_PATH}/pages/dashboard.html`,
         forgotPassword: `${VIEW_PATH}/pages/forgotPassword.html`,
         genesisAdmin: `${VIEW_PATH}/pages/genesisAdmin.html`,
@@ -93,14 +74,13 @@ const CORE_PATHS = {
         tempSetup: `${VIEW_PATH}/pages/tempSetup.html`,
         userProfile: `${VIEW_PATH}/pages/userProfile.html`,
         volunteerDashboard: `${VIEW_PATH}/pages/volunteerDashboard.html`
-
     },
     
     // Utils
     utils: {
         logger: `${MODULE_PATH}/utils/logging/test-logger.html`,
         test: `${MODULE_PATH}/utils/testPage.html`,
-        testUser: `${VIEW_PATH}/utils/testUser.html`
+        testUser: `${MODULE_PATH}/utils/testUser.html`
     },
 
     // Data files
@@ -110,16 +90,20 @@ const CORE_PATHS = {
 
     // Module paths
     modules: {
+        // Core modules
+        init: env.INIT_PATH,
+        paths: `${CONFIG_PATH}/paths.js`,
+        
         // Models
         dataService: `${MODULE_PATH}/models/dataService.js`,
         user: `${MODULE_PATH}/models/user.js`,
         
         // Services
-        navigation: `${MODULE_PATH}/services/navigation/navigation.js`,
-        logger: `${MODULE_PATH}/utils/logging/logger.js`,
-        config: '/config/client.js',
-        themeManager: `${MODULE_PATH}/services/state/thememanager.js`,
-        fontManager: `${MODULE_PATH}/services/state/fontmanager.js`,
+        navigation: `${MODULE_PATH}/services/navigation/navigationService.js`,
+        logger: `${MODULE_PATH}/utils/logging/LoggerService.js`,
+        config: `${CONFIG_PATH}/client.js`,
+        themeManager: `${MODULE_PATH}/services/state/ThemeManagerService.js`,
+        fontManager: `${MODULE_PATH}/services/state/FontManagerService.js`,
         
         // Controllers
         index: `${MODULE_PATH}/controllers/index.js`,
@@ -134,7 +118,6 @@ const CORE_PATHS = {
 // Path configuration
 const paths = {
     // Environment
-    SITE_STATE,
     BASE_URL,
     
     // Core paths
@@ -146,14 +129,14 @@ const paths = {
         
         // Handle root path specially
         if (path === '/') {
-            return SITE_STATE === 'dev' ? BASE_URL : BASE_URL + '/';
+            return env.SITE_STATE === 'dev' ? BASE_URL : BASE_URL + '/';
         }
         
         // Clean the path
         const cleanPath = path.replace(/^\/+/, '');
         
         // For development environment
-        if (SITE_STATE === 'dev') {
+        if (env.SITE_STATE === 'dev') {
             // For module imports, we need the / prefix
             if (isModule) {
                 return `/${cleanPath}`;
@@ -192,7 +175,7 @@ const paths = {
     // Get page path
     getPagePath: (name) => {
         const pagePath = CORE_PATHS.pages[name];
-        return SITE_STATE === 'dev' ? `${BASE_URL}${pagePath}` : paths.resolve(pagePath);
+        return env.SITE_STATE === 'dev' ? `${BASE_URL}${pagePath}` : paths.resolve(pagePath);
     },
 
     // Get utility path

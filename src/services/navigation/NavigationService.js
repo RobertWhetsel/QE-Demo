@@ -1,205 +1,155 @@
-import paths, { SITE_STATE } from '../../../config/paths.js';
 import Logger from '../../utils/logging/LoggerService.js';
-import { checkPageAccess } from '../../models/database.js';
-import { User } from '../../models/user.js';
+import config from '../../../config/client.js';
 
 class NavigationService {
     #logger;
-    #sidebarState = false;
+    #currentRoute;
+    #routes = new Map();
+    #debugMode = window.env.SITE_STATE === 'dev';
     #history = [];
     #maxHistoryLength = 50;
-    #isInitialized = false;
 
     constructor() {
         this.#logger = Logger;
-        this.#logger.info('NavigationService initializing');
+        if (this.#debugMode) {
+            this.#logger.info('NavigationService initializing');
+        }
         this.#initialize();
     }
 
     #initialize() {
         try {
-            // Set up history tracking
-            this.#setupHistoryTracking();
-            
-            // Listen for popstate events
-            this.#setupPopStateListener();
+            // Setup popstate listener
+            window.addEventListener('popstate', (event) => {
+                this.#handlePopState(event);
+            });
 
-            this.#isInitialized = true;
-            this.#logger.info('NavigationService initialized successfully');
+            // Setup initial route
+            this.#handleInitialRoute();
+
+            if (this.#debugMode) {
+                this.#logger.info('NavigationService initialized successfully');
+            }
         } catch (error) {
             this.#logger.error('NavigationService initialization error:', error);
-            throw error;
         }
     }
 
-    #setupHistoryTracking() {
-        // Track initial page
-        this.#addToHistory(window.location.pathname);
-
-        // Set up navigation observer
-        const observer = new MutationObserver(() => {
-            this.#addToHistory(window.location.pathname);
-        });
-
-        observer.observe(document.documentElement, {
-            childList: true,
-            subtree: true
-        });
+    #handleInitialRoute() {
+        const path = window.location.pathname;
+        this.#currentRoute = path;
+        this.#addToHistory(path);
+        this.#handleRoute(path);
     }
 
-    #setupPopStateListener() {
-        window.addEventListener('popstate', (event) => {
-            this.#logger.info('Handling popstate event:', event.state);
-            if (event.state?.path) {
-                this.navigateTo(event.state.path, false);
-            }
-        });
+    #handlePopState(event) {
+        const path = window.location.pathname;
+        this.#currentRoute = path;
+        this.#handleRoute(path);
     }
 
-    async navigateTo(path, addToHistory = true) {
-        try {
-            const resolvedPath = paths.resolve(path);
-            this.#logger.info('Navigating to:', resolvedPath);
-
-            // Check authorization for path
-            if (!this.#checkAuthorization(resolvedPath)) {
-                this.#logger.warn('Navigation denied: unauthorized');
-                this.navigateToPage('login');
-                return;
+    #handleRoute(path) {
+        const route = this.#routes.get(path);
+        if (route) {
+            try {
+                route.handler();
+                if (this.#debugMode) {
+                    this.#logger.info(`Navigated to: ${path}`);
+                }
+            } catch (error) {
+                this.#logger.error(`Error handling route ${path}:`, error);
             }
-
-            // Add to browser history if needed
-            if (addToHistory) {
-                window.history.pushState({ path: resolvedPath }, '', resolvedPath);
-                this.#addToHistory(resolvedPath);
-            }
-
-            window.location.href = resolvedPath;
-        } catch (error) {
-            this.#logger.error('Navigation error:', error);
-            throw error;
+        } else {
+            this.#logger.warn(`No handler found for route: ${path}`);
+            this.navigateTo('/404');
         }
-    }
-
-    navigateToPage(pageName) {
-        try {
-            this.#logger.info('Navigating to page:', pageName);
-            
-            // Handle root navigation specially
-            if (pageName === 'root') {
-                this.#logger.info('Navigating to root');
-                this.navigateTo('/');
-                return;
-            }
-
-            // Get resolved page path
-            const resolvedPath = paths.getPagePath(pageName);
-            this.#logger.info('Resolved page path:', resolvedPath);
-            
-            if (!resolvedPath) {
-                throw new Error(`Page path not found for: ${pageName}`);
-            }
-            
-            this.navigateTo(resolvedPath);
-        } catch (error) {
-            this.#logger.error('Page navigation error:', error);
-            throw error;
-        }
-    }
-
-    navigateToUtil(utilName) {
-        try {
-            this.#logger.info('Navigating to util:', utilName);
-            const utilPath = paths.core.utils[utilName];
-            
-            if (!utilPath) {
-                throw new Error(`Util path not found for: ${utilName}`);
-            }
-
-            const resolvedPath = paths.resolve(utilPath);
-            this.#logger.info('Resolved util path:', resolvedPath);
-            window.open(resolvedPath, '_blank');
-        } catch (error) {
-            this.#logger.error('Util navigation error:', error);
-            throw error;
-        }
-    }
-
-    #checkAuthorization(path) {
-        const userRole = User.getCurrentUserRole();
-        return checkPageAccess(userRole, path);
     }
 
     #addToHistory(path) {
-        this.#history.unshift(path);
+        this.#history.unshift({
+            path,
+            timestamp: new Date().toISOString()
+        });
+
         if (this.#history.length > this.#maxHistoryLength) {
             this.#history.pop();
         }
     }
 
-    toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const content = document.querySelector('.dashboard__content');
+    registerRoute(path, handler, options = {}) {
+        this.#routes.set(path, { handler, options });
         
-        if (sidebar) {
-            this.#sidebarState = !this.#sidebarState;
-            this.#logger.info('Toggling sidebar:', { state: this.#sidebarState });
-            
-            if (this.#sidebarState) {
-                sidebar.classList.add('sidebar--open');
-                if (content) content.classList.add('dashboard__content--shifted');
+        if (this.#debugMode) {
+            this.#logger.info(`Registered route: ${path}`);
+        }
+    }
+
+    navigateTo(path, options = {}) {
+        if (!this.#routes.has(path)) {
+            this.#logger.warn(`Attempting to navigate to unregistered route: ${path}`);
+            return false;
+        }
+
+        const { replace = false } = options;
+
+        try {
+            if (replace) {
+                window.history.replaceState({}, '', path);
             } else {
-                sidebar.classList.remove('sidebar--open');
-                if (content) content.classList.remove('dashboard__content--shifted');
+                window.history.pushState({}, '', path);
             }
+
+            this.#currentRoute = path;
+            this.#addToHistory(path);
+            this.#handleRoute(path);
+
+            return true;
+        } catch (error) {
+            this.#logger.error(`Error navigating to ${path}:`, error);
+            return false;
         }
     }
 
-    closeSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const content = document.querySelector('.dashboard__content');
-        
-        if (sidebar) {
-            this.#sidebarState = false;
-            this.#logger.info('Closing sidebar');
-            
-            sidebar.classList.remove('sidebar--open');
-            if (content) content.classList.remove('dashboard__content--shifted');
-        }
-    }
-
-    goBack() {
+    back() {
         window.history.back();
     }
 
-    reload() {
-        window.location.reload();
+    forward() {
+        window.history.forward();
     }
 
-    // Public getters
-    get sidebarState() {
-        return this.#sidebarState;
+    getCurrentRoute() {
+        return this.#currentRoute;
     }
 
-    get currentPath() {
-        return window.location.pathname;
-    }
-
-    get navigationHistory() {
+    getHistory() {
         return [...this.#history];
     }
 
-    // Public utility methods
-    isCurrentPage(pageName) {
-        const pagePath = paths.getPagePath(pageName);
-        return this.currentPath === pagePath;
+    clearHistory() {
+        this.#history = [];
+        if (this.#debugMode) {
+            this.#logger.info('Navigation history cleared');
+        }
     }
 
-    getBaseUrl() {
-        return SITE_STATE === 'dev' ? 'http://127.0.0.1:5500' : paths.BASE_URL;
+    isRegisteredRoute(path) {
+        return this.#routes.has(path);
+    }
+
+    getRegisteredRoutes() {
+        return Array.from(this.#routes.keys());
+    }
+
+    setMaxHistoryLength(length) {
+        this.#maxHistoryLength = length;
+        // Trim history if needed
+        while (this.#history.length > length) {
+            this.#history.pop();
+        }
     }
 }
 
 // Create and export singleton instance
-const navigationService = new NavigationService();
-export default navigationService;
+const navigation = new NavigationService();
+export default navigation;

@@ -1,309 +1,162 @@
-import Logger from '../logger/LoggerService.js';
 import config from '../../../config/client.js';
-import { SITE_STATE } from '../../../config/paths.js';
 
 class QueueService {
-    static instance = null;
-    #logger;
-    #isInitialized = false;
-    #queues = new Map();
-    #workers = new Map();
-    #processing = new Map();
+    #queue = [];
+    #processing = false;
     #maxRetries = 3;
-    #retryDelay = 1000; // 1 second
+    #debugMode = window.env.SITE_STATE === 'dev';
     #maxQueueSize = 1000;
-    #debugMode = SITE_STATE === 'dev';
 
     constructor() {
-        if (QueueService.instance) {
-            return QueueService.instance;
+        if (this.#debugMode) {
+            console.log('QueueService initializing');
         }
-        this.#logger = Logger;
-        this.#logger.info('QueueService initializing');
         this.#initialize();
-        QueueService.instance = this;
     }
 
-    async #initialize() {
-        try {
-            // Initialize default queues
-            this.createQueue('default');
-            this.createQueue('high-priority');
-            this.createQueue('background');
-
-            // Setup visibility change handling
-            this.#setupVisibilityHandler();
-
-            this.#isInitialized = true;
-            this.#logger.info('QueueService initialized successfully');
-        } catch (error) {
-            this.#logger.error('QueueService initialization error:', error);
-            throw error;
-        }
-    }
-
-    #setupVisibilityHandler() {
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.pauseAll();
-            } else {
-                this.resumeAll();
-            }
+    #initialize() {
+        // Setup unload handler to save queue
+        window.addEventListener('beforeunload', () => {
+            this.#saveQueue();
         });
+
+        // Load saved queue
+        this.#loadQueue();
+
+        // Start processing
+        this.#processQueue();
     }
 
-    createQueue(queueName, options = {}) {
-        if (this.#queues.has(queueName)) {
-            throw new Error(`Queue ${queueName} already exists`);
-        }
-
-        const queue = {
-            name: queueName,
-            items: [],
-            options: {
-                maxSize: options.maxSize || this.#maxQueueSize,
-                maxRetries: options.maxRetries || this.#maxRetries,
-                retryDelay: options.retryDelay || this.#retryDelay,
-                priority: options.priority || 0
-            },
-            paused: false
-        };
-
-        this.#queues.set(queueName, queue);
-        this.#processing.set(queueName, false);
-
-        this.#logger.info('Queue created:', { queueName, options });
-        return true;
-    }
-
-    async enqueue(queueName, task, options = {}) {
+    #saveQueue() {
         try {
-            const queue = this.#queues.get(queueName);
-            if (!queue) {
-                throw new Error(`Queue ${queueName} not found`);
-            }
-
-            if (queue.items.length >= queue.options.maxSize) {
-                throw new Error(`Queue ${queueName} is full`);
-            }
-
-            const queueItem = {
-                id: crypto.randomUUID(),
-                task,
-                options: {
-                    priority: options.priority || 0,
-                    retries: 0,
-                    maxRetries: options.maxRetries || queue.options.maxRetries,
-                    timeout: options.timeout,
-                    ...options
-                },
-                status: 'pending',
-                addedAt: new Date().toISOString()
-            };
-
-            queue.items.push(queueItem);
-            
-            // Sort by priority
-            queue.items.sort((a, b) => b.options.priority - a.options.priority);
-
-            this.#logger.debug('Task enqueued:', {
-                queueName,
-                taskId: queueItem.id,
-                priority: queueItem.options.priority
-            });
-
-            // Start processing if not already running
-            if (!queue.paused && !this.#processing.get(queueName)) {
-                this.#processQueue(queueName);
-            }
-
-            return queueItem.id;
-
+            localStorage.setItem('taskQueue', JSON.stringify(this.#queue));
         } catch (error) {
-            this.#logger.error('Enqueue error:', error);
-            throw error;
+            console.error('Error saving queue:', error);
         }
     }
 
-    async #processQueue(queueName) {
-        const queue = this.#queues.get(queueName);
-        if (!queue || queue.paused || this.#processing.get(queueName)) {
-            return;
+    #loadQueue() {
+        try {
+            const savedQueue = localStorage.getItem('taskQueue');
+            if (savedQueue) {
+                this.#queue = JSON.parse(savedQueue);
+                if (this.#debugMode) {
+                    console.log('Loaded saved queue:', this.#queue);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading queue:', error);
         }
+    }
 
-        this.#processing.set(queueName, true);
+    async #processQueue() {
+        if (this.#processing || this.#queue.length === 0) return;
+
+        this.#processing = true;
 
         try {
-            while (queue.items.length > 0 && !queue.paused) {
-                const item = queue.items[0];
+            while (this.#queue.length > 0) {
+                const task = this.#queue[0];
                 
-                try {
-                    item.status = 'processing';
-                    item.startedAt = new Date().toISOString();
-
-                    // Execute task with timeout if specified
-                    if (item.options.timeout) {
-                        await this.#executeWithTimeout(item);
-                    } else {
-                        await item.task();
-                    }
-
-                    // Task completed successfully
-                    item.status = 'completed';
-                    item.completedAt = new Date().toISOString();
-                    this.#logger.debug('Task completed:', { queueName, taskId: item.id });
-
-                } catch (error) {
-                    await this.#handleTaskError(queue, item, error);
+                if (this.#debugMode) {
+                    console.log('Processing task:', task);
                 }
 
-                // Remove completed or failed tasks
-                if (item.status === 'completed' || item.status === 'failed') {
-                    queue.items.shift();
+                try {
+                    await this.#processTask(task);
+                    this.#queue.shift(); // Remove completed task
+                    this.#saveQueue();
+                } catch (error) {
+                    if (task.retries < this.#maxRetries) {
+                        task.retries++;
+                        if (this.#debugMode) {
+                            console.log(`Retrying task (${task.retries}/${this.#maxRetries}):`, task);
+                        }
+                    } else {
+                        this.#queue.shift(); // Remove failed task
+                        this.#saveQueue();
+                        console.error('Task failed after max retries:', task, error);
+                    }
                 }
             }
         } finally {
-            this.#processing.set(queueName, false);
+            this.#processing = false;
         }
     }
 
-    async #executeWithTimeout(item) {
-        return Promise.race([
-            item.task(),
-            new Promise((_, reject) => {
-                setTimeout(() => {
-                    reject(new Error('Task timeout'));
-                }, item.options.timeout);
-            })
-        ]);
-    }
-
-    async #handleTaskError(queue, item, error) {
-        this.#logger.error('Task error:', {
-            queueName: queue.name,
-            taskId: item.id,
-            error: error.message
+    async #processTask(task) {
+        // Simulate task processing
+        await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (Math.random() > 0.1) { // 90% success rate
+                    resolve();
+                } else {
+                    reject(new Error('Random task failure'));
+                }
+            }, 1000);
         });
+    }
 
-        if (item.options.retries < item.options.maxRetries) {
-            item.options.retries++;
-            item.status = 'pending';
-            
-            // Move to end of queue for retry after delay
-            queue.items.shift();
-            await new Promise(resolve => setTimeout(resolve, queue.options.retryDelay));
-            queue.items.push(item);
-
-        } else {
-            item.status = 'failed';
-            item.error = error.message;
-            item.failedAt = new Date().toISOString();
+    addTask(task) {
+        if (this.#queue.length >= this.#maxQueueSize) {
+            throw new Error('Queue is full');
         }
-    }
 
-    pause(queueName) {
-        const queue = this.#queues.get(queueName);
-        if (queue) {
-            queue.paused = true;
-            this.#logger.info('Queue paused:', queueName);
-        }
-    }
-
-    resume(queueName) {
-        const queue = this.#queues.get(queueName);
-        if (queue) {
-            queue.paused = false;
-            this.#processQueue(queueName);
-            this.#logger.info('Queue resumed:', queueName);
-        }
-    }
-
-    pauseAll() {
-        for (const [queueName] of this.#queues) {
-            this.pause(queueName);
-        }
-    }
-
-    resumeAll() {
-        for (const [queueName] of this.#queues) {
-            this.resume(queueName);
-        }
-    }
-
-    clear(queueName) {
-        const queue = this.#queues.get(queueName);
-        if (queue) {
-            queue.items = [];
-            this.#logger.info('Queue cleared:', queueName);
-        }
-    }
-
-    clearAll() {
-        for (const [queueName] of this.#queues) {
-            this.clear(queueName);
-        }
-    }
-
-    getQueueStatus(queueName) {
-        const queue = this.#queues.get(queueName);
-        if (!queue) return null;
-
-        return {
-            name: queue.name,
-            size: queue.items.length,
-            paused: queue.paused,
-            processing: this.#processing.get(queueName),
-            items: queue.items.map(item => ({
-                id: item.id,
-                status: item.status,
-                retries: item.options.retries,
-                priority: item.options.priority,
-                addedAt: item.addedAt,
-                startedAt: item.startedAt,
-                completedAt: item.completedAt,
-                failedAt: item.failedAt,
-                error: item.error
-            }))
-        };
-    }
-
-    getStats() {
-        const stats = {
-            queues: {},
-            totalQueues: this.#queues.size,
-            totalTasks: 0,
-            processingQueues: 0
+        const newTask = {
+            ...task,
+            id: Date.now(),
+            retries: 0,
+            addedAt: new Date().toISOString()
         };
 
-        for (const [name, queue] of this.#queues) {
-            const queueStats = {
-                size: queue.items.length,
-                paused: queue.paused,
-                processing: this.#processing.get(name),
-                pending: queue.items.filter(i => i.status === 'pending').length,
-                processing: queue.items.filter(i => i.status === 'processing').length,
-                completed: queue.items.filter(i => i.status === 'completed').length,
-                failed: queue.items.filter(i => i.status === 'failed').length
-            };
+        this.#queue.push(newTask);
+        this.#saveQueue();
 
-            stats.queues[name] = queueStats;
-            stats.totalTasks += queue.items.length;
-            if (this.#processing.get(name)) {
-                stats.processingQueues++;
+        if (this.#debugMode) {
+            console.log('Added task to queue:', newTask);
+        }
+
+        // Start processing if not already processing
+        if (!this.#processing) {
+            this.#processQueue();
+        }
+
+        return newTask.id;
+    }
+
+    removeTask(taskId) {
+        const index = this.#queue.findIndex(task => task.id === taskId);
+        if (index !== -1) {
+            const removedTask = this.#queue.splice(index, 1)[0];
+            this.#saveQueue();
+
+            if (this.#debugMode) {
+                console.log('Removed task from queue:', removedTask);
             }
-        }
 
-        return stats;
+            return true;
+        }
+        return false;
     }
 
-    static getInstance() {
-        if (!QueueService.instance) {
-            QueueService.instance = new QueueService();
+    getQueueStatus() {
+        return {
+            length: this.#queue.length,
+            processing: this.#processing,
+            tasks: [...this.#queue]
+        };
+    }
+
+    clearQueue() {
+        this.#queue = [];
+        this.#saveQueue();
+
+        if (this.#debugMode) {
+            console.log('Queue cleared');
         }
-        return QueueService.instance;
     }
 }
 
 // Create and export singleton instance
-const queueService = QueueService.getInstance();
-export default queueService;
+const queue = new QueueService();
+export default queue;
