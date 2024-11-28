@@ -1,5 +1,5 @@
 // Import paths configuration
-import paths from '/config/paths.js';
+import paths from '/config/paths.services.js';
 
 // Import dependencies using paths.resolve after paths is available
 let ThemeManager, FontManager, User, DataService, Logger, config, navigation;

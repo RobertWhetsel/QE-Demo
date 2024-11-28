@@ -2,7 +2,7 @@ import paths from '../../../config/paths.js';
 import Logger from '../../utils/logging/logger.js';
 import { User } from '../../models/user.js';
 import navigation from '../../services/navigation/navigation.js';
-import { UserCreationController } from '../admin/UserCreationController.js';
+import { UserCreationController } from '../admin/userCreation.controller.js';
 
 export class SidebarController {
     #logger;

@@ -1,4 +1,4 @@
-import cacheService from '../cache/CacheService.js';
+import cacheService from '../cache/cache.service.js';
 
 class BaseService {
     #debugMode = window.env.SITE_STATE === 'dev';

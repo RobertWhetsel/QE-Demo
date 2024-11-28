@@ -1,5 +1,5 @@
 // Import paths configuration
-import paths from './paths.js';
+import paths from './paths.config.js';
 
 // Get SITE_STATE from window.env
 const SITE_STATE = window.env.SITE_STATE;
@@ -19,7 +19,7 @@ const config = {
                 userData: 'userData',
                 auth: 'isAuthenticated',
                 userRole: 'userRole',
-                username: 'username',
+                username: 'userName',
                 users: 'users'
             }
         },
@@ -50,7 +50,7 @@ const config = {
                 userData: 'userData',
                 auth: 'isAuthenticated',
                 userRole: 'userRole',
-                username: 'username',
+                username: 'userName',
                 users: 'users'
             }
         },

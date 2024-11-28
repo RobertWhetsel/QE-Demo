@@ -1,6 +1,6 @@
-import { ROLES } from './index.js';
+import { ROLES } from './index.model.js';
 import paths from '../../config/paths.js';
-import Logger from '../utils/logging/LoggerService.js';
+import Logger from '../utils/logging/loggerService.utils.js';
 
 // Page access configuration
 const PAGE_ACCESS = {

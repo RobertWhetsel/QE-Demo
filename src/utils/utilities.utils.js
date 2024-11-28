@@ -1,6 +1,8 @@
 import { DOM_SELECTORS } from './constants.js';
 import DatabaseService from './modules/database.js';
 
+//RENEME THIS FILE
+
 /**
  * Form submission handler
  * @param {string} formId - ID of the form element

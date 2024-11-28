@@ -1,4 +1,4 @@
-import Logger from '../../utils/logging/LoggerService.js';
+import Logger from '../../utils/logging/loggerService.utils.js';
 import config from '../../../config/client.js';
 import errorHandler from '../error/ErrorHandlerService.js';
 

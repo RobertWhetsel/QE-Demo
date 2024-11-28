@@ -1,6 +1,6 @@
 import logger from '../logger/LoggerService.js';
 import cacheService from '../cache/CacheService.js';
-import errorHandler from '../error/ErrorHandlerService.js';
+import errorHandler from '../error/errorHandler.service.js';
 import { checkPageAccess, PUBLIC_PAGES } from '../../models/database.js';
 import { ROLES } from '../../models/index.js';
 import config from '../../../config/client.js';

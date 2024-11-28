@@ -2,7 +2,7 @@ import Logger from '../logger/LoggerService.js';
 import config from '../../../config/client.js';
 import paths from '../../../config/paths.js';
 import databaseService from '../database/DatabaseService.js';
-import queueService from '../queue/QueueService.js';
+import queueService from '../queue/queue.service.js';
 
 class ExportService {
     static instance = null;

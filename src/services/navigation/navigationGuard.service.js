@@ -1,6 +1,6 @@
 import { User } from '../../models/user.js';
 import logger from '../logger/LoggerService.js';
-import navigation from './NavigationService.js';
+import navigation from './navigation.services.js';
 import errorHandler from '../error/ErrorHandlerService.js';
 import { ROLES } from '../../models/index.js';
 import { checkPageAccess, PUBLIC_PAGES } from '../../models/database.js';

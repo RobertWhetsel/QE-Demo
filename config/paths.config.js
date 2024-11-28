@@ -43,44 +43,42 @@ const CORE_PATHS = {
     
     // HTML components
     components: {
-        head: `${VIEW_PATH}/components/head.html`,
-        nav: `${VIEW_PATH}/components/nav.html`,
-        sidebar: `${VIEW_PATH}/components/sidebar.html`,
-        header: `${VIEW_PATH}/components/header.html`,
-        'shared/layout': `${VIEW_PATH}/components/shared/layout.html`,
-        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.html`
+        head: `${VIEW_PATH}/components/head.views.html`,
+        nav: `${VIEW_PATH}/components/nav.views.html`,
+        sidebar: `${VIEW_PATH}/components/sidebar.views.html`,
+        header: `${VIEW_PATH}/components/header.views.html`,
+        'shared/layout': `${VIEW_PATH}/components/shared/layout.views.html`,
+        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.views.html`
     },
     
     // Pages
     pages: {
         root: '/',
-        adminControlPanel: `${VIEW_PATH}/pages/adminControlPanel.html`,
-        auth: `${VIEW_PATH}/pages/auth.html`,
-        availableSurveys: `${VIEW_PATH}/pages/availableSurveys.html`,
-        base: `${VIEW_PATH}/pages/base.html`,
-        completedSurveys: `${VIEW_PATH}/pages/completedSurveys.html`,
-        dashboard: `${VIEW_PATH}/pages/dashboard.html`,
-        forgotPassword: `${VIEW_PATH}/pages/forgotPassword.html`,
-        genesisAdmin: `${VIEW_PATH}/pages/genesisAdmin.html`,
-        login: `${VIEW_PATH}/pages/login.html`,
-        messages: `${VIEW_PATH}/pages/messages.html`,
-        platformAdmin: `${VIEW_PATH}/pages/platformAdmin.html`,
-        research: `${VIEW_PATH}/pages/research.html`,
-        researchDashboard: `${VIEW_PATH}/pages/researchDashboard.html`,
-        settings: `${VIEW_PATH}/pages/settings.html`,
-        spreadsheet: `${VIEW_PATH}/pages/spreadsheet.html`,
-        survey: `${VIEW_PATH}/pages/survey.html`,
-        tasks: `${VIEW_PATH}/pages/tasks.html`,
-        tempSetup: `${VIEW_PATH}/pages/tempSetup.html`,
-        userProfile: `${VIEW_PATH}/pages/userProfile.html`,
-        volunteerDashboard: `${VIEW_PATH}/pages/volunteerDashboard.html`
+        adminControlPanel: `${VIEW_PATH}/pages/admin-control-panel.views.html`,
+        auth: `${VIEW_PATH}/pages/auth.views.html`,
+        availableSurveys: `${VIEW_PATH}/pages/available-surveys.views.html`,
+        base: `${VIEW_PATH}/pages/base.views.html`,
+        completedSurveys: `${VIEW_PATH}/pages/completed-surveys.views.html`,
+        dashboard: `${VIEW_PATH}/pages/dashboard.views.html`,
+        forgotPassword: `${VIEW_PATH}/pages/forgot-password.views.html`,
+        genesisAdmin: `${VIEW_PATH}/pages/genesis-admin.views.html`,
+        login: `${VIEW_PATH}/pages/login.views.html`,
+        messages: `${VIEW_PATH}/pages/messages.views.html`,
+        research: `${VIEW_PATH}/pages/research.views.html`,
+        researchDashboard: `${VIEW_PATH}/pages/research-dashboard.views.html`,
+        settings: `${VIEW_PATH}/pages/settings.views.html`,
+        spreadsheet: `${VIEW_PATH}/pages/spreadsheet.views.html`,
+        survey: `${VIEW_PATH}/pages/survey.views.html`,
+        tasks: `${VIEW_PATH}/pages/tasks.views.html`,
+        userProfile: `${VIEW_PATH}/pages/user-profile.views.html`,
+        volunteerDashboard: `${VIEW_PATH}/pages/volunteer-dashboard.views.html`
     },
     
     // Utils
     utils: {
-        logger: `${MODULE_PATH}/utils/logging/test-logger.html`,
-        test: `${MODULE_PATH}/utils/testPage.html`,
-        testUser: `${MODULE_PATH}/utils/testUser.html`
+        logger: `${MODULE_PATH}/utils/logging/test-logger.utils.html`,
+        test: `${MODULE_PATH}/utils/testPage.utils.html`,
+        testUser: `${MODULE_PATH}/utils/test-user.utils.html`
     },
 
     // Data files
@@ -92,21 +90,21 @@ const CORE_PATHS = {
     modules: {
         // Core modules
         init: env.INIT_PATH,
-        paths: `${CONFIG_PATH}/paths.js`,
+        paths: `${CONFIG_PATH}/paths.services.js`,
         
         // Models
-        dataService: `${MODULE_PATH}/models/dataService.js`,
-        user: `${MODULE_PATH}/models/user.js`,
+        dataService: `${MODULE_PATH}/models/data.services.js`,
+        user: `${MODULE_PATH}/models/user.models.js`,
         
         // Services
-        navigation: `${MODULE_PATH}/services/navigation/navigationService.js`,
-        logger: `${MODULE_PATH}/utils/logging/LoggerService.js`,
+        navigation: `${MODULE_PATH}/services/navigation/navigation.services.js`,
+        logger: `${MODULE_PATH}/utils/logging/logger.services.js`,
         config: `${CONFIG_PATH}/client.js`,
-        themeManager: `${MODULE_PATH}/services/state/ThemeManagerService.js`,
-        fontManager: `${MODULE_PATH}/services/state/FontManagerService.js`,
+        themeManager: `${MODULE_PATH}/services/state/themeManager.services.js`,
+        fontManager: `${MODULE_PATH}/services/state/fontManager.services.js`,
         
         // Controllers
-        index: `${MODULE_PATH}/controllers/index.js`,
+        index: `${MODULE_PATH}/controllers/index.controllers.js`,
         admincontrolpanel: `${MODULE_PATH}/controllers/admin/admincontrolpanel.js`,
         login: `${MODULE_PATH}/controllers/auth/login.js`,
         settings: `${MODULE_PATH}/controllers/user/settings.js`,

@@ -1,5 +1,5 @@
 import { User } from '../../models/user.js';
-import Logger from '../../utils/logging/LoggerService.js';
+import Logger from '../../utils/logging/loggerService.utils.js';
 import errorHandler from '../error/ErrorHandlerService.js';
 
 class ThemeManagerService {

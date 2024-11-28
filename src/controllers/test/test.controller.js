@@ -2,7 +2,7 @@ import navigation from '../../services/navigation/navigation.js';
 import { User } from '../../models/user.js';
 import ThemeManager from '../../services/state/thememanager.js';
 import FontManager from '../../services/state/fontmanager.js';
-import Logger from '../../utils/logging/LoggerService.js';
+import Logger from '../../utils/logging/loggerService.utils.js';
 import config from '../../../config/client.js';
 import paths from '../../../config/paths.js';
 

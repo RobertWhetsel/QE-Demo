@@ -1,8 +1,8 @@
 import paths from '../../config/paths.js';
 
 // Core Models
-export { User } from './user.js';
-export { DataService } from './dataservice.js';
+export { User } from './user.model.js';
+export { DataService } from './dataService.model.js';
 
 // Constants and Types
 export const MODEL_TYPES = {
@@ -31,4 +31,4 @@ export const DATA_PATHS = {
 };
 
 // Export database utilities
-export { checkPageAccess, getAllowedPages, PUBLIC_PAGES } from './database.js';
+export { checkPageAccess, getAllowedPages, PUBLIC_PAGES } from './database.model.js';
