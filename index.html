@@ -1,81 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Eye - Welcome</title>
-    
-    <!-- Import paths and load CSS -->
+    <title>Welcome - Quantum Eye</title>
+
     <script type="module">
-        import paths from '/config/paths.js';
-        window.paths = paths; // Make paths available globally
-
-        // Load CSS files in correct order
-        const cssPaths = paths.getCssPaths();
-        cssPaths.forEach(href => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-        });
-
-        // Wait for CSS to load before initializing app
-        Promise.all(
-            Array.from(document.styleSheets).map(sheet => {
-                if (sheet.href) {
-                    return new Promise((resolve, reject) => {
-                        sheet.onload = resolve;
-                        sheet.onerror = reject;
-                    });
-                }
-                return Promise.resolve();
-            })
-        ).then(() => {
-            // Initialize application state
-            const init = paths.resolve('src/services/init.js');
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = init;
-            document.head.appendChild(script);
-        });
-
-        // Set logo source immediately after paths is loaded
-        window.addEventListener('DOMContentLoaded', () => {
-            const logoPath = paths.getAssetPath('logo');
-            document.getElementById('logoImg').src = logoPath;
-        });
+        import { initializeApp } from '/src/services/init/init.js';
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </head>
 <body>
-    <div class="welcome">
-        <img id="logoImg" alt="Quantum Eye Logo" class="welcome__logo">
+    <main class="welcome" role="main">
         <div class="welcome__content">
-            <h2 class="welcome__title">Login Instructions</h2>
-            <p class="welcome__text">Welcome to the Quantum Eye system. Please follow these steps:</p>
-            <ol class="welcome__list">
-                <li class="welcome__list-item">Click the Begin button below to start</li>
-                <li class="welcome__list-item">The system will check for existing users</li>
-                <li class="welcome__list-item">If users exist, you'll be taken to the login page</li>
-                <li class="welcome__list-item">If no users exist, you'll be directed to create a Genesis Admin account</li>
-            </ol>
+            <img id="logoImg" class="welcome__logo" alt="QE Logo">
+            <h2 class="welcome__title">Welcome to the Quantum Eye system</h2>
+            <div class="welcome__text">
+                <p class="font-bold">Login Instructions:</p>
+                <ol class="welcome__list">
+                    <li class="welcome__list-item">Click the Begin button below to start</li>
+                    <li class="welcome__list-item">The system will check for existing users</li>
+                    <li class="welcome__list-item">If users exist, you'll be taken to the login page</li>
+                    <li class="welcome__list-item">If no users exist, you'll be directed to create a Genesis Admin account</li>
+                </ol>
+            </div>
+            <div class="welcome__action">
+                <button id="begin-button" class="button button--primary">Begin Login Process</button>
+            </div>
+            <div class="welcome__tests">
+                <button id="test-button" class="button button--secondary">View Tests</button>
+            </div>
         </div>
-        <button id="begin-button" class="button button--primary">Begin Login Process</button>
-    </div>
-
-    <button id="logsButton" class="button button--secondary button--fixed">
-        View Logs
-    </button>
-
-    <script type="module">
-        import { IndexController } from '/src/controllers/index.js';
-        
-        // Initialize page after app is initialized
-        function initPage() {
-            new IndexController();
-        }
-
-        // Wait for app initialization before starting
-        document.addEventListener('appInitialized', initPage);
-    </script>
+    </main>
 </body>
 </html>

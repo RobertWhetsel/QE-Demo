@@ -1,40 +1,68 @@
-/* Welcome component styles following BEM methodology */
+/* Block */
 .welcome {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    text-align: center;
-    background-color: var(--bg-primary);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
+    min-height: 100vh;
+    padding: var(--spacing-xl);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
 }
 
-.welcome__logo {
-    max-width: 200px;
-    margin: 0 auto 2rem;  /* Center the logo horizontally and add bottom margin */
-    display: block;  /* Ensure block display for margin auto to work */
-}
-
+/* Content */
 .welcome__content {
-    margin: 2rem 0;
-    text-align: left;
+    width: 100%;
+    max-width: 600px;
+    background: var(--surface-color);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
 }
 
+/* Logo */
+.welcome__logo {
+    width: 200px;
+    height: auto;
+    margin: 0 auto var(--spacing-xl);
+}
+
+/* Title */
 .welcome__title {
     color: var(--text-primary);
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-lg);
 }
 
+/* Text */
 .welcome__text {
     color: var(--text-secondary);
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-md);
 }
 
+/* List */
 .welcome__list {
-    padding-left: 1.5rem;
+    text-align: left;
+    list-style-type: decimal;
+    padding-left: var(--spacing-xl);
+    margin: var(--spacing-lg) 0;
 }
 
 .welcome__list-item {
-    margin: 0.5rem 0;
     color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.5;
+}
+
+/* Action */
+.welcome__action {
+    margin-top: var(--spacing-xl);
+}
+
+/* Tests */
+.welcome__tests {
+    position: fixed;
+    bottom: var(--spacing-xl);
+    right: var(--spacing-xl);
+    z-index: var(--z-index-overlay);
 }

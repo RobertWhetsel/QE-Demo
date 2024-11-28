@@ -1,0 +1,22 @@
+{
+    "name": "QE-Demo Configuration System",
+    "short_name": "QE-Demo",
+    "description": "A demo web application using a structured configuration system to manage settings across environments.",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4CAF50",
+    "icons": [
+        {
+            "src": "icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "scope": "/"
+}

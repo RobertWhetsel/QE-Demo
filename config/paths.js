@@ -9,7 +9,7 @@ if (SITE_STATE === 'dev') {
     BASE_URL = 'http://127.0.0.1:5500';
     ASSET_PATH = '/assets';
     VIEW_PATH = '/src/views';
-    STYLE_PATH = '/src/styles';  // Updated to new styles location
+    STYLE_PATH = '/src/styles';
     MODULE_PATH = '/src';
 } else {
     // Production paths (AWS server)
@@ -24,7 +24,8 @@ if (SITE_STATE === 'dev') {
 const CORE_PATHS = {
     // Assets
     assets: {
-        logo: `${ASSET_PATH}/qeLogoBW.png`
+        logo: `${ASSET_PATH}/qeLogoBW.png`,
+        acme: `${ASSET_PATH}/acme.png`
     },
     
     // CSS files in load order
@@ -40,16 +41,18 @@ const CORE_PATHS = {
             `${STYLE_PATH}/layouts/_containers.css`,
             `${STYLE_PATH}/layouts/_grid.css`
         ],
-        // Component styles
+        // Component styles - ordered by dependency
         components: [
+            `${STYLE_PATH}/components/_admin-form.css`,
+            `${STYLE_PATH}/components/_admin-panel.css`,
             `${STYLE_PATH}/components/_button.css`,
             `${STYLE_PATH}/components/_form.css`,
             `${STYLE_PATH}/components/_loading.css`,
-            `${STYLE_PATH}/components/_welcome.css`,
             `${STYLE_PATH}/components/_login.css`,
             `${STYLE_PATH}/components/_navigation.css`,
             `${STYLE_PATH}/components/_admin-panel.css`,
-            `${STYLE_PATH}/components/_admin-form.css`  // Added for admin form
+            `${STYLE_PATH}/components/_test-panel.css`
+            `${STYLE_PATH}/components/_welcome.css`,
         ],
         // Utility styles loaded last
         utilities: [
@@ -64,24 +67,40 @@ const CORE_PATHS = {
         sidebar: `${VIEW_PATH}/components/sidebar.html`,
         header: `${VIEW_PATH}/components/header.html`,
         'shared/layout': `${VIEW_PATH}/components/shared/layout.html`,
-        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.html`  // Added admin form component
+        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.html`
     },
     
     // Pages
     pages: {
-        root: '/',  // Root directory for index.html
-        login: `${VIEW_PATH}/pages/login.html`,
-        genesisAdmin: `${VIEW_PATH}/pages/genesisAdmin.html`,
+        root: '/',
         adminControlPanel: `${VIEW_PATH}/pages/adminControlPanel.html`,
+        auth: `${VIEW_PATH}/pages/auth.html`,
+        availableSurveys: `${VIEW_PATH}/pages/availableSurveys.html`,
+        base: `${VIEW_PATH}/pages/base.html`,
+        CompletedSurveys: `${VIEW_PATH}/pages/CompletedSurveys.html`,
+        dashboard: `${VIEW_PATH}/pages/dashboard.html`,
+        forgotPassword: `${VIEW_PATH}/pages/forgotPassword.html`,
+        genesisAdmin: `${VIEW_PATH}/pages/genesisAdmin.html`,
+        login: `${VIEW_PATH}/pages/login.html`,
+        messages: `${VIEW_PATH}/pages/messages.html`,
         platformAdmin: `${VIEW_PATH}/pages/platformAdmin.html`,
+        research: `${VIEW_PATH}/pages/research.html`,
+        researchDashboard: `${VIEW_PATH}/pages/researchDashboard.html`,
         settings: `${VIEW_PATH}/pages/settings.html`,
-        userProfile: `${VIEW_PATH}/pages/userProfile.html`
+        spreadsheet: `${VIEW_PATH}/pages/spreadsheet.html`,
+        survey: `${VIEW_PATH}/pages/survey.html`,
+        tasks: `${VIEW_PATH}/pages/tasks.html`,
+        tempSetup: `${VIEW_PATH}/pages/tempSetup.html`,
+        userProfile: `${VIEW_PATH}/pages/userProfile.html`,
+        volunteerDashboard: `${VIEW_PATH}/pages/volunteerDashboard.html`
+
     },
     
     // Utils
     utils: {
         logger: `${MODULE_PATH}/utils/logging/test-logger.html`,
-        test: `${MODULE_PATH}/utils/testPage.html`
+        test: `${MODULE_PATH}/utils/testPage.html`,
+        testUser: `${VIEW_PATH}/utils/testUser.html`
     },
 
     // Data files
@@ -92,7 +111,7 @@ const CORE_PATHS = {
     // Module paths
     modules: {
         // Models
-        dataService: `${MODULE_PATH}/models/dataservice.js`,
+        dataService: `${MODULE_PATH}/models/dataService.js`,
         user: `${MODULE_PATH}/models/user.js`,
         
         // Services
@@ -149,14 +168,12 @@ const paths = {
 
     // Get all CSS paths in correct order
     getCssPaths: () => {
-        // Load all styles in correct order
         const allStyles = [
             ...CORE_PATHS.styles.base,
             ...CORE_PATHS.styles.layouts,
             ...CORE_PATHS.styles.components,
             ...CORE_PATHS.styles.utilities
         ];
-        
         return allStyles.map(path => paths.resolve(path));
     },
 
@@ -193,7 +210,7 @@ const paths = {
     // Get module path
     getModulePath: (name) => {
         const modulePath = CORE_PATHS.modules[name];
-        return paths.resolve(modulePath, true); // Pass true for module paths
+        return paths.resolve(modulePath, true);
     }
 };
 

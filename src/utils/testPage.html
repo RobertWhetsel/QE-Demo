@@ -8,7 +8,7 @@
     <!-- Import paths and load CSS -->
     <script type="module">
         import paths from '/config/paths.js';
-        window.paths = paths; // Make paths available globally
+        window.paths = paths;
 
         // Load CSS files in correct order
         const cssPaths = paths.getCssPaths();
@@ -38,152 +38,62 @@
             script.src = init;
             document.head.appendChild(script);
         });
-
-        // Set logo source immediately after paths is loaded
-        window.addEventListener('DOMContentLoaded', () => {
-            const logoPath = paths.getAssetPath('logo');
-            document.getElementById('logoImg').src = logoPath;
-        });
     </script>
-
-    <style>
-        .test-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-
-        .test-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .test-header img {
-            width: 40px;
-            height: 40px;
-        }
-
-        .test-header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .test-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;
-        }
-
-        .test-section {
-            background: white;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .test-section h2 {
-            margin: 0 0 10px 0;
-            font-size: 1rem;
-            color: #333;
-        }
-
-        .results-section {
-            grid-column: 1 / -1;
-        }
-
-        .test-results {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .test-result {
-            background: #f8f9fa;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .test-result h3 {
-            margin: 0 0 5px 0;
-            font-size: 0.9rem;
-        }
-
-        .test-result pre {
-            margin: 0;
-            padding: 5px;
-            background: white;
-            border-radius: 2px;
-            font-size: 0.8rem;
-            overflow-x: auto;
-        }
-
-        #error-message {
-            margin: 5px 0;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-    </style>
 </head>
 <body>
     <div id="layout-container"></div>
 
-    <div class="test-container">
-        <div class="test-header">
-            <img id="logoImg" alt="QE Logo">
-            <h1>QE Test Panel</h1>
-        </div>
+    <main class="test-panel">
+        <header class="test-panel__header">
+            <img id="logoImg" class="test-panel__logo" alt="QE Logo">
+            <h1 class="test-panel__title">QE Test Panel</h1>
+        </header>
 
-        <div class="test-grid">
-            <div class="test-section">
-                <h2>Components</h2>
-                <div class="button-group">
+        <div class="test-panel__grid">
+            <section class="test-panel__section">
+                <h2 class="test-panel__section-title">Components</h2>
+                <div class="test-panel__button-group">
                     <button id="testHead" class="button button--primary">Head</button>
                     <button id="testNav" class="button button--primary">Nav</button>
                     <button id="testSidebar" class="button button--primary">Sidebar</button>
                     <button id="testLayout" class="button button--primary">Layout</button>
                 </div>
-            </div>
+            </section>
 
-            <div class="test-section">
-                <h2>Services</h2>
-                <div class="button-group">
+            <section class="test-panel__section">
+                <h2 class="test-panel__section-title">Services</h2>
+                <div class="test-panel__button-group">
                     <button id="testAuth" class="button button--primary">Auth</button>
                     <button id="testData" class="button button--primary">Data</button>
                     <button id="testNavigation" class="button button--primary">Navigation</button>
                 </div>
-            </div>
+            </section>
 
-            <div class="test-section">
-                <h2>State</h2>
-                <div class="button-group">
+            <section class="test-panel__section">
+                <h2 class="test-panel__section-title">State</h2>
+                <div class="test-panel__button-group">
                     <button id="testTheme" class="button button--primary">Theme</button>
                     <button id="testFont" class="button button--primary">Font</button>
                     <button id="testStorage" class="button button--primary">Storage</button>
                 </div>
-            </div>
+            </section>
 
-            <div class="test-section">
-                <h2>Debug</h2>
-                <div class="button-group">
+            <section class="test-panel__section">
+                <h2 class="test-panel__section-title">Debug</h2>
+                <div class="test-panel__button-group">
                     <button id="viewLogs" class="button button--secondary">Logs</button>
                     <button id="clearStorage" class="button button--secondary">Clear</button>
                     <button id="resetState" class="button button--secondary">Reset</button>
                 </div>
-            </div>
+            </section>
 
-            <div class="test-section results-section">
-                <h2>Results</h2>
-                <div id="error-message" class="message message--error"></div>
-                <div id="results" class="test-results"></div>
-            </div>
+            <section class="test-panel__section test-panel__results">
+                <h2 class="test-panel__section-title">Results</h2>
+                <div id="error-message" class="test-panel__error"></div>
+                <div id="results" class="test-panel__results-content"></div>
+            </section>
         </div>
-    </div>
+    </main>
 
     <div id="loading" class="loading">
         <div class="loading__spinner"></div>
