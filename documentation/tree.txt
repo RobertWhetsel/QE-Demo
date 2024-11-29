@@ -4,16 +4,19 @@
 ├── assets
 │   ├── acme.png
 │   └── qeLogoBW.png
-├── coding-guidelines.md
 ├── config
 │   ├── client.config.js
 │   ├── env.json
-│   ├── paths.config.js
+│   └── paths.config.js
+├── data
 │   ├── users.csv
 │   └── users.json
+├── documentation
+│   ├── coding-guidelines.md
+│   ├── naming-conventions.md
+│   └── tree.txt
 ├── index.html
 ├── manifest.json
-├── naming-conventions.md
 ├── src
 │   ├── controllers
 │   │   ├── admin
@@ -107,7 +110,6 @@
 │   │   │   └── Search.service.js
 │   │   ├── state
 │   │   │   ├── fontManager.service.js
-│   │   │   ├── stateManager.service.js
 │   │   │   └── themeManager.service.js
 │   │   ├── storage
 │   │   │   └── storage.service.js
@@ -140,9 +142,13 @@
 │   │   ├── loadCommonHead.utilis.js
 │   │   ├── logging
 │   │   │   ├── app.log
-│   │   │   ├── loggerService.utils.js
+│   │   │   ├── logger.utils.js
 │   │   │   └── test-logger.utils.js
 │   │   ├── standardization.utils.js
+│   │   ├── tests
+│   │   │   ├── test-logger.view.html
+│   │   │   ├── test-page.view.html
+│   │   │   └── test-user.view.html
 │   │   └── utilities.utils.js
 │   └── views
 │       ├── components
@@ -174,11 +180,7 @@
 │       │   ├── tasks.view.html
 │       │   ├── user-profile.view.html
 │       │   └── volunteer-dashboard.view.html
-│       ├── templates
-│       └── tests
-│           ├── test-logger.view.html
-│           ├── testPage.view.html
-│           └── testUser.view.html
+│       └── templates
 └── tree.txt
 
-59 directories, 123 files
+61 directories, 123 files

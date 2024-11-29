@@ -1,44 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QE Test Page</title>
-    
-    <!-- Import paths and load CSS -->
-    <script type="module">
-        import paths from '/config/paths.js';
-        window.paths = paths;
-
-        // Load CSS files in correct order
-        const cssPaths = paths.getCssPaths();
-        cssPaths.forEach(href => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-        });
-
-        // Wait for CSS to load before initializing app
-        Promise.all(
-            Array.from(document.styleSheets).map(sheet => {
-                if (sheet.href) {
-                    return new Promise((resolve, reject) => {
-                        sheet.onload = resolve;
-                        sheet.onerror = reject;
-                    });
-                }
-                return Promise.resolve();
-            })
-        ).then(() => {
-            // Initialize application state
-            const init = paths.resolve('src/services/init.js');
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = init;
-            document.head.appendChild(script);
-        });
-    </script>
 </head>
 <body>
     <div id="layout-container"></div>
@@ -66,6 +31,14 @@
                     <button id="testAuth" class="button button--primary">Auth</button>
                     <button id="testData" class="button button--primary">Data</button>
                     <button id="testNavigation" class="button button--primary">Navigation</button>
+                </div>
+            </section>
+
+            <section class="test-panel__section">
+                <h2 class="test-panel__section-title"> CSS </h2>
+                <div class="test-panel__button-group">
+                    <button id="testStyles">Test CSS Loading</button>
+                    <button id="verifyStyles">Verify Stylesheets</button>
                 </div>
             </section>
 
@@ -100,15 +73,9 @@
     </div>
 
     <script type="module">
-        import { TestController } from '/src/controllers/test/testController.js';
-        
-        // Initialize page after app is initialized
-        function initPage() {
-            new TestController();
-        }
-
-        // Wait for app initialization before starting
-        document.addEventListener('appInitialized', initPage);
+        // Just import the test controller using existing window.env
+        const { TestController } = await import(window.env.CORE_PATHS.controllers.test.test);
+        new TestController();
     </script>
 </body>
 </html>

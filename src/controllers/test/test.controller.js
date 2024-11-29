@@ -1,10 +1,27 @@
-import navigation from '../../services/navigation/navigation.js';
-import { User } from '../../models/user.js';
-import ThemeManager from '../../services/state/thememanager.js';
-import FontManager from '../../services/state/fontmanager.js';
-import Logger from '../../utils/logging/loggerService.utils.js';
-import config from '../../../config/client.js';
-import paths from '../../../config/paths.js';
+// test.controller.js
+let {
+    navigation,
+    User,
+    ThemeManager,
+    FontManager,
+    Logger,
+    config,
+    EventBus
+} = {};
+
+// Initialize dependencies asynchronously
+async function initializeDependencies() {
+    const { PathResolver } = window.env;
+    const { CORE_PATHS } = window.env;
+
+    navigation = await import(PathResolver.getModulePath(CORE_PATHS.services.navigation.navigation));
+    User = (await import(PathResolver.getModulePath(CORE_PATHS.models.user))).User;
+    ThemeManager = (await import(PathResolver.getModulePath(CORE_PATHS.services.state.theme))).default;
+    FontManager = (await import(PathResolver.getModulePath(CORE_PATHS.services.state.font))).default;
+    Logger = (await import(PathResolver.getModulePath(CORE_PATHS.utils.logging.logger))).default;
+    config = (await import(PathResolver.getModulePath(CORE_PATHS.services.base.config))).default;
+    EventBus = (await import(PathResolver.getModulePath(CORE_PATHS.services.events.eventBus))).default;
+}
 
 export class TestController {
     #logger;
@@ -13,9 +30,13 @@ export class TestController {
     #testResults = [];
 
     constructor() {
-        this.#logger = Logger;
-        this.#logger.info('TestController initializing');
-        this.#initialize();
+        initializeDependencies().then(() => {
+            this.#logger = Logger;
+            this.#logger.info('TestController initializing');
+            this.#initialize();
+        }).catch(error => {
+            console.error('Failed to initialize TestController dependencies:', error);
+        });
     }
 
     async #initialize() {
@@ -25,6 +46,10 @@ export class TestController {
             
             // Setup event listeners
             this.#setupEventListeners();
+            
+            // Subscribe to style loading events
+            EventBus.subscribe('styleLoadSuccess', this.#handleStyleLoadSuccess.bind(this));
+            EventBus.subscribe('styleLoadError', this.#handleStyleLoadError.bind(this));
 
             this.#isInitialized = true;
             this.#logger.info('TestController initialized successfully');
@@ -47,6 +72,10 @@ export class TestController {
             testData: document.getElementById('testData'),
             testNavigation: document.getElementById('testNavigation'),
 
+            // CSS test buttons
+            testStyles: document.getElementById('testStyles'),
+            verifyStyles: document.getElementById('verifyStyles'),
+
             // State test buttons
             testTheme: document.getElementById('testTheme'),
             testFont: document.getElementById('testFont'),
@@ -57,18 +86,13 @@ export class TestController {
             clearStorage: document.getElementById('clearStorage'),
             resetState: document.getElementById('resetState'),
 
-            // Results and messages
+            // Display elements
             results: document.getElementById('results'),
             errorMessage: document.getElementById('error-message'),
             loadingSpinner: document.getElementById('loading')
         };
 
-        this.#logger.debug('View elements initialized:', {
-            hasComponentButtons: !!(this.#view.testHead && this.#view.testNav),
-            hasServiceButtons: !!(this.#view.testAuth && this.#view.testData),
-            hasStateButtons: !!(this.#view.testTheme && this.#view.testFont),
-            hasDebugButtons: !!(this.#view.viewLogs && this.#view.clearStorage)
-        });
+        this.#logger.debug('View elements initialized');
     }
 
     #setupEventListeners() {
@@ -76,214 +100,218 @@ export class TestController {
         this.#view.testHead?.addEventListener('click', () => this.#testComponent('head'));
         this.#view.testNav?.addEventListener('click', () => this.#testComponent('nav'));
         this.#view.testSidebar?.addEventListener('click', () => this.#testComponent('sidebar'));
-        this.#view.testLayout?.addEventListener('click', () => this.#testComponent('shared/layout'));
+        this.#view.testLayout?.addEventListener('click', () => this.#testComponent('layout'));
 
         // Service tests
-        this.#view.testAuth?.addEventListener('click', () => this.#testAuth());
-        this.#view.testData?.addEventListener('click', () => this.#testData());
-        this.#view.testNavigation?.addEventListener('click', () => this.#testNavigation());
+        this.#view.testAuth?.addEventListener('click', () => this.#testService('auth'));
+        this.#view.testData?.addEventListener('click', () => this.#testService('data'));
+        this.#view.testNavigation?.addEventListener('click', () => this.#testService('navigation'));
+
+        // CSS tests
+        this.#view.testStyles?.addEventListener('click', () => this.#testStyleLoading());
+        this.#view.verifyStyles?.addEventListener('click', () => this.#verifyStylesheets());
 
         // State tests
-        this.#view.testTheme?.addEventListener('click', () => this.#testTheme());
-        this.#view.testFont?.addEventListener('click', () => this.#testFont());
-        this.#view.testStorage?.addEventListener('click', () => this.#testStorage());
+        this.#view.testTheme?.addEventListener('click', () => this.#testState('theme'));
+        this.#view.testFont?.addEventListener('click', () => this.#testState('font'));
+        this.#view.testStorage?.addEventListener('click', () => this.#testState('storage'));
 
         // Debug actions
         this.#view.viewLogs?.addEventListener('click', () => this.#viewLogs());
         this.#view.clearStorage?.addEventListener('click', () => this.#clearStorage());
         this.#view.resetState?.addEventListener('click', () => this.#resetState());
-
-        this.#logger.debug('Event listeners setup complete');
     }
 
-    async #testComponent(name) {
+    async #testComponent(component) {
         try {
-            this.#showLoading(true);
-            this.#logger.info(`Testing ${name} component`);
+            const { PathResolver, CORE_PATHS } = window.env;
+            const componentPath = CORE_PATHS.views.components[component];
+            const response = await fetch(PathResolver.resolve(componentPath));
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load ${component} component`);
+            }
 
-            const response = await fetch(paths.getComponentPath(name));
-            const html = await response.text();
-
-            this.#showResult(`${name} Component`, {
-                'Status': 'Loaded',
-                'Length': html.length,
-                'Path': paths.getComponentPath(name)
+            this.#showResult(`${component} Component Test`, {
+                status: 'success',
+                path: componentPath
             });
         } catch (error) {
-            this.#logger.error(`Component test failed: ${name}`, error);
-            this.#handleError(`Failed to load ${name}`);
-        } finally {
-            this.#showLoading(false);
+            this.#logger.error(`Component test failed for ${component}:`, error);
+            this.#handleError(`Failed to test ${component} component`);
         }
     }
 
-    async #testAuth() {
+    async #testService(service) {
         try {
-            this.#logger.info('Testing Auth service');
-            const user = User.getCurrentUser();
-
-            this.#showResult('Auth Test', {
-                'User Service': !!User,
-                'Authenticated': User.isAuthenticated(),
-                'Current User': user?.username,
-                'Role': user?.role
+            const { PathResolver, CORE_PATHS } = window.env;
+            const servicePath = CORE_PATHS.services[service];
+            const module = await import(PathResolver.resolve(servicePath));
+            
+            this.#showResult(`${service} Service Test`, {
+                status: 'success',
+                path: servicePath,
+                exports: Object.keys(module)
             });
         } catch (error) {
-            this.#logger.error('Auth test failed:', error);
-            this.#handleError('Auth test failed');
+            this.#logger.error(`Service test failed for ${service}:`, error);
+            this.#handleError(`Failed to test ${service} service`);
         }
     }
 
-    async #testData() {
+    async #testStyleLoading() {
         try {
-            const dataService = window.QE?.DataService;
-            const data = await dataService?.getData();
+            const stylesheets = document.styleSheets;
+            let loadedCount = 0;
+            let failedCount = 0;
+            
+            for (let i = 0; i < stylesheets.length; i++) {
+                const sheet = stylesheets[i];
+                try {
+                    if (sheet.href) {
+                        // Test accessing rules to verify loading
+                        const rules = sheet.cssRules;
+                        this.#logger.info(`Stylesheet loaded: ${sheet.href}`);
+                        loadedCount++;
+                    }
+                } catch (error) {
+                    this.#logger.error(`Failed to load stylesheet: ${sheet.href}`);
+                    failedCount++;
+                }
+            }
 
-            this.#showResult('Data Test', {
-                'Service': !!dataService,
-                'Data': !!data,
-                'Users': data?.users?.length || 0
+            this.#showResult('Style Loading Test', {
+                total: stylesheets.length,
+                loaded: loadedCount,
+                failed: failedCount
             });
+
         } catch (error) {
-            this.#logger.error('Data test failed:', error);
-            this.#handleError('Data test failed');
+            this.#logger.error('Style test failed:', error);
+            this.#handleError('Style test failed');
         }
     }
 
-    #testNavigation() {
+    async #verifyStylesheets() {
+        const expectedStyles = window.env.STYLE_PATHS;
+        const loadedStyles = Array.from(document.styleSheets)
+            .map(sheet => sheet.href)
+            .filter(Boolean);
+
+        const missingStyles = [];
+        const { PathResolver } = window.env;
+
+        Object.values(expectedStyles).flat().forEach(stylePath => {
+            const fullPath = PathResolver.resolve(stylePath);
+            if (!loadedStyles.some(href => href.includes(stylePath))) {
+                missingStyles.push(stylePath);
+            }
+        });
+
+        this.#showResult('Style Verification', {
+            expected: Object.values(expectedStyles).flat().length,
+            loaded: loadedStyles.length,
+            missing: missingStyles
+        });
+    }
+
+    async #testState(state) {
         try {
-            this.#showResult('Navigation Test', {
-                'Service': !!navigation,
-                'Path': window.location.pathname,
-                'Base URL': paths.BASE_URL
-            });
+            let result;
+            switch (state) {
+                case 'theme':
+                    result = await ThemeManager.getTheme();
+                    break;
+                case 'font':
+                    result = await FontManager.getFont();
+                    break;
+                case 'storage':
+                    result = {
+                        localStorage: Object.keys(localStorage),
+                        sessionStorage: Object.keys(sessionStorage)
+                    };
+                    break;
+            }
+
+            this.#showResult(`${state} State Test`, result);
         } catch (error) {
-            this.#logger.error('Navigation test failed:', error);
-            this.#handleError('Navigation test failed');
+            this.#logger.error(`State test failed for ${state}:`, error);
+            this.#handleError(`Failed to test ${state} state`);
         }
     }
 
-    #testTheme() {
+    async #viewLogs() {
         try {
-            this.#showResult('Theme Test', {
-                'Current': document.documentElement.getAttribute('data-theme'),
-                'Manager': !!ThemeManager
-            });
+            const logs = await Logger.getLogs();
+            this.#showResult('Application Logs', logs);
         } catch (error) {
-            this.#logger.error('Theme test failed:', error);
-            this.#handleError('Theme test failed');
+            this.#logger.error('Failed to view logs:', error);
+            this.#handleError('Failed to view logs');
         }
     }
 
-    #testFont() {
+    async #clearStorage() {
         try {
-            this.#showResult('Font Test', {
-                'Current': document.documentElement.getAttribute('data-font'),
-                'Manager': !!FontManager
-            });
-        } catch (error) {
-            this.#logger.error('Font test failed:', error);
-            this.#handleError('Font test failed');
-        }
-    }
-
-    #testStorage() {
-        try {
-            this.#showResult('Storage Test', {
-                'Local Storage': Object.keys(localStorage),
-                'Session Storage': Object.keys(sessionStorage)
-            });
-        } catch (error) {
-            this.#logger.error('Storage test failed:', error);
-            this.#handleError('Storage test failed');
-        }
-    }
-
-    #viewLogs() {
-        this.#logger.info('Opening logs viewer');
-        window.open(paths.getUtilPath('logger'), '_blank');
-    }
-
-    #clearStorage() {
-        try {
-            this.#logger.info('Clearing storage');
             localStorage.clear();
             sessionStorage.clear();
             this.#showResult('Storage Cleared', {
-                'Status': 'Success'
+                status: 'success',
+                timestamp: new Date().toISOString()
             });
         } catch (error) {
-            this.#logger.error('Clear storage failed:', error);
+            this.#logger.error('Failed to clear storage:', error);
             this.#handleError('Failed to clear storage');
         }
     }
 
-    #resetState() {
-        this.#logger.info('Resetting application state');
-        this.#clearStorage();
-        location.reload();
+    async #resetState() {
+        try {
+            await ThemeManager.reset();
+            await FontManager.reset();
+            this.#clearStorage();
+            this.#showResult('State Reset', {
+                status: 'success',
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            this.#logger.error('Failed to reset state:', error);
+            this.#handleError('Failed to reset state');
+        }
+    }
+
+    #handleStyleLoadSuccess(event) {
+        this.#logger.info('Style loaded:', event.detail);
+    }
+
+    #handleStyleLoadError(event) {
+        this.#logger.error('Style load error:', event.detail);
     }
 
     #showResult(title, data) {
-        this.#logger.info(`Showing test result: ${title}`);
+        const result = { title, data, timestamp: new Date().toISOString() };
+        this.#testResults.push(result);
         
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'test-result';
-        resultDiv.innerHTML = `
-            <h3>${title}</h3>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
-        `;
-
         if (this.#view.results) {
-            this.#view.results.insertBefore(resultDiv, this.#view.results.firstChild);
-        }
-
-        // Store result
-        this.#testResults.push({ title, data, timestamp: new Date().toISOString() });
-    }
-
-    #showLoading(show) {
-        if (this.#view.loadingSpinner) {
-            this.#view.loadingSpinner.style.display = show ? 'flex' : 'none';
+            const resultHtml = `
+                <div class="test-result">
+                    <h3>${title}</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <small>${result.timestamp}</small>
+                </div>
+            `;
+            this.#view.results.insertAdjacentHTML('afterbegin', resultHtml);
         }
     }
 
     #handleError(message) {
-        this.#logger.error('Test error:', message);
+        this.#logger.error(message);
         if (this.#view.errorMessage) {
             this.#view.errorMessage.textContent = message;
-            this.#view.errorMessage.classList.add('show');
-            
+            this.#view.errorMessage.style.display = 'block';
             setTimeout(() => {
-                this.#view.errorMessage.classList.remove('show');
-            }, config.ui.toastDuration);
+                this.#view.errorMessage.style.display = 'none';
+            }, 5000);
         }
-    }
-
-    // Public methods for external access
-    getTestResults() {
-        return [...this.#testResults];
-    }
-
-    clearResults() {
-        if (this.#view.results) {
-            this.#view.results.innerHTML = '';
-        }
-        this.#testResults = [];
-    }
-
-    async runAllTests() {
-        const components = ['head', 'nav', 'sidebar', 'layout'];
-        for (const component of components) {
-            await this.#testComponent(component);
-        }
-
-        this.#testAuth();
-        this.#testData();
-        this.#testNavigation();
-        this.#testTheme();
-        this.#testFont();
-        this.#testStorage();
     }
 }
 

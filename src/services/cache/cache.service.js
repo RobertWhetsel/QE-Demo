@@ -1,4 +1,6 @@
-import { User } from '../../models/user.js';
+// Get paths from window.env
+const { PATHS_MODULE } = window.env;
+const paths = await import(PATHS_MODULE);
 
 class CacheService {
     #cache = new Map();

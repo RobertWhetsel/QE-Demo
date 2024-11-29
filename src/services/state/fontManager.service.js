@@ -1,4 +1,4 @@
-import { User } from '../../models/user.js';
+import { User } from '../../models/user.model.js';
 
 class FontManager {
     // Map of display names to CSS-safe values and full font-family strings

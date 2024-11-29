@@ -1,11 +1,16 @@
-import logger from '../logger/LoggerService.js';
-import errorHandler from '../error/ErrorHandlerService.js';
-import databaseService from '../database/DatabaseService.js';
-import cacheService from '../cache/CacheService.js';
-import { ROLES } from '../../models/index.js';
-import config from '../../../config/client.js';
-import { checkPageAccess, PUBLIC_PAGES } from '../../models/database.js';
-import { hashPassword, comparePasswords } from '../../utils/crypto.js';
+//import logger from '../logger/LoggerService.js';
+//import errorHandler from '../error/ErrorHandlerService.js';
+//import databaseService from '../database/DatabaseService.js';
+//import cacheService from '../cache/CacheService.js';
+//import { ROLES } from '../../models/index.js';
+//import config from '../../../config/client.js';
+//import { checkPageAccess, PUBLIC_PAGES } from '../../models/database.js';
+//import { hashPassword, comparePasswords } from '../../utils/crypto.js';
+
+
+// Get paths from window.env
+const { PATHS_MODULE } = window.env;
+const paths = await import(PATHS_MODULE);
 
 class AuthService {
     #logger;

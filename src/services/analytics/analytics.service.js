@@ -1,11 +1,18 @@
+// Use proper path resolution from window.env
+const { default: Logger } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.utils.logging.logger));
+const { EventBus } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.events.eventBus));
+
 class AnalyticsService {
     #enabled = window.env.SITE_STATE !== 'dev';
     #events = [];
-    #maxEvents = 1000;
+    #maxEvents = window.env.ANALYTICS_MAX_EVENTS || 1000;
+    #flushInterval = window.env.ANALYTICS_FLUSH_INTERVAL || 30000;
+    #logger;
 
     constructor() {
+        this.#logger = Logger;
         if (this.#enabled) {
-            console.log('Analytics Service initializing');
+            this.#logger.info('AnalyticsService initializing');
             this.#initialize();
         }
     }
@@ -17,7 +24,13 @@ class AnalyticsService {
         });
 
         // Setup periodic flush
-        setInterval(() => this.#flush(), 30000); // Flush every 30 seconds
+        setInterval(() => this.#flush(), this.#flushInterval);
+
+        // Subscribe to relevant events
+        EventBus.subscribe('error', (data) => this.trackError(data.error));
+        EventBus.subscribe('navigationEnd', (data) => this.trackPageView(data.route));
+
+        this.#logger.info('AnalyticsService initialized successfully');
     }
 
     #flush() {
@@ -25,7 +38,7 @@ class AnalyticsService {
             // In production, send to analytics service
             // In dev, just log
             if (window.env.SITE_STATE === 'dev') {
-                console.log('Analytics events:', this.#events);
+                this.#logger.debug('Analytics events:', this.#events);
             } else {
                 // Send to analytics service
                 this.#sendToAnalytics(this.#events);
@@ -36,7 +49,10 @@ class AnalyticsService {
 
     #sendToAnalytics(events) {
         // Implementation for sending to analytics service
-        console.log('Sending to analytics:', events);
+        this.#logger.info('Sending to analytics:', events);
+        
+        // Publish event for tracking
+        EventBus.publish('analyticsSend', { events });
     }
 
     trackEvent(category, action, label = null, value = null) {
@@ -51,6 +67,9 @@ class AnalyticsService {
         };
 
         this.#events.push(event);
+        
+        // Publish event for real-time tracking
+        EventBus.publish('analyticsEvent', event);
 
         if (this.#events.length >= this.#maxEvents) {
             this.#flush();
@@ -59,14 +78,34 @@ class AnalyticsService {
 
     trackPageView(page) {
         this.trackEvent('Page View', page);
+        this.#logger.debug('Page view tracked:', page);
     }
 
     trackError(error) {
         this.trackEvent('Error', error.message, error.stack);
+        this.#logger.debug('Error tracked:', error.message);
     }
 
     trackTiming(category, variable, time) {
         this.trackEvent('Timing', category, variable, time);
+        this.#logger.debug('Timing tracked:', { category, variable, time });
+    }
+
+    // Public getters
+    get isEnabled() {
+        return this.#enabled;
+    }
+
+    get pendingEvents() {
+        return this.#events.length;
+    }
+
+    get configuration() {
+        return {
+            enabled: this.#enabled,
+            maxEvents: this.#maxEvents,
+            flushInterval: this.#flushInterval
+        };
     }
 }
 

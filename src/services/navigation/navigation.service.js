@@ -1,155 +1,92 @@
-import Logger from '../../utils/logging/loggerService.utils.js';
-import config from '../../../config/client.js';
-
+// Navigation service following MVC and modular patterns
 class NavigationService {
-    #logger;
-    #currentRoute;
-    #routes = new Map();
-    #debugMode = window.env.SITE_STATE === 'dev';
-    #history = [];
-    #maxHistoryLength = 50;
-
     constructor() {
-        this.#logger = Logger;
-        if (this.#debugMode) {
-            this.#logger.info('NavigationService initializing');
+        if (NavigationService.instance) {
+            return NavigationService.instance;
         }
-        this.#initialize();
-    }
-
-    #initialize() {
-        try {
-            // Setup popstate listener
-            window.addEventListener('popstate', (event) => {
-                this.#handlePopState(event);
-            });
-
-            // Setup initial route
-            this.#handleInitialRoute();
-
-            if (this.#debugMode) {
-                this.#logger.info('NavigationService initialized successfully');
-            }
-        } catch (error) {
-            this.#logger.error('NavigationService initialization error:', error);
-        }
-    }
-
-    #handleInitialRoute() {
-        const path = window.location.pathname;
-        this.#currentRoute = path;
-        this.#addToHistory(path);
-        this.#handleRoute(path);
-    }
-
-    #handlePopState(event) {
-        const path = window.location.pathname;
-        this.#currentRoute = path;
-        this.#handleRoute(path);
-    }
-
-    #handleRoute(path) {
-        const route = this.#routes.get(path);
-        if (route) {
-            try {
-                route.handler();
-                if (this.#debugMode) {
-                    this.#logger.info(`Navigated to: ${path}`);
-                }
-            } catch (error) {
-                this.#logger.error(`Error handling route ${path}:`, error);
-            }
-        } else {
-            this.#logger.warn(`No handler found for route: ${path}`);
-            this.navigateTo('/404');
-        }
-    }
-
-    #addToHistory(path) {
-        this.#history.unshift({
-            path,
-            timestamp: new Date().toISOString()
-        });
-
-        if (this.#history.length > this.#maxHistoryLength) {
-            this.#history.pop();
-        }
-    }
-
-    registerRoute(path, handler, options = {}) {
-        this.#routes.set(path, { handler, options });
+        NavigationService.instance = this;
         
-        if (this.#debugMode) {
-            this.#logger.info(`Registered route: ${path}`);
-        }
+        // Initialize state
+        this.currentPath = window.location.pathname;
+        this.history = [];
+        this.isInitialized = false;
     }
 
-    navigateTo(path, options = {}) {
-        if (!this.#routes.has(path)) {
-            this.#logger.warn(`Attempting to navigate to unregistered route: ${path}`);
-            return false;
+    async initialize() {
+        if (this.isInitialized) {
+            return;
         }
 
-        const { replace = false } = options;
-
         try {
-            if (replace) {
-                window.history.replaceState({}, '', path);
-            } else {
-                window.history.pushState({}, '', path);
-            }
+            // Get paths configuration
+            const { default: paths } = await import(window.env.PATHS_MODULE);
+            this.paths = paths;
 
-            this.#currentRoute = path;
-            this.#addToHistory(path);
-            this.#handleRoute(path);
-
+            // Set up event listeners
+            window.addEventListener('popstate', this.handlePopState.bind(this));
+            
+            // Mark as initialized
+            this.isInitialized = true;
+            
             return true;
         } catch (error) {
-            this.#logger.error(`Error navigating to ${path}:`, error);
+            console.error('Navigation service initialization failed:', error);
             return false;
         }
     }
 
-    back() {
-        window.history.back();
+    handlePopState(event) {
+        this.currentPath = window.location.pathname;
+        this.notifyListeners();
     }
 
-    forward() {
-        window.history.forward();
-    }
+    async navigate(path) {
+        if (!this.isInitialized) {
+            throw new Error('Navigation service not initialized');
+        }
 
-    getCurrentRoute() {
-        return this.#currentRoute;
-    }
+        try {
+            const resolvedPath = this.paths.resolve(path);
+            
+            // Update history
+            this.history.push(this.currentPath);
+            this.currentPath = resolvedPath;
 
-    getHistory() {
-        return [...this.#history];
-    }
-
-    clearHistory() {
-        this.#history = [];
-        if (this.#debugMode) {
-            this.#logger.info('Navigation history cleared');
+            // Update browser history
+            window.history.pushState({}, '', resolvedPath);
+            
+            // Notify listeners
+            this.notifyListeners();
+            
+            return true;
+        } catch (error) {
+            console.error('Navigation failed:', error);
+            return false;
         }
     }
 
-    isRegisteredRoute(path) {
-        return this.#routes.has(path);
+    notifyListeners() {
+        // Dispatch navigation event
+        const event = new CustomEvent('navigation', {
+            detail: {
+                path: this.currentPath,
+                previousPath: this.history[this.history.length - 1]
+            }
+        });
+        document.dispatchEvent(event);
     }
 
-    getRegisteredRoutes() {
-        return Array.from(this.#routes.keys());
+    getCurrentPath() {
+        return this.currentPath;
     }
 
-    setMaxHistoryLength(length) {
-        this.#maxHistoryLength = length;
-        // Trim history if needed
-        while (this.#history.length > length) {
-            this.#history.pop();
+    goBack() {
+        if (this.history.length > 0) {
+            const previousPath = this.history.pop();
+            this.navigate(previousPath);
         }
     }
 }
 
-// Create and export singleton instance
-const navigation = new NavigationService();
-export default navigation;
+// Export singleton instance
+export default new NavigationService();

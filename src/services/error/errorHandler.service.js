@@ -1,5 +1,12 @@
-import Logger from '../../utils/logging/loggerService.utils.js';
-import config from '../../../config/client.js';
+// Initialize dependencies
+let Logger, config;
+
+// Load dependencies asynchronously
+async function initializeDependencies() {
+    const { PathResolver, CORE_PATHS } = window.env;
+    Logger = (await import(PathResolver.resolve(CORE_PATHS.utils.logging.logger))).default;
+    config = (await import(PathResolver.resolve(CORE_PATHS.services.base.config))).default;
+}
 
 class ErrorHandlerService {
     #logger;
@@ -11,9 +18,13 @@ class ErrorHandlerService {
     #debugMode = window.env.SITE_STATE === 'dev';
 
     constructor() {
-        this.#logger = Logger;
-        this.#logger.info('ErrorHandlerService initializing');
-        this.#initialize();
+        initializeDependencies().then(() => {
+            this.#logger = Logger;
+            this.#logger.info('ErrorHandlerService initializing');
+            this.#initialize();
+        }).catch(error => {
+            console.error('Failed to initialize ErrorHandlerService dependencies:', error);
+        });
     }
 
     #initialize() {

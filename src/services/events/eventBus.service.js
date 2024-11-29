@@ -1,114 +1,155 @@
-import logger from '../logger/LoggerService.js';
+// Use proper path resolution from window.env
+const { default: Logger } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.utils.logging.logger));
 
 class EventBusService {
-    #events = {};
-    #debugMode = window.env.SITE_STATE === 'dev';
-    #maxListeners = 10;
+    #subscribers = new Map();
     #logger;
+    #eventHistory = [];
+    #maxHistoryLength = 100;
 
     constructor() {
-        this.#logger = logger;
-        if (this.#debugMode) {
-            this.#logger.info('EventBusService initializing');
+        if (EventBusService.instance) {
+            return EventBusService.instance;
         }
+        EventBusService.instance = this;
+        this.#logger = Logger;
+        this.#logger.info('EventBusService initialized');
     }
 
-    on(event, callback) {
-        if (!this.#events[event]) {
-            this.#events[event] = [];
+    // Core event methods
+    subscribe(eventName, callback) {
+        if (!this.#subscribers.has(eventName)) {
+            this.#subscribers.set(eventName, new Set());
         }
+        this.#subscribers.get(eventName).add(callback);
+        this.#logger.debug(`Subscribed to event: ${eventName}`);
+        return () => this.unsubscribe(eventName, callback);
+    }
 
-        if (this.#events[event].length >= this.#maxListeners) {
-            const warning = `Warning: Event '${event}' has exceeded ${this.#maxListeners} listeners`;
-            this.#logger.warn(warning);
-            if (this.#debugMode) {
-                console.warn(warning);
+    unsubscribe(eventName, callback) {
+        if (this.#subscribers.has(eventName)) {
+            this.#subscribers.get(eventName).delete(callback);
+            if (this.#subscribers.get(eventName).size === 0) {
+                this.#subscribers.delete(eventName);
             }
-        }
-
-        this.#events[event].push(callback);
-
-        if (this.#debugMode) {
-            this.#logger.debug(`Added listener for event: ${event}`);
-        }
-
-        return () => this.off(event, callback);
-    }
-
-    off(event, callback) {
-        if (!this.#events[event]) return;
-
-        const index = this.#events[event].indexOf(callback);
-        if (index > -1) {
-            this.#events[event].splice(index, 1);
-            if (this.#debugMode) {
-                this.#logger.debug(`Removed listener for event: ${event}`);
-            }
-        }
-
-        if (this.#events[event].length === 0) {
-            delete this.#events[event];
+            this.#logger.debug(`Unsubscribed from event: ${eventName}`);
         }
     }
 
-    once(event, callback) {
-        const onceCallback = (...args) => {
-            this.off(event, onceCallback);
-            callback.apply(this, args);
+    publish(eventName, data) {
+        this.#logEvent(eventName, data);
+        if (this.#subscribers.has(eventName)) {
+            this.#subscribers.get(eventName).forEach(callback => {
+                try {
+                    callback(data);
+                } catch (error) {
+                    this.#logger.error(`Error in event handler for ${eventName}:`, error);
+                }
+            });
+        }
+    }
+
+    // Style loading specific events
+    publishStyleLoadSuccess(path) {
+        this.publish('styleLoadSuccess', { path });
+    }
+
+    publishStyleLoadError(path, error) {
+        this.publish('styleLoadError', { path, error });
+    }
+
+    publishStyleLoadProgress(loaded, total) {
+        this.publish('styleLoadProgress', { loaded, total });
+    }
+
+    // Navigation events
+    publishNavigationStart(route) {
+        this.publish('navigationStart', { route });
+    }
+
+    publishNavigationEnd(route) {
+        this.publish('navigationEnd', { route });
+    }
+
+    publishNavigationError(error) {
+        this.publish('navigationError', { error });
+    }
+
+    // Auth events
+    publishAuthStateChange(state) {
+        this.publish('authStateChange', { state });
+    }
+
+    publishLoginSuccess(user) {
+        this.publish('loginSuccess', { user });
+    }
+
+    publishLogoutSuccess() {
+        this.publish('logoutSuccess', {});
+    }
+
+    // State management events
+    publishStateChange(key, value) {
+        this.publish('stateChange', { key, value });
+    }
+
+    publishThemeChange(theme) {
+        this.publish('themeChange', { theme });
+    }
+
+    publishFontChange(font) {
+        this.publish('fontChange', { font });
+    }
+
+    // Error events
+    publishError(error) {
+        this.publish('error', { error });
+    }
+
+    publishValidationError(errors) {
+        this.publish('validationError', { errors });
+    }
+
+    // Data events
+    publishDataUpdate(key, data) {
+        this.publish('dataUpdate', { key, data });
+    }
+
+    publishDataError(key, error) {
+        this.publish('dataError', { key, error });
+    }
+
+    // Private methods
+    #logEvent(eventName, data) {
+        const event = {
+            eventName,
+            data,
+            timestamp: new Date().toISOString()
         };
-        return this.on(event, onceCallback);
-    }
 
-    emit(event, data) {
-        if (!this.#events[event]) return;
-
-        if (this.#debugMode) {
-            this.#logger.debug(`Emitting event: ${event}`, data);
+        this.#eventHistory.unshift(event);
+        if (this.#eventHistory.length > this.#maxHistoryLength) {
+            this.#eventHistory.pop();
         }
 
-        this.#events[event].forEach(callback => {
-            try {
-                callback(data);
-            } catch (error) {
-                this.#logger.error(`Error in event listener for '${event}':`, error);
-            }
-        });
+        this.#logger.debug(`Event published: ${eventName}`, data);
     }
 
-    removeAllListeners(event) {
-        if (event) {
-            delete this.#events[event];
-            if (this.#debugMode) {
-                this.#logger.debug(`Removed all listeners for event: ${event}`);
-            }
-        } else {
-            this.#events = {};
-            if (this.#debugMode) {
-                this.#logger.debug('Removed all event listeners');
-            }
-        }
+    // Public getters
+    get eventHistory() {
+        return [...this.#eventHistory];
     }
 
-    listenerCount(event) {
-        return this.#events[event]?.length || 0;
+    get subscriberCount() {
+        return Array.from(this.#subscribers.values())
+            .reduce((total, subscribers) => total + subscribers.size, 0);
     }
 
-    eventNames() {
-        return Object.keys(this.#events);
-    }
-
-    setMaxListeners(n) {
-        this.#maxListeners = n;
-        if (this.#debugMode) {
-            this.#logger.debug(`Max listeners set to: ${n}`);
-        }
-    }
-
-    getMaxListeners() {
-        return this.#maxListeners;
+    get eventTypes() {
+        return Array.from(this.#subscribers.keys());
     }
 }
 
 // Create and export singleton instance
-const eventBus = new EventBusService();
-export default eventBus;
+const EventBus = new EventBusService();
+export { EventBus };

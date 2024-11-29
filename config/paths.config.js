@@ -1,199 +1,189 @@
-// Use globally available env
-const env = window.env;
+/**
+ * Global path configuration module
+ */
 
-// Path configuration based on site state
-const BASE_URL = env.SITE_STATE === 'dev' ? env.DEV_URL : env.AWS_URL;
-const paths_config = env.SITE_STATE === 'dev' ? env.DEV_PATHS : env.PROD_PATHS;
-const { ASSET_PATH, VIEW_PATH, STYLE_PATH, MODULE_PATH, CONFIG_PATH } = paths_config;
+// Initialize paths in window.env
+window.env.PathResolver = {
+    resolve: function(path) {
+        // Use SITE_STATE instead of SITE_STATUS to match env.json
+        return window.env.SITE_STATE === 'dev' 
+            ? window.env.DEV_URL + path
+            : window.env.AWS_URL + path;
+    },
+    
+    getAssetPath: function(name) {
+        const basePath = window.env.SITE_STATE === 'dev'
+            ? window.env.DEV_PATHS.ASSET_PATH
+            : window.env.PROD_PATHS.ASSET_PATH;
+        return basePath + '/' + name;
+    },
 
-// Core paths configuration
-const CORE_PATHS = {
-    // Assets
-    assets: {
-        logo: `${ASSET_PATH}/qeLogoBW.png`,
-        acme: `${ASSET_PATH}/acme.png`
+    getModulePath: function(name) {
+        const basePath = window.env.SITE_STATE === 'dev'
+            ? window.env.DEV_PATHS.MODULE_PATH
+            : window.env.PROD_PATHS.MODULE_PATH;
+        return basePath + '/' + name;
+    }
+};
+
+// Set style paths
+window.env.STYLE_PATHS = {
+    base: [
+        window.env.DEV_PATHS.STYLE_PATH + '/base/_variables.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/base/_reset.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/base/_typography.css'
+    ],
+    layouts: [
+        window.env.DEV_PATHS.STYLE_PATH + '/layouts/_containers.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/layouts/_grid.css'
+    ],
+    components: [
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_admin-form.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_admin-panel.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_button.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_form.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_loading.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_login.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_navigation.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_test-panel.css',
+        window.env.DEV_PATHS.STYLE_PATH + '/components/_welcome.css'
+    ],
+    utilities: [
+        window.env.DEV_PATHS.STYLE_PATH + '/utilities/_helpers.css'
+    ]
+};
+
+// Set core paths
+window.env.CORE_PATHS = {
+    controllers: {
+        admin: {
+            admin: window.env.DEV_PATHS.MODULE_PATH + '/controllers/admin/admin.controller.js',
+            genesisAdmin: window.env.DEV_PATHS.MODULE_PATH + '/controllers/admin/genesisAdmin.controller.js',
+            userCreation: window.env.DEV_PATHS.MODULE_PATH + '/controllers/admin/userCreation.controller.js'
+        },
+        auth: {
+            login: window.env.DEV_PATHS.MODULE_PATH + '/controllers/auth/login.controller.js',
+            register: window.env.DEV_PATHS.MODULE_PATH + '/controllers/auth/register.controller.js'
+        },
+        base: {
+            base: window.env.DEV_PATHS.MODULE_PATH + '/controllers/base/base.controller.js'
+        },
+        components: {
+            navigation: window.env.DEV_PATHS.MODULE_PATH + '/controllers/components/navigation.controller.js',
+            sidebar: window.env.DEV_PATHS.MODULE_PATH + '/controllers/components/sidebar.controller.js'
+        },
+        dashboard: {
+            dashboard: window.env.DEV_PATHS.MODULE_PATH + '/controllers/dashboard/dashboard.controller.js'
+        },
+        messages: {
+            messages: window.env.DEV_PATHS.MODULE_PATH + '/controllers/messages/messages.controller.js'
+        },
+        report: {
+            report: window.env.DEV_PATHS.MODULE_PATH + '/controllers/report/report.controller.js'
+        },
+        research: {
+            research: window.env.DEV_PATHS.MODULE_PATH + '/controllers/research/research.controller.js',
+            researchDashboard: window.env.DEV_PATHS.MODULE_PATH + '/controllers/research/researchDashboard.controller.js'
+        },
+        search: {
+            search: window.env.DEV_PATHS.MODULE_PATH + '/controllers/search/search.controller.js'
+        },
+        spreadsheet: {
+            spreadsheet: window.env.DEV_PATHS.MODULE_PATH + '/controllers/spreadsheet/spreadsheet.controller.js'
+        },
+        survey: {
+            survey: window.env.DEV_PATHS.MODULE_PATH + '/controllers/survey/survey.controller.js',
+            surveyManager: window.env.DEV_PATHS.MODULE_PATH + '/controllers/survey/surveyManager.controller.js'
+        },
+        task: {
+            task: window.env.DEV_PATHS.MODULE_PATH + '/controllers/task/task.controller.js'
+        },
+        test: {
+            test: window.env.DEV_PATHS.MODULE_PATH + '/controllers/test/test.controller.js'
+        },
+        user: {
+            settings: window.env.DEV_PATHS.MODULE_PATH + '/controllers/user/settings.controller.js',
+            userProfile: window.env.DEV_PATHS.MODULE_PATH + '/controllers/user/userProfile.controller.js',
+            volunteerDashboard: window.env.DEV_PATHS.MODULE_PATH + '/controllers/user/volunteerDashboard.controller.js'
+        },
+        welcome: window.env.DEV_PATHS.MODULE_PATH + '/controllers/welcome/welcome.controller.js'
     },
-    
-    // CSS files in load order
-    styles: {
-        base: [
-            `${STYLE_PATH}/base/_variables.css`,
-            `${STYLE_PATH}/base/_reset.css`,
-            `${STYLE_PATH}/base/_typography.css`
-        ],
-        layouts: [
-            `${STYLE_PATH}/layouts/_containers.css`,
-            `${STYLE_PATH}/layouts/_grid.css`
-        ],
-        components: [
-            `${STYLE_PATH}/components/_admin-form.css`,
-            `${STYLE_PATH}/components/_admin-panel.css`,
-            `${STYLE_PATH}/components/_button.css`,
-            `${STYLE_PATH}/components/_form.css`,
-            `${STYLE_PATH}/components/_loading.css`,
-            `${STYLE_PATH}/components/_login.css`,
-            `${STYLE_PATH}/components/_navigation.css`,
-            `${STYLE_PATH}/components/_test-panel.css`,
-            `${STYLE_PATH}/components/_welcome.css`
-        ],
-        utilities: [
-            `${STYLE_PATH}/utilities/_helpers.css`
-        ]
+    models: {
+        data: window.env.DEV_PATHS.MODULE_PATH + '/models/data.model.js',
+        database: window.env.DEV_PATHS.MODULE_PATH + '/models/database.model.js',
+        index: window.env.DEV_PATHS.MODULE_PATH + '/models/index.model.js',
+        user: window.env.DEV_PATHS.MODULE_PATH + '/models/user.model.js'
     },
-    
-    // HTML components
-    components: {
-        head: `${VIEW_PATH}/components/head.view.html`,
-        nav: `${VIEW_PATH}/components/nav.view.html`,
-        sidebar: `${VIEW_PATH}/components/sidebar.view.html`,
-        header: `${VIEW_PATH}/components/header.views.html`,
-        'shared/layout': `${VIEW_PATH}/components/shared/layout.view.html`,
-        'admin/user-creation-form': `${VIEW_PATH}/components/admin/user-creation-form.view.html`
+    services: {
+        analytics: window.env.DEV_PATHS.MODULE_PATH + '/services/analytics/analytics.service.js',
+        auth: window.env.DEV_PATHS.MODULE_PATH + '/services/auth/auth.service.js',
+        base: window.env.DEV_PATHS.MODULE_PATH + '/services/base/base.service.js',
+        cache: window.env.DEV_PATHS.MODULE_PATH + '/services/cache/cache.service.js',
+        data: window.env.DEV_PATHS.MODULE_PATH + '/services/data/data.service.js',
+        database: window.env.DEV_PATHS.MODULE_PATH + '/services/database/database.service.js',
+        error: window.env.DEV_PATHS.MODULE_PATH + '/services/error/errorHandler.service.js',
+        export: window.env.DEV_PATHS.MODULE_PATH + '/services/export/export.service.js',
+        form: window.env.DEV_PATHS.MODULE_PATH + '/services/form/formHandler.service.js',
+        init: window.env.DEV_PATHS.MODULE_PATH + '/services/init/init.service.js',
+        navigation: window.env.DEV_PATHS.MODULE_PATH + '/services/navigation/navigation.service.js',
+        notification: window.env.DEV_PATHS.MODULE_PATH + '/services/notification/notification.service.js',
+        queue: window.env.DEV_PATHS.MODULE_PATH + '/services/queue/queue.service.js',
+        report: window.env.DEV_PATHS.MODULE_PATH + '/services/report/report.service.js',
+        router: window.env.DEV_PATHS.MODULE_PATH + '/services/router/router.service.js',
+        search: window.env.DEV_PATHS.MODULE_PATH + '/services/search/search.service.js',
+        state: {
+            font: window.env.DEV_PATHS.MODULE_PATH + '/services/state/fontManager.service.js',
+            theme: window.env.DEV_PATHS.MODULE_PATH + '/services/state/themeManager.service.js'
+        },
+        storage: window.env.DEV_PATHS.MODULE_PATH + '/services/storage/storage.service.js',
+        validation: window.env.DEV_PATHS.MODULE_PATH + '/services/validation/validation.service.js',
+        websocket: window.env.DEV_PATHS.MODULE_PATH + '/services/websocket/websocket.service.js'
     },
-    
-    // Pages
-    pages: {
-        root: '/',
-        adminControlPanel: `${VIEW_PATH}/pages/admin-control-panel.view.html`,
-        auth: `${VIEW_PATH}/pages/auth.view.html`,
-        availableSurveys: `${VIEW_PATH}/pages/available-surveys.view.html`,
-        base: `${VIEW_PATH}/pages/base.view.html`,
-        completedSurveys: `${VIEW_PATH}/pages/completed-surveys.view.html`,
-        dashboard: `${VIEW_PATH}/pages/dashboard.view.html`,
-        forgotPassword: `${VIEW_PATH}/pages/forgot-password.view.html`,
-        genesisAdmin: `${VIEW_PATH}/pages/genesis-admin.view.html`,
-        login: `${VIEW_PATH}/pages/login.view.html`,
-        messages: `${VIEW_PATH}/pages/messages.view.html`,
-        research: `${VIEW_PATH}/pages/research.view.html`,
-        researchDashboard: `${VIEW_PATH}/pages/research-dashboard.view.html`,
-        settings: `${VIEW_PATH}/pages/settings.view.html`,
-        spreadsheet: `${VIEW_PATH}/pages/spreadsheet.view.html`,
-        survey: `${VIEW_PATH}/pages/survey.vies.html`,
-        tasks: `${VIEW_PATH}/pages/tasks.view.html`,
-        userProfile: `${VIEW_PATH}/pages/user-profile.view.html`,
-        volunteerDashboard: `${VIEW_PATH}/pages/volunteer-dashboard.view.html`
-    },
-    
-    // Utils
     utils: {
-        logger: `${MODULE_PATH}/utils/tests/test-logger.utils.html`,
-        test: `${MODULE_PATH}/utils/tests/testPage.utils.html`,
-        testUser: `${MODULE_PATH}/utils/tests/test-user.utils.html`
+        logging: { // Make sure logger is properly defined here
+            logger: window.env.DEV_PATHS.MODULE_PATH + '/utils/logging/logger.utils.js' // This matches file structure
+        },
+        tests: {
+            testPage: window.env.DEV_PATHS.MODULE_PATH + '/utils/tests/test-page.view.html',
+            testLogger: window.env.DEV_PATHS.MODULE_PATH + '/utils/tests/test-logger.view.html',
+            testUser: window.env.DEV_PATHS.MODULE_PATH + '/utils/tests/testUser.view.html'
+        }
     },
-
-    // Data files
-    data: {
-        users: `${MODULE_PATH}/models/data/users.json`
-    },
-
-    // Module paths
-    modules: {
-        // Core modules
-        init: env.INIT_PATH,
-        paths: `${CONFIG_PATH}/paths.config.js`,
-        
-        // Models
-        dataService: `${MODULE_PATH}/models/data.service.js`,
-        user: `${MODULE_PATH}/models/user.model.js`,
-        
-        // Services
-        navigation: `${MODULE_PATH}/services/navigation/navigation.service.js`,
-        logger: `${MODULE_PATH}/utils/logging/logger.service.js`,
-        config: `${CONFIG_PATH}/client.js`,
-        themeManager: `${MODULE_PATH}/services/state/themeManager.service.js`,
-        fontManager: `${MODULE_PATH}/services/state/fontManager.service.js`,
-        errorHandler: `${MODULE_PATH}/services/error/errorHandler.service.js`,
-        
-        // Controllers
-        index: `${MODULE_PATH}/controllers/index.controller.js`,
-        admincontrolpanel: `${MODULE_PATH}/controllers/admin/adminControlPanel.controllerjs`,
-        login: `${MODULE_PATH}/controllers/auth/login.js`,
-        settings: `${MODULE_PATH}/controllers/user/settings.js`,
-        userprofile: `${MODULE_PATH}/controllers/user/userprofile.js`,
-        test: `${MODULE_PATH}/controllers/test/testController.js`
+    views: {
+        pages: {
+            adminPanel: window.env.DEV_PATHS.VIEW_PATH + '/pages/admin-control-panel.view.html',
+            auth: window.env.DEV_PATHS.VIEW_PATH + '/pages/auth.view.html',
+            availableSurveys: window.env.DEV_PATHS.VIEW_PATH + '/pages/available-surveys.view.html',
+            base: window.env.DEV_PATHS.VIEW_PATH + '/pages/base.view.html',
+            completedSurveys: window.env.DEV_PATHS.VIEW_PATH + '/pages/completed-surveys.view.html',
+            dashboard: window.env.DEV_PATHS.VIEW_PATH + '/pages/dashboard.view.html',
+            forgotPassword: window.env.DEV_PATHS.VIEW_PATH + '/pages/forgot-password.view.html',
+            genesisAdmin: window.env.DEV_PATHS.VIEW_PATH + '/pages/genesis-admin.view.html',
+            login: window.env.DEV_PATHS.VIEW_PATH + '/pages/login.view.html',
+            messages: window.env.DEV_PATHS.VIEW_PATH + '/pages/messages.view.html',
+            researchDashboard: window.env.DEV_PATHS.VIEW_PATH + '/pages/research-dashboard.view.html',
+            research: window.env.DEV_PATHS.VIEW_PATH + '/pages/research.view.html',
+            settings: window.env.DEV_PATHS.VIEW_PATH + '/pages/settings.view.html',
+            spreadsheet: window.env.DEV_PATHS.VIEW_PATH + '/pages/spreadsheet.view.html',
+            survey: window.env.DEV_PATHS.VIEW_PATH + '/pages/survey.view.html',
+            tasks: window.env.DEV_PATHS.VIEW_PATH + '/pages/tasks.view.html',
+            userProfile: window.env.DEV_PATHS.VIEW_PATH + '/pages/user-profile.view.html',
+            volunteerDashboard: window.env.DEV_PATHS.VIEW_PATH + '/pages/volunteer-dashboard.view.html'
+        },
+        components: {
+            admin: {
+                userCreationForm: window.env.DEV_PATHS.VIEW_PATH + '/components/admin/user-creation-form.view.html'
+            },
+            head: window.env.DEV_PATHS.VIEW_PATH + '/components/head.view.html',
+            header: window.env.DEV_PATHS.VIEW_PATH + '/components/header.view.html',
+            nav: window.env.DEV_PATHS.VIEW_PATH + '/components/nav.view.html',
+            shared: {
+                layout: window.env.DEV_PATHS.VIEW_PATH + '/components/shared/layout.view.html'
+            },
+            sidebar: window.env.DEV_PATHS.VIEW_PATH + '/components/sidebar.view.html'
+        }
     }
 };
 
-// Path configuration
-const paths = {
-    // Environment
-    BASE_URL,
-    
-    // Core paths
-    core: CORE_PATHS,
-    
-    // Helper functions
-    resolve: (path, isModule = false) => {
-        if (!path) return '';
-        
-        // Handle root path specially
-        if (path === '/') {
-            return env.SITE_STATE === 'dev' ? BASE_URL : BASE_URL + '/';
-        }
-        
-        // Clean the path
-        const cleanPath = path.replace(/^\/+/, '');
-        
-        // For development environment
-        if (env.SITE_STATE === 'dev') {
-            // For module imports, we need the / prefix
-            if (isModule) {
-                return `/${cleanPath}`;
-            }
-            // For other resources, combine with base URL
-            return `${BASE_URL}/${cleanPath}`;
-        }
-        
-        // For production, prepend AWS URL
-        return `${BASE_URL}/${cleanPath}`;
-    },
-
-    // Get all CSS paths in correct order
-    getCssPaths: () => {
-        const allStyles = [
-            ...CORE_PATHS.styles.base,
-            ...CORE_PATHS.styles.layouts,
-            ...CORE_PATHS.styles.components,
-            ...CORE_PATHS.styles.utilities
-        ];
-        return allStyles.map(path => paths.resolve(path));
-    },
-
-    // Get asset path
-    getAssetPath: (name) => {
-        const assetPath = CORE_PATHS.assets[name];
-        return paths.resolve(assetPath);
-    },
-
-    // Get component path
-    getComponentPath: (name) => {
-        const componentPath = CORE_PATHS.components[name];
-        return paths.resolve(componentPath);
-    },
-
-    // Get page path
-    getPagePath: (name) => {
-        const pagePath = CORE_PATHS.pages[name];
-        return env.SITE_STATE === 'dev' ? `${BASE_URL}${pagePath}` : paths.resolve(pagePath);
-    },
-
-    // Get utility path
-    getUtilPath: (name) => {
-        const utilPath = CORE_PATHS.utils[name];
-        return paths.resolve(utilPath);
-    },
-
-    // Get data file path
-    getDataPath: (name) => {
-        const dataPath = CORE_PATHS.data[name];
-        return paths.resolve(dataPath);
-    },
-
-    // Get module path
-    getModulePath: (name) => {
-        const modulePath = CORE_PATHS.modules[name];
-        return paths.resolve(modulePath, true);
-    }
-};
-
-export default paths;
+// Export the PathResolver for module usage
+export default window.env.PathResolver;

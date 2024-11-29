@@ -1,4 +1,4 @@
-import config from '../../../config/client.js';
+import config from '../../../config/client.config.js';
 
 class LoggerService {
     #logBuffer = [];
