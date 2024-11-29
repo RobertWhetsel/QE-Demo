@@ -1,0 +1,178 @@
+<nav class="nav">
+    <div class="nav__container">
+        <!-- Sidebar Toggle -->
+        <div class="nav__toggle-wrapper">
+            <button class="nav__toggle" aria-label="Toggle Sidebar" data-action="toggle-sidebar">
+                <span class="nav__toggle-icon">&#9776;</span>
+            </button>
+        </div>
+
+        <!-- Main Navigation -->
+        <div class="nav__main">
+            <!-- Primary Navigation -->
+            <ul class="nav__list nav__list--primary">
+                <li class="nav__item">
+                    <a href="/dashboard" class="nav__link" data-route="dashboard">
+                        <span class="nav__icon nav__icon--dashboard"></span>
+                        <span class="nav__text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/research" class="nav__link" data-route="research">
+                        <span class="nav__icon nav__icon--research"></span>
+                        <span class="nav__text">Research</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/tasks" class="nav__link" data-route="tasks">
+                        <span class="nav__icon nav__icon--tasks"></span>
+                        <span class="nav__text">Tasks</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Secondary Navigation -->
+            <ul class="nav__list nav__list--secondary">
+                <li class="nav__item">
+                    <a href="/settings" class="nav__link" data-route="settings">
+                        <span class="nav__icon nav__icon--settings"></span>
+                        <span class="nav__text">Settings</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/help" class="nav__link" data-route="help">
+                        <span class="nav__icon nav__icon--help"></span>
+                        <span class="nav__text">Help</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Role-based Navigation -->
+        <div class="nav__role-based" hidden data-role-nav>
+            <!-- Admin Navigation -->
+            <ul class="nav__list nav__list--admin" hidden data-role="ADMIN">
+                <li class="nav__item">
+                    <a href="/admin" class="nav__link" data-route="admin">
+                        <span class="nav__icon nav__icon--admin"></span>
+                        <span class="nav__text">Admin Panel</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/users" class="nav__link" data-route="users">
+                        <span class="nav__icon nav__icon--users"></span>
+                        <span class="nav__text">User Management</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Researcher Navigation -->
+            <ul class="nav__list nav__list--researcher" hidden data-role="RESEARCHER">
+                <li class="nav__item">
+                    <a href="/research-dashboard" class="nav__link" data-route="research-dashboard">
+                        <span class="nav__icon nav__icon--research"></span>
+                        <span class="nav__text">Research Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/surveys" class="nav__link" data-route="surveys">
+                        <span class="nav__icon nav__icon--survey"></span>
+                        <span class="nav__text">Surveys</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Volunteer Navigation -->
+            <ul class="nav__list nav__list--volunteer" hidden data-role="VOLUNTEER">
+                <li class="nav__item">
+                    <a href="/volunteer-dashboard" class="nav__link" data-route="volunteer-dashboard">
+                        <span class="nav__icon nav__icon--volunteer"></span>
+                        <span class="nav__text">Volunteer Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav__item">
+                    <a href="/available-surveys" class="nav__link" data-route="available-surveys">
+                        <span class="nav__icon nav__icon--survey"></span>
+                        <span class="nav__text">Available Surveys</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script type="module">
+    // Import required services using environment paths
+    const { default: NavigationService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation));
+    const { default: NavigationController } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.controllers.components.navigation));
+
+    class NavComponent {
+        constructor() {
+            this.nav = document.querySelector('.nav');
+            this.sidebarToggle = document.querySelector('[data-action="toggle-sidebar"]');
+            this.roleNav = document.querySelector('[data-role-nav]');
+            
+            this.initializeEventListeners();
+            this.initializeRoleBasedNavigation();
+            this.highlightCurrentRoute();
+        }
+
+        initializeEventListeners() {
+            // Sidebar toggle
+            this.sidebarToggle?.addEventListener('click', () => {
+                document.body.classList.toggle('sidebar-collapsed');
+                this.updateAriaStates();
+            });
+
+            // Route highlighting
+            window.addEventListener('popstate', () => this.highlightCurrentRoute());
+            
+            // Handle navigation links
+            this.nav?.addEventListener('click', (event) => {
+                const link = event.target.closest('[data-route]');
+                if (link) {
+                    event.preventDefault();
+                    const route = link.dataset.route;
+                    NavigationService.navigate(`/${route}`);
+                }
+            });
+        }
+
+        updateAriaStates() {
+            const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+            this.sidebarToggle?.setAttribute('aria-expanded', !isCollapsed);
+            this.nav?.setAttribute('aria-hidden', isCollapsed);
+        }
+
+        initializeRoleBasedNavigation() {
+            const userRole = window.QE?.currentUser?.role;
+            if (userRole) {
+                this.roleNav.hidden = false;
+                const roleMenus = this.roleNav.querySelectorAll('[data-role]');
+                roleMenus.forEach(menu => {
+                    menu.hidden = menu.dataset.role !== userRole;
+                });
+            }
+        }
+
+        highlightCurrentRoute() {
+            const currentPath = window.location.pathname;
+            this.nav?.querySelectorAll('.nav__link').forEach(link => {
+                const isActive = link.getAttribute('href') === currentPath;
+                link.classList.toggle('nav__link--active', isActive);
+                link.setAttribute('aria-current', isActive ? 'page' : null);
+            });
+        }
+    }
+
+    // Initialize navigation when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        const navComponent = new NavComponent();
+        new NavigationController();
+    });
+
+    // Update navigation when user data changes
+    document.addEventListener('userDataUpdated', () => {
+        new NavComponent().initializeRoleBasedNavigation();
+    });
+</script>

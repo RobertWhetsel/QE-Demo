@@ -29,7 +29,7 @@
 ### paths.js Configuration
 1. **Environment Configuration**
    ```javascript
-   const SITE_STATUS = {
+   const SITE_STATE = {
        dev: 'dev',
        prod: 'prod'
    };

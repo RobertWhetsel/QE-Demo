@@ -1,14 +1,59 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Quantum Eye - Advanced Research Platform">
+<meta name="theme-color" content="#ffffff">
+<title>{{pageTitle}} - Quantum Eye</title>
+
+<!-- Import paths -->
+<script type="module">
+    import paths from '/config/paths.js';
+    window.paths = paths; // Make paths available globally
+</script>
+
+<!-- Theme initialization - Must be first -->
+<script type="module">
+    import ThemeManager from '/src/services/state/thememanager.js';
+    // Apply theme immediately before any content loads
+    ThemeManager.initialize();
+</script>
+
 <!-- Load CSS files -->
 <script>
-    // Get CSS paths from paths.js and load them
-    const cssPaths = paths.getCssPaths();
-    cssPaths.forEach(href => {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-    });
+    // Load all CSS files from environment paths
+    const loadStyles = () => {
+        const allStyles = [
+            ...window.env.STYLE_PATHS.base,
+            ...window.env.STYLE_PATHS.layouts,
+            ...window.env.STYLE_PATHS.components,
+            ...window.env.STYLE_PATHS.utilities
+        ];
+
+        allStyles.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = window.env.PathResolver.resolve(href);
+            document.head.appendChild(link);
+        });
+    };
+
+    // Execute style loading
+    loadStyles();
 </script>
+
+<style>
+    /* Ensure smooth theme transitions */
+    :root {
+        transition: background-color var(--transition-speed) ease,
+                    color var(--transition-speed) ease;
+    }
+
+    /* Ensure theme colors are inherited */
+    html, body {
+        background-color: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        min-height: 100vh;
+    }
+</style>
 
 <!-- Initialize User Model -->
 <script type="module">
@@ -121,6 +166,14 @@
             console.error('Error handling user data change:', error);
         }
     });
+
+    // Add page-specific styles
+    const additionalStyles = `{{additionalStyles}}`;
+    if (additionalStyles) {
+        const style = document.createElement('style');
+        style.textContent = additionalStyles;
+        document.head.appendChild(style);
+    }
 
     // Dispatch event when head is ready
     document.dispatchEvent(new CustomEvent('headReady'));

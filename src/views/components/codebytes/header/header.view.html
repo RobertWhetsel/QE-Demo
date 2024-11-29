@@ -1,0 +1,142 @@
+<header class="header">
+    <div class="header__container">
+        <!-- Logo Section -->
+        <div class="header__logo">
+            <a href="/" class="header__logo-link">
+                <img src="/assets/qeLogoBW.png" alt="Quantum Eye Logo" class="header__logo-image">
+            </a>
+        </div>
+
+        <!-- Navigation Section -->
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item">
+                    <a href="/dashboard" class="header__nav-link" data-route="dashboard">Dashboard</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="/research" class="header__nav-link" data-route="research">Research</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="/tasks" class="header__nav-link" data-route="tasks">Tasks</a>
+                </li>
+                <li class="header__nav-item">
+                    <a href="/messages" class="header__nav-link" data-route="messages">Messages</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- User Controls Section -->
+        <div class="header__controls">
+            <!-- Theme Toggle -->
+            <button class="header__theme-toggle" aria-label="Toggle theme" data-action="toggle-theme">
+                <span class="header__theme-icon"></span>
+            </button>
+
+            <!-- User Menu -->
+            <div class="header__user-menu">
+                <button class="header__user-button" aria-expanded="false" aria-haspopup="true">
+                    <span class="header__user-name">{{username}}</span>
+                    <span class="header__user-role">{{userRole}}</span>
+                </button>
+                <div class="header__user-dropdown" hidden>
+                    <ul class="header__dropdown-list">
+                        <li class="header__dropdown-item">
+                            <a href="/profile" class="header__dropdown-link" data-route="profile">Profile</a>
+                        </li>
+                        <li class="header__dropdown-item">
+                            <a href="/settings" class="header__dropdown-link" data-route="settings">Settings</a>
+                        </li>
+                        <li class="header__dropdown-item">
+                            <button class="header__dropdown-button" data-action="logout">Logout</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script type="module">
+    // Import required services
+    const { default: ThemeManager } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.state.theme));
+    const { default: NavigationService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation));
+
+    class HeaderComponent {
+        constructor() {
+            this.themeToggle = document.querySelector('[data-action="toggle-theme"]');
+            this.userButton = document.querySelector('.header__user-button');
+            this.userDropdown = document.querySelector('.header__user-dropdown');
+            this.logoutButton = document.querySelector('[data-action="logout"]');
+            
+            this.initializeEventListeners();
+            this.updateUserInfo();
+        }
+
+        initializeEventListeners() {
+            // Theme toggle
+            this.themeToggle?.addEventListener('click', () => {
+                const currentTheme = ThemeManager.getCurrentTheme();
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                ThemeManager.setTheme(newTheme);
+                this.updateThemeIcon(newTheme);
+            });
+
+            // User dropdown toggle
+            this.userButton?.addEventListener('click', () => {
+                const isExpanded = this.userButton.getAttribute('aria-expanded') === 'true';
+                this.userButton.setAttribute('aria-expanded', !isExpanded);
+                this.userDropdown.hidden = isExpanded;
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.header__user-menu')) {
+                    this.userButton?.setAttribute('aria-expanded', 'false');
+                    this.userDropdown.hidden = true;
+                }
+            });
+
+            // Logout handler
+            this.logoutButton?.addEventListener('click', async () => {
+                try {
+                    const { default: AuthService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.auth.auth));
+                    await AuthService.logout();
+                    NavigationService.navigate('/login');
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                }
+            });
+        }
+
+        updateThemeIcon(theme) {
+            const icon = this.themeToggle?.querySelector('.header__theme-icon');
+            if (icon) {
+                icon.textContent = theme === 'light' ? '🌙' : '☀️';
+            }
+        }
+
+        updateUserInfo() {
+            if (window.QE?.currentUser) {
+                const nameElement = document.querySelector('.header__user-name');
+                const roleElement = document.querySelector('.header__user-role');
+                
+                if (nameElement) {
+                    nameElement.textContent = window.QE.currentUser.username;
+                }
+                if (roleElement) {
+                    roleElement.textContent = window.QE.currentUser.role;
+                }
+            }
+        }
+    }
+
+    // Initialize header component when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new HeaderComponent();
+    });
+
+    // Update user info when user data changes
+    document.addEventListener('userDataUpdated', () => {
+        new HeaderComponent().updateUserInfo();
+    });
+</script>
