@@ -1,30 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Include the head partial -->
-    {{> head.view}}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Eye Platform</title>
+    
+    <!-- Initialize application -->
+    <script>
+        (async function loadEnvironment() {
+            try {
+                console.log('Starting application initialization...');
+
+                // 1. Load env.json first
+                console.log('Loading env.json...');
+                const response = await fetch('/config/env.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to load env.json: ${response.status} ${response.statusText}`);
+                }
+                window.env = await response.json();
+                console.log('env.json loaded successfully');
+                
+                // 2. Load paths.config.js to set up path resolution
+                console.log('Loading paths.config.js...');
+                await import('/config/paths.config.js')
+                    .then(module => {
+                        console.log('paths.config.js loaded successfully');
+                        
+                        // 3. Load and inject head component
+                        return fetch('/src/views/components/head/head.view.html')
+                            .then(response => response.text())
+                            .then(html => {
+                                // Insert head content before the existing script
+                                const headContent = document.createRange().createContextualFragment(html);
+                                document.head.insertBefore(headContent, document.head.firstChild);
+                                console.log('Head component loaded successfully');
+                            });
+                    })
+                    .then(() => {
+                        // 4. Load init.service.js after head component
+                        return import('/src/services/init/init.service.js');
+                    })
+                    .then(() => {
+                        console.log('init.service.js loaded successfully');
+                        return import('/src/controllers/welcome/welcome.controller.js');
+                    })
+                    .then(module => {
+                        console.log('Welcome controller module loaded');
+                        const welcomeController = new module.WelcomeController();
+                        return welcomeController.initialize();
+                    })
+                    .then(success => {
+                        console.log('Welcome controller initialization:', success ? 'successful' : 'failed');
+                    })
+                    .catch(error => {
+                        console.error('Initialization error:', error);
+                        document.body.innerHTML = `<div class="error">Failed to initialize application: ${error.message}</div>`;
+                    });
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                document.body.innerHTML = `<div class="error">Failed to initialize application: ${error.message}</div>`;
+            }
+        })();
+    </script>
+    
+    <!-- Only keep error style for initialization failures -->
+    <style>
+        .error {
+            color: red;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Include the main layout -->
-    {{> layout.view}}
-
-<div class="welcome" role="main">
-    <div class="welcome__content">
-      <h2 class="welcome__title">Welcome to the Quantum Eye Platform</h2>
-      
-      <div class="welcome__text">
-        <p>Login Instructions:</p>
-        <ol>
-          <li>Click the Begin button below to start</li>
-          <li>The system will check for existing users</li>
-          <li>If users exist, you'll be taken to the login page</li>
-          <li>If no users exist, you'll be directed to create a Genesis Admin account</li>
-        </ol>
-      </div>
-  
-      <div class="welcome__action">Begin Login Process</div>
-      <div class="welcome__tests">View Tests</div>
-    </div>
-  </div>
+    <!-- Main content container -->
+    <main class="qe-container" role="main">
+        <!-- Welcome message section -->
+        <div class="welcome" role="main">
+            <div class="welcome__content">
+                <h2 class="welcome__title">Welcome to the Quantum Eye Platform</h2>
+                <div class="welcome__text">
+                    <p>Login Instructions:</p>
+                    <ol class="welcome__list">
+                        <li class="welcome__list-item">Click the Begin button below to start</li>
+                        <li class="welcome__list-item">The system will check for existing users</li>
+                        <li class="welcome__list-item">If users exist, you'll be taken to the login page</li>
+                        <li class="welcome__list-item">If no users exist, you'll be directed to create a Genesis Admin account</li>
+                    </ol>
+                </div>
+                <button class="welcome__action button button--primary">Begin Login Process</button>
+                <button class="welcome__tests button button--secondary button--compact">View Tests</button>
+            </div>
+        </div>
+    </main>
 </body>
 </html>

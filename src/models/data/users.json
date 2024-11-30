@@ -1,12 +1,26 @@
 {
-    "users": [
-        {
-            "username": "genesis",
-            "email": "admin@example.com",
-            "password": "admin123",
-            "role": "Genesis Admin",
-            "created": "2023-11-19"
+    "users": [],
+    "pendingUsers": [],
+    "schema": {
+        "id": "string",
+        "username": "string",
+        "email": "string",
+        "password": "string",
+        "role": "string",
+        "lastLogin": "string|null",
+        "dateCreated": "string",
+        "isActive": "boolean",
+        "preferences": {
+            "theme": "string",
+            "font": "string",
+            "fontSize": "string",
+            "language": "string",
+            "notifications": "boolean",
+            "accessibility": {
+                "highContrast": "boolean",
+                "fontSize": "string",
+                "reduceMotion": "boolean"
+            }
         }
-    ],
-    "pendingUsers": []
+    }
 }

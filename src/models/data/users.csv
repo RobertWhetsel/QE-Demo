@@ -1,3 +1,1 @@
-username,fullName,email,phoneNumber,role,status,created,password
-genesis,Genesis Administrator,genesis.admin@system.local,,Genesis Admin,active,2024-01-01T00:00:00.000Z,admin123
-rwhetsel,Platform Administrator,rwhetsel@system.local,,Platform Admin,active,2024-01-01T00:00:00.000Z,changeme_immediately
+id,username,email,role,password,lastLogin,dateCreated,isActive,preferences

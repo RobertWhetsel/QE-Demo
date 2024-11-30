@@ -2,15 +2,13 @@
 ├── LICENSE
 ├── README.md
 ├── assets
+│   ├── 127.0.0.1.html
 │   ├── acme.png
 │   └── qeLogoBW.png
 ├── config
 │   ├── client.config.js
 │   ├── env.json
 │   └── paths.config.js
-├── data
-│   ├── users.csv
-│   └── users.json
 ├── documentation
 │   ├── coding-guidelines.md
 │   ├── naming-conventions.md
@@ -95,6 +93,9 @@
 │   │   ├── index.service.js
 │   │   ├── init
 │   │   │   └── init.service.js
+│   │   ├── llm
+│   │   │   ├── llm.config.json
+│   │   │   └── llm.service.js
 │   │   ├── navigation
 │   │   │   ├── navigation.service.js
 │   │   │   └── navigationGuard.service.js
@@ -154,12 +155,14 @@
 │       ├── components
 │       │   ├── admin
 │       │   │   └── user-creation-form.view.html
-│       │   ├── head.view.html
-│       │   ├── header.view.html
-│       │   ├── nav.view.html
-│       │   ├── shared
-│       │   │   └── layout.view.html
-│       │   └── sidebar.view.html
+│       │   ├── head
+│       │   │   └── head.view.html
+│       │   ├── header
+│       │   │   └── header.view.html
+│       │   ├── nav
+│       │   │   └── nav.view.html
+│       │   └── sidebar
+│       │       └── sidebar.view.html
 │       ├── index.view.js
 │       ├── pages
 │       │   ├── admin-control-panel.view.html
@@ -181,6 +184,7 @@
 │       │   ├── user-profile.view.html
 │       │   └── volunteer-dashboard.view.html
 │       └── templates
+│           └── layout.view.html
 └── tree.txt
 
-61 directories, 123 files
+64 directories, 124 files

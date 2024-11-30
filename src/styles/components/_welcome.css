@@ -38,11 +38,11 @@
 .welcome__text {
     color: var(--text-secondary);
     margin-bottom: var(--spacing-md);
+    text-align: left;
 }
 
 /* List */
 .welcome__list {
-    text-align: left;
     list-style-type: decimal;
     padding-left: var(--spacing-xl);
     margin: var(--spacing-lg) 0;
@@ -54,15 +54,21 @@
     line-height: 1.5;
 }
 
-/* Action */
+/* Action Button Container */
 .welcome__action {
-    margin-top: var(--spacing-xl);
+    margin: var(--spacing-xl) auto var(--spacing-md);
 }
 
-/* Tests */
+/* Tests Button Container */
 .welcome__tests {
-    position: fixed;
-    bottom: var(--spacing-xl);
-    right: var(--spacing-xl);
-    z-index: var(--z-index-overlay);
+    margin: 0 auto;
+}
+
+/* Button Specific Overrides */
+.welcome__action.button {
+    display: block; /* Make the button full width */
+}
+
+.welcome__tests.button {
+    display: inline-block; /* Keep the test button inline */
 }

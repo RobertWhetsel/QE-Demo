@@ -1,0 +1,151 @@
+<!-- Meta Tags for Basic SEO and Responsiveness -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Quantum Eye - Advanced Research Platform">
+<meta name="theme-color" content="#ffffff">
+<title>{{pageTitle}} - Quantum Eye</title>
+
+<!-- Import and Setup Environment Paths -->
+<script type="module">
+    import PathResolver from '/config/paths.config.js';
+    window.PathResolver = PathResolver;
+
+    // Check if ThemeManager is initialized to avoid redundancy
+    import ThemeManager from window.PathResolver.getModulePath('services/state/themeManager.service.js');
+    if (!window.themeInitialized) {
+        ThemeManager.initialize();
+        window.themeInitialized = true;
+    }
+</script>
+
+<!-- Load CSS Files Based on Environment Settings -->
+<script>
+    (() => {
+        // Only load styles if they haven't been loaded yet
+        if (!window.stylesLoaded) {
+            console.log('Loading styles...');
+            const loadStyles = () => {
+                if (!window.env || !window.env.STYLE_PATHS || !window.env.PathResolver) {
+                    console.error('Required configurations not found for style loading');
+                    return;
+                }
+
+                const styles = [
+                    ...window.env.STYLE_PATHS.base,
+                    ...window.env.STYLE_PATHS.layouts,
+                    ...window.env.STYLE_PATHS.components,
+                    ...window.env.STYLE_PATHS.utilities,
+                ];
+                
+                styles.forEach(href => {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = window.env.PathResolver.resolve(href);
+                    document.head.appendChild(link);
+                    console.log('Loaded style:', link.href);
+                });
+            };
+
+            loadStyles();
+            window.stylesLoaded = true;
+        }
+    })();
+</script>
+
+<!-- Inline Styles for Smooth Theme Transitions -->
+<style>
+    :root {
+        transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+    }
+    html, body {
+        background-color: var(--color-surface-primary);
+        color: var(--color-text-primary);
+        min-height: 100vh;
+    }
+</style>
+
+<!-- Initialize User Models and Managers -->
+<script type="module">
+    (async () => {
+        const { User } = await import(window.PathResolver.getModulePath('models/user.model.js'));
+        const FontManager = await import(window.PathResolver.getModulePath('services/state/fontManager.service.js'));
+
+        window.QE = window.QE || {};
+        window.QE.User = User;
+
+        if (!window.themeInitialized) {
+            ThemeManager.initialize();
+            window.themeInitialized = true;
+        }
+        FontManager.initialize();
+
+        // Process user data and preferences
+        try {
+            if (User.isAuthenticated()) {
+                const currentUser = User.getCurrentUser();
+                if (currentUser) {
+                    window.QE.currentUser = currentUser;
+                    window.QE.userRole = currentUser.role;
+
+                    const preferences = User.getUserPreferences();
+                    if (preferences) {
+                        if (preferences.theme) ThemeManager.setTheme(preferences.theme);
+                        if (preferences.fontFamily) FontManager.setFont(preferences.fontFamily);
+                    }
+
+                    document.dispatchEvent(new CustomEvent('userDataReady', {
+                        detail: {
+                            user: currentUser,
+                            role: currentUser.role,
+                            preferences: preferences
+                        }
+                    }));
+                }
+            }
+
+            // Listen for storage events for real-time updates
+            window.addEventListener('storage', event => {
+                if (event.key === 'theme_change') {
+                    const data = JSON.parse(event.newValue || '{}');
+                    if (data.theme) ThemeManager.applyTheme(data.theme);
+                }
+
+                if (event.key?.startsWith('user_preferences_')) {
+                    const preferences = JSON.parse(event.newValue || '{}');
+                    if (preferences.fontFamily) FontManager.applyFont(preferences.fontFamily);
+                }
+            });
+
+            // Additional logic for updating user data
+            window.addEventListener('storage', event => {
+                if (event.key === 'currentUser' || event.key === 'users_csv' || event.key === 'users_json') {
+                    const currentUser = User.getCurrentUser();
+                    if (currentUser) {
+                        window.QE.currentUser = currentUser;
+                        window.QE.userRole = currentUser.role;
+
+                        document.dispatchEvent(new CustomEvent('userDataUpdated', {
+                            detail: {
+                                user: currentUser,
+                                role: currentUser.role
+                            }
+                        }));
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Error initializing user data:', error);
+        }
+
+        // Load additional styles if necessary
+        const additionalStyles = `{{additionalStyles}}`;
+        if (additionalStyles) {
+            const styleTag = document.createElement('style');
+            styleTag.textContent = additionalStyles;
+            document.head.appendChild(styleTag);
+        }
+
+        document.dispatchEvent(new CustomEvent('headReady'));
+    })();
+</script>
