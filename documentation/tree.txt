@@ -15,6 +15,7 @@
 │   └── tree.txt
 ├── index.html
 ├── manifest.json
+├── note.html
 ├── src
 │   ├── controllers
 │   │   ├── admin
@@ -187,4 +188,4 @@
 │           └── layout.view.html
 └── tree.txt
 
-64 directories, 124 files
+64 directories, 125 files
