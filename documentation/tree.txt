@@ -10,15 +10,15 @@
 │   ├── env.json
 │   └── paths.config.js
 ├── documentation
+│   ├── FlexNet Family.md
 │   ├── architecture-doc.md
 │   ├── coding-guidelines.md
 │   ├── installation-guide.md
 │   ├── naming-conventions.md
-│   ├── readme.md
 │   └── tree.txt
 ├── index.html
 ├── manifest.json
-├── note.html
+├── new.readme.md
 ├── src
 │   ├── controllers
 │   │   ├── admin
@@ -132,6 +132,7 @@
 │   │   │   ├── _admin-panel.css
 │   │   │   ├── _button.css
 │   │   │   ├── _form.css
+│   │   │   ├── _header.css
 │   │   │   ├── _loading.css
 │   │   │   ├── _login.css
 │   │   │   ├── _navigation.css
@@ -139,7 +140,8 @@
 │   │   │   └── _welcome.css
 │   │   ├── templates
 │   │   │   ├── _containers.css
-│   │   │   └── _grid.css
+│   │   │   ├── _grid.css
+│   │   │   └── _layout.css
 │   │   └── utilities
 │   │       └── _helpers.css
 │   ├── utils
@@ -163,6 +165,8 @@
 │       │   │   └── head.view.html
 │       │   ├── header
 │       │   │   └── header.view.html
+│       │   ├── loading
+│       │   │   └── loading.view.html
 │       │   ├── nav
 │       │   │   └── nav.view.html
 │       │   └── sidebar
@@ -191,4 +195,4 @@
 │           └── layout.view.html
 └── tree.txt
 
-64 directories, 128 files
+65 directories, 131 files

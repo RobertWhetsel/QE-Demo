@@ -34,12 +34,36 @@ class InitializationService {
             checkExistingUsers: async () => {
                 try {
                     console.log('Checking for existing users...');
+                    
+                    // First check if we have a GENESIS_USER in env.json
+                    if (window.env && window.env.GENESIS_USER) {
+                        console.log('Found GENESIS_USER in env.json');
+                        return true;
+                    }
+
+                    // Then check users.json
                     const response = await fetch('/src/models/data/users.json');
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     const users = await response.json();
                     const hasUsers = Array.isArray(users) && users.length > 0;
+                    
+                    if (!hasUsers) {
+                        // If no users exist, try to load from users.csv
+                        console.log('No users found, checking users.csv...');
+                        const csvResponse = await fetch('/src/models/data/users.csv');
+                        if (csvResponse.ok) {
+                            const csvText = await csvResponse.text();
+                            // Just checking if we have data beyond the header row
+                            const hasCSVUsers = csvText.split('\n').length > 1;
+                            if (hasCSVUsers) {
+                                console.log('Found users in CSV file');
+                                return true;
+                            }
+                        }
+                    }
+
                     console.log('User check result:', hasUsers ? 'Users found' : 'No users found');
                     return hasUsers;
                 } catch (error) {
@@ -48,6 +72,7 @@ class InitializationService {
                 }
             }
         };
+        console.log('User service initialized');
     }
 
     initializeLoadingSequence() {
@@ -94,20 +119,8 @@ class InitializationService {
         document.addEventListener('headerReady', () => markResourceLoaded('header'));
         document.addEventListener('navigationReady', () => markResourceLoaded('navigation'));
 
-        // Initialize user service
-        this.initializeUserService().then(() => {
-            markResourceLoaded('userService');
-        });
-    }
-
-    async initializeUserService() {
-        try {
-            await window.QE.User.checkExistingUsers();
-            console.log('User service initialized successfully');
-        } catch (error) {
-            console.error('Error initializing user service:', error);
-            throw error;
-        }
+        // Mark user service as loaded immediately since it's initialized in constructor
+        markResourceLoaded('userService');
     }
 }
 

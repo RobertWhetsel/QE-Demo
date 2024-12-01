@@ -13,6 +13,15 @@
     <div class="loading__placeholder loading__placeholder--content"></div>
 </div>
 
+<!-- QE Test Loading States -->
+<div class="loading loading--test" id="testLoading">
+    <div class="loading__spinner"></div>
+    <div class="loading__test-info" id="testLoadingInfo">
+        <div class="loading__test-name"></div>
+        <div class="loading__test-progress"></div>
+    </div>
+</div>
+
 <script type="module">
     class LoadingManager {
         static instance = null;
@@ -25,6 +34,9 @@
 
             this.loadingElement = document.getElementById('appLoading');
             this.placeholdersElement = document.getElementById('appPlaceholders');
+            this.testLoadingElement = document.getElementById('testLoading');
+            this.testLoadingInfo = document.getElementById('testLoadingInfo');
+            this.loadedComponents = new Set();
             this.initializeEventListeners();
         }
 
@@ -33,18 +45,29 @@
             document.addEventListener('headReady', () => this.handleComponentLoad('head'));
             document.addEventListener('userDataReady', () => this.handleComponentLoad('userData'));
             document.addEventListener('DOMContentLoaded', () => this.handleComponentLoad('DOM'));
+            
+            // QE-specific events
+            document.addEventListener('testStart', (e) => this.handleTestStart(e.detail));
+            document.addEventListener('testProgress', (e) => this.handleTestProgress(e.detail));
+            document.addEventListener('testComplete', () => this.handleTestComplete());
         }
 
         handleComponentLoad(component) {
+            this.loadedComponents.add(component);
             console.log(`Component loaded: ${component}`);
             this.checkAllComponentsLoaded();
         }
 
         checkAllComponentsLoaded() {
-            // Add a slight delay to ensure smooth transition
-            setTimeout(() => {
-                this.hideLoading();
-            }, 500);
+            const requiredComponents = ['head', 'userData', 'DOM'];
+            const allLoaded = requiredComponents.every(comp => this.loadedComponents.has(comp));
+            
+            if (allLoaded) {
+                // Add a slight delay to ensure smooth transition
+                setTimeout(() => {
+                    this.hideLoading();
+                }, 500);
+            }
         }
 
         hideLoading() {
@@ -61,6 +84,28 @@
             setTimeout(() => {
                 this.loadingElement.remove();
                 this.placeholdersElement.remove();
+            }, 300);
+        }
+
+        // QE-specific methods
+        handleTestStart(detail) {
+            const { testName } = detail;
+            this.testLoadingElement.classList.remove('loading--hidden');
+            this.testLoadingInfo.querySelector('.loading__test-name').textContent = testName;
+            this.testLoadingInfo.querySelector('.loading__test-progress').textContent = 'Initializing...';
+        }
+
+        handleTestProgress(detail) {
+            const { current, total, status } = detail;
+            const progressText = `${status} (${current}/${total})`;
+            this.testLoadingInfo.querySelector('.loading__test-progress').textContent = progressText;
+        }
+
+        handleTestComplete() {
+            this.testLoadingElement.classList.add('loading--hidden');
+            setTimeout(() => {
+                this.testLoadingInfo.querySelector('.loading__test-name').textContent = '';
+                this.testLoadingInfo.querySelector('.loading__test-progress').textContent = '';
             }, 300);
         }
     }
