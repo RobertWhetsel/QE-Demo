@@ -1,0 +1,88 @@
+/* Layout Container */
+.layout {
+    display: grid;
+    grid-template-areas:
+        "head"
+        "header"
+        "nav"
+        "sidebar"
+        "content"
+        "footer";
+    min-height: 100vh;
+}
+
+/* Account for fixed header */
+.layout__header {
+    grid-area: header;
+    height: 64px; /* Match header height */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+/* Main content area with proper spacing */
+.layout__content {
+    grid-area: content;
+    padding: var(--spacing-lg);
+    margin-top: 64px; /* Match header height */
+    min-height: calc(100vh - 64px); /* Subtract header height */
+    background-color: var(--color-background);
+}
+
+/* Sidebar */
+.layout__sidebar {
+    grid-area: sidebar;
+    position: fixed;
+    top: 64px; /* Position below header */
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    z-index: 900;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Show sidebar when active */
+.sidebar-active .layout__sidebar {
+    transform: translateX(0);
+}
+
+/* Adjust content when sidebar is active */
+.sidebar-active .layout__content {
+    margin-left: 250px; /* Match sidebar width */
+}
+
+/* Footer */
+.layout__footer {
+    grid-area: footer;
+    padding: var(--spacing-lg);
+    background-color: var(--color-surface-secondary);
+}
+
+/* Responsive Layout */
+@media (min-width: 768px) {
+    .layout {
+        grid-template-areas:
+            "head head"
+            "header header"
+            "sidebar content"
+            "footer footer";
+        grid-template-columns: auto 1fr;
+    }
+
+    .layout__sidebar {
+        position: sticky;
+        transform: none;
+        top: 64px; /* Match header height */
+    }
+
+    .layout__content {
+        margin-left: 0;
+    }
+
+    .sidebar-active .layout__content {
+        margin-left: 0;
+    }
+}

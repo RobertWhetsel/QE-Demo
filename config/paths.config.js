@@ -36,14 +36,16 @@ try {
             `${envPaths.STYLE_PATH}/base/_typography.css`,
         ],
         layouts: [
-            `${envPaths.STYLE_PATH}/layouts/_containers.css`,
-            `${envPaths.STYLE_PATH}/layouts/_grid.css`,
+            `${envPaths.STYLE_PATH}/templates/_layout.css`,
+            `${envPaths.STYLE_PATH}/templates/_containers.css`,
+            `${envPaths.STYLE_PATH}/templates/_grid.css`,
         ],
         components: [
             `${envPaths.STYLE_PATH}/components/_admin-form.css`,
             `${envPaths.STYLE_PATH}/components/_admin-panel.css`,
             `${envPaths.STYLE_PATH}/components/_button.css`,
             `${envPaths.STYLE_PATH}/components/_form.css`,
+            `${envPaths.STYLE_PATH}/components/_header.css`,
             `${envPaths.STYLE_PATH}/components/_loading.css`,
             `${envPaths.STYLE_PATH}/components/_login.css`,
             `${envPaths.STYLE_PATH}/components/_navigation.css`,

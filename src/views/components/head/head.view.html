@@ -10,12 +10,13 @@
     import PathResolver from '/config/paths.config.js';
     window.PathResolver = PathResolver;
 
-    // Check if ThemeManager is initialized to avoid redundancy
+    // Import managers
     import ThemeManager from window.PathResolver.getModulePath('services/state/themeManager.service.js');
-    if (!window.themeInitialized) {
-        ThemeManager.initialize();
-        window.themeInitialized = true;
-    }
+    import FontManager from window.PathResolver.getModulePath('services/state/fontManager.service.js');
+
+    // Initialize managers
+    ThemeManager.initialize();
+    FontManager.initialize();
 </script>
 
 <!-- Load CSS Files Based on Environment Settings -->
@@ -68,16 +69,9 @@
 <script type="module">
     (async () => {
         const { User } = await import(window.PathResolver.getModulePath('models/user.model.js'));
-        const FontManager = await import(window.PathResolver.getModulePath('services/state/fontManager.service.js'));
 
         window.QE = window.QE || {};
         window.QE.User = User;
-
-        if (!window.themeInitialized) {
-            ThemeManager.initialize();
-            window.themeInitialized = true;
-        }
-        FontManager.initialize();
 
         // Process user data and preferences
         try {

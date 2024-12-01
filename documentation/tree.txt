@@ -10,8 +10,11 @@
 │   ├── env.json
 │   └── paths.config.js
 ├── documentation
+│   ├── architecture-doc.md
 │   ├── coding-guidelines.md
+│   ├── installation-guide.md
 │   ├── naming-conventions.md
+│   ├── readme.md
 │   └── tree.txt
 ├── index.html
 ├── manifest.json
@@ -134,7 +137,7 @@
 │   │   │   ├── _navigation.css
 │   │   │   ├── _test-panel.css
 │   │   │   └── _welcome.css
-│   │   ├── layouts
+│   │   ├── templates
 │   │   │   ├── _containers.css
 │   │   │   └── _grid.css
 │   │   └── utilities
@@ -188,4 +191,4 @@
 │           └── layout.view.html
 └── tree.txt
 
-64 directories, 125 files
+64 directories, 128 files

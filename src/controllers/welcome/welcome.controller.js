@@ -82,11 +82,6 @@ export class WelcomeController {
     }
  
     async handleBeginClick() {
-        if (!this.#isInitialized) {
-            console.error('Cannot handle click - controller not initialized');
-            throw new Error('Welcome controller not initialized');
-        }
- 
         try {
             console.log('Checking for existing users...');
             const hasUsers = await window.QE.User.checkExistingUsers();
@@ -106,11 +101,6 @@ export class WelcomeController {
     }
  
     handleTestClick() {
-        if (!this.#isInitialized) {
-            console.error('Cannot handle click - controller not initialized');
-            throw new Error('Welcome controller not initialized');
-        }
- 
         try {
             // Use the pre-resolved path directly from VIEW_PATHS
             const testPath = window.env.VIEW_PATHS.testPage;

@@ -102,12 +102,25 @@
 </nav>
 
 <script type="module">
-    // Import required services using environment paths
-    const { default: NavigationService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation));
-    const { default: NavigationController } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.controllers.components.navigation));
+    // Import all required services at the top level using Promise.all for parallel loading
+    const [
+        { default: NavigationService },
+        { default: NavigationController }
+    ] = await Promise.all([
+        import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation)),
+        import(window.env.PathResolver.resolve(window.env.CORE_PATHS.controllers.components.navigation))
+    ]);
 
     class NavComponent {
+        static instance = null;
+
         constructor() {
+            // Singleton pattern
+            if (NavComponent.instance) {
+                return NavComponent.instance;
+            }
+            NavComponent.instance = this;
+
             this.nav = document.querySelector('.nav');
             this.sidebarToggle = document.querySelector('[data-action="toggle-sidebar"]');
             this.roleNav = document.querySelector('[data-role-nav]');
@@ -165,14 +178,16 @@
         }
     }
 
-    // Initialize navigation when DOM is ready
+    // Initialize navigation and controller when DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
+        // Create singleton instances
         const navComponent = new NavComponent();
-        new NavigationController();
+        NavigationController.initialize();
     });
 
     // Update navigation when user data changes
     document.addEventListener('userDataUpdated', () => {
-        new NavComponent().initializeRoleBasedNavigation();
+        // Use existing instance to update role-based navigation
+        NavComponent.instance?.initializeRoleBasedNavigation();
     });
 </script>

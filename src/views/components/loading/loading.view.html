@@ -1,0 +1,70 @@
+<div class="loading" id="appLoading">
+    <div class="loading__spinner"></div>
+</div>
+
+<div class="loading__placeholders" id="appPlaceholders">
+    <!-- Header Placeholder -->
+    <div class="loading__placeholder loading__placeholder--header"></div>
+    
+    <!-- Navigation Placeholder -->
+    <div class="loading__placeholder loading__placeholder--nav"></div>
+    
+    <!-- Content Placeholder -->
+    <div class="loading__placeholder loading__placeholder--content"></div>
+</div>
+
+<script type="module">
+    class LoadingManager {
+        static instance = null;
+
+        constructor() {
+            if (LoadingManager.instance) {
+                return LoadingManager.instance;
+            }
+            LoadingManager.instance = this;
+
+            this.loadingElement = document.getElementById('appLoading');
+            this.placeholdersElement = document.getElementById('appPlaceholders');
+            this.initializeEventListeners();
+        }
+
+        initializeEventListeners() {
+            // Listen for component load events
+            document.addEventListener('headReady', () => this.handleComponentLoad('head'));
+            document.addEventListener('userDataReady', () => this.handleComponentLoad('userData'));
+            document.addEventListener('DOMContentLoaded', () => this.handleComponentLoad('DOM'));
+        }
+
+        handleComponentLoad(component) {
+            console.log(`Component loaded: ${component}`);
+            this.checkAllComponentsLoaded();
+        }
+
+        checkAllComponentsLoaded() {
+            // Add a slight delay to ensure smooth transition
+            setTimeout(() => {
+                this.hideLoading();
+            }, 500);
+        }
+
+        hideLoading() {
+            // Remove loading class from body
+            document.body.classList.remove('loading-active');
+            
+            // Hide loading spinner with fade out
+            this.loadingElement.classList.add('loading--hidden');
+            
+            // Hide placeholders with fade out
+            this.placeholdersElement.classList.add('loading--hidden');
+            
+            // Remove elements after animation
+            setTimeout(() => {
+                this.loadingElement.remove();
+                this.placeholdersElement.remove();
+            }, 300);
+        }
+    }
+
+    // Initialize loading manager
+    new LoadingManager();
+</script>

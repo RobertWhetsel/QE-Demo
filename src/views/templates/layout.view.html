@@ -1,4 +1,7 @@
 <div class="layout">
+    <!-- Loading Component -->
+    {{> loading.view}}
+    
     <div class="layout__head">
       {{> head.view}}
     </div>
@@ -18,4 +21,63 @@
     <footer class="layout__footer">
       {{> footer.view}}
     </footer>
-  </div>
+</div>
+
+<script type="module">
+    // Add loading class to body initially
+    document.body.classList.add('loading-active');
+
+    // Initialize layout functionality
+    class LayoutManager {
+        static instance = null;
+
+        constructor() {
+            if (LayoutManager.instance) {
+                return LayoutManager.instance;
+            }
+            LayoutManager.instance = this;
+
+            this.initializeEventListeners();
+        }
+
+        initializeEventListeners() {
+            // Listen for critical component load events
+            const criticalComponents = ['head', 'header', 'navigation', 'userData'];
+            let loadedComponents = new Set();
+
+            const checkAllLoaded = () => {
+                if (criticalComponents.every(component => loadedComponents.has(component))) {
+                    console.log('All critical components loaded');
+                    // Dispatch event for loading manager
+                    document.dispatchEvent(new CustomEvent('allComponentsLoaded'));
+                }
+            };
+
+            // Listen for individual component load events
+            document.addEventListener('headReady', () => {
+                loadedComponents.add('head');
+                checkAllLoaded();
+            });
+
+            document.addEventListener('headerReady', () => {
+                loadedComponents.add('header');
+                checkAllLoaded();
+            });
+
+            document.addEventListener('navigationReady', () => {
+                loadedComponents.add('navigation');
+                checkAllLoaded();
+            });
+
+            document.addEventListener('userDataReady', () => {
+                loadedComponents.add('userData');
+                checkAllLoaded();
+            });
+        }
+    }
+
+    // Initialize layout manager when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        new LayoutManager();
+    });
+</script>

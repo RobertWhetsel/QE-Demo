@@ -57,12 +57,27 @@
 </header>
 
 <script type="module">
-    // Import required services
-    const { default: ThemeManager } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.state.theme));
-    const { default: NavigationService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation));
+    // Import all required services at the top level
+    const [
+        { default: ThemeManager },
+        { default: NavigationService },
+        { default: AuthService }
+    ] = await Promise.all([
+        import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.state.theme)),
+        import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.navigation.navigation)),
+        import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.auth.auth))
+    ]);
 
     class HeaderComponent {
+        static instance = null;
+
         constructor() {
+            // Singleton pattern
+            if (HeaderComponent.instance) {
+                return HeaderComponent.instance;
+            }
+            HeaderComponent.instance = this;
+
             this.themeToggle = document.querySelector('[data-action="toggle-theme"]');
             this.userButton = document.querySelector('.header__user-button');
             this.userDropdown = document.querySelector('.header__user-dropdown');
@@ -99,7 +114,6 @@
             // Logout handler
             this.logoutButton?.addEventListener('click', async () => {
                 try {
-                    const { default: AuthService } = await import(window.env.PathResolver.resolve(window.env.CORE_PATHS.services.auth.auth));
                     await AuthService.logout();
                     NavigationService.navigate('/login');
                 } catch (error) {
@@ -137,6 +151,7 @@
 
     // Update user info when user data changes
     document.addEventListener('userDataUpdated', () => {
-        new HeaderComponent().updateUserInfo();
+        // Use existing instance to update user info
+        HeaderComponent.instance?.updateUserInfo();
     });
 </script>
